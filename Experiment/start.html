@@ -47,10 +47,10 @@
     <script src="Support.js"> </script>
     <script>
     //experiment.printBlock();
-    const experimentFrame = new ExperimentFrame();
+    const experimentFrame= new ExperimentFrame();
 
     // Function to show the start window
-  function showStartWindow() {
+        function showStartWindow() {
     // Get the break window modal
         const startWindow = document.getElementById('startWindow');
     // Show the modal
@@ -70,9 +70,7 @@
     
     // Request full-screen mode for the document body
     const docBody = document.documentElement;
-
     if (docBody.requestFullscreen) {
-      
       docBody.requestFullscreen();
     } else if (docBody.mozRequestFullScreen) {
       docBody.mozRequestFullScreen();
