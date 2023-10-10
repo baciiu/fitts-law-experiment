@@ -92,7 +92,7 @@ class ExperimentFrame {
 		currentTrialIndexEl.innerText = this.trialNumber;
 
 		const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
-		currentBlockIndexEl.innerText = this.getTotalTrials();
+		currentBlockIndexEl.innerText = this.getTotalTrialsNumber();
 
 		const trialsToBlockIndexEI = document.getElementById("trialsToBreakIndex");
 		trialsToBlockIndexEI.innerText = this.getRemainingTrials();
@@ -108,7 +108,7 @@ class ExperimentFrame {
 		}
 	}
 
-	getTotalTrials() {
+	getTotalTrialsNumber() {
 		let totalTrials = 0;
 		for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
 			const block = this.experiment.getBlock(i + 1);
