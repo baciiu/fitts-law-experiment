@@ -74,7 +74,7 @@ class Block {
 		// Shuffle the trials array randomly
 		this.shuffleArray(this.trials);
 
-		exportToCSV(this.trials);
+		exportTrialToCSV(this.trials);
 	}
 
 	// return trial

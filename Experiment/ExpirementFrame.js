@@ -21,7 +21,6 @@ class ExperimentFrame {
 			this.printedFirstBlock = true;
 			this.printAllTrials();
 		}
-
 		const STRectDrawing = new STRectsDrawing(trial, this.trialNumber, this.experiment.rectSize, this.experiment.numRects, () => {
 			this.trialCompleted();
 		});

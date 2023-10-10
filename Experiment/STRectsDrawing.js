@@ -1,5 +1,5 @@
 class STRectsDrawing {
-	constructor(trial, trialNumber, Size, nums, onTargetClicked) {
+	constructor(trial, trialNumber, Size, nums, onTargetClicked, click) {
 		this.shape = trial.shape;
 		this.startClicked = false;
 		this.isTargetClicked = false;
@@ -17,6 +17,7 @@ class STRectsDrawing {
 		this.handleCanvasClick = this.handleCanvasClick.bind(this);
 		this.trialNumber = trialNumber;
 		this.intDevice = trial.intDevice;
+		this.click = click;
 	}
 
 	showRects() {
@@ -143,6 +144,58 @@ class STRectsDrawing {
 				this.isTargetClicked = true;
 			}
 		}
+		this.click = new Click(
+			this.trialNumber,
+			this.trialId,
+			x,
+			y,
+			distanceToStart,
+			distanceTotarget,
+			startX,
+			startY,
+			this.startClicked,
+			this.isTargetClicked,
+			targetX,
+			targetY,
+			this.targetHeightPx,
+			this.targetWidthPx,
+			this.trialDirection
+		);
+		console.log(this.click);
+		/*
+		console.log(
+			"\n Trial Number: " +
+				this.trialNumber +
+				" | Trial ID: " +
+				this.trialId +
+				" | Click X: " +
+				x +
+				" | Click Y: " +
+				y +
+				" | Distance to Start: " +
+				distanceToStart +
+				" | Distance to Target: " +
+				this.distanceTotarget +
+				" | Target Clicked: " +
+				this.isTargetClicked +
+				" | Start Coordinates X: " +
+				startX +
+				" | Start Coordinates Y: " +
+				startY +
+				" | Start Clicked: " +
+				this.startClicked +
+				" | Target Coordinates X: " +
+				targetX +
+				" | Target Coordinates Y: " +
+				targetY +
+				" | TargetHeightPx: " +
+				targetHeightPx +
+				" | TargetHeightPx: " +
+				targetWidthPx +
+				" | Trial Direction: " +
+				this.trialDirection +
+				"\n"
+		);*/
 	}
 
 	printToConsole() {
@@ -171,5 +224,9 @@ class STRectsDrawing {
 				" | Trail Direction: " +
 				this.trialDirection
 		);
+	}
+
+	getClicks() {
+		return this.click;
 	}
 }
