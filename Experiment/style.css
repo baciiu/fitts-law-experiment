@@ -1,4 +1,13 @@
-body {Background-color: #e9e9e7; width: 100%; height: 100%; overflow: hidden;}
+body {
+  background-color: #e9e9e7; 
+  width: 100%; 
+  height: 100%; 
+  overflow: hidden; 
+  margin: 0;
+}
+canvas {
+  display: block;
+}
 p {
 	position: absolute;
         top: 50%;

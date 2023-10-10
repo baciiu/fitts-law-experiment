@@ -1,133 +1,136 @@
 class ExperimentFrame {
-  constructor() {
-    this.blockNumber = 1;
-    this.trialNumber = 1;
-    this.experiment = new Experiment();
-    this.totalBlocks = this.experiment.getNumBlocks(); // Track the total number of blocks
-    // Set the number of trials per break
-    this.trialsPerBreak = 3;
-  }
+	constructor() {
+		this.blockNumber = 1;
+		this.trialNumber = 1;
+		this.experiment = new Experiment();
+		this.totalBlocks = this.experiment.getNumBlocks(); // Track the total number of blocks
+		// Set the number of trials per break
+		this.trialsPerBreak = 3;
+	}
 
-  // Show only the target and start rectangles on the screen
-  showTrial() {
-    const trial = this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber);
-    if (!this.printedFirstBlock) {
+	// Show only the target and start rectangles on the screen
+	showTrial() {
+		const trial = this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber);
 
-      this.printedFirstBlock = true;
-      this.printAllTrials();
-    }
+		// Calculate canvas dimensions based on the window size
+		const canvas = document.getElementById("canvas");
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
 
-    const STRectDrawing = new STRectsDrawing(trial, this.trialNumber, this.experiment.rectSize, this.experiment.numRects, () => {
-      this.trialCompleted();
-    });
+		if (!this.printedFirstBlock) {
+			this.printedFirstBlock = true;
+			this.printAllTrials();
+		}
 
-    this.showIndexes();
-    STRectDrawing.showRects();
+		const STRectDrawing = new STRectsDrawing(trial, this.trialNumber, this.experiment.rectSize, this.experiment.numRects, () => {
+			this.trialCompleted();
+		});
 
-    // Check if it's time for a break
-        if (this.trialNumber % this.trialsPerBreak === 0) {
-    // Display the break window
-        this.displayBreakWindow(); 
-        }
-  }
+		this.showIndexes();
+		STRectDrawing.showRects();
 
-    // Function to display the break window
-  displayBreakWindow() {
-      // Get the break window modal
-    const breakWindow = document.getElementById('breakWindow');
-    // Show the modal
-    breakWindow.style.display = 'block';
+		// Check if it's time for a break
+		if (this.trialNumber % this.trialsPerBreak === 0) {
+			// Display the break window
+			this.displayBreakWindow();
+		}
+	}
 
-    // Disable the rest of the page interaction while the break window is visible
-    document.body.style.pointerEvents = 'none';
+	// Function to display the break window
+	displayBreakWindow() {
+		// Get the break window modal
+		const breakWindow = document.getElementById("breakWindow");
+		// Show the modal
+		breakWindow.style.display = "block";
 
-    // Get the continue button
-    const continueButton = document.getElementById('continueButton');
+		// Disable the rest of the page interaction while the break window is visible
+		document.body.style.pointerEvents = "none";
 
-    // Event listener for the continue button
-    continueButton.addEventListener('click', () => {
-      // Hide the break window modal
-      breakWindow.style.display = 'none';
+		// Get the continue button
+		const continueButton = document.getElementById("continueButton");
 
-      // Enable the page interaction again
-      document.body.style.pointerEvents = 'auto';
-    });
-  }
+		// Event listener for the continue button
+		continueButton.addEventListener("click", () => {
+			// Hide the break window modal
+			breakWindow.style.display = "none";
 
-  trialCompleted() {
-    const currentBlock = this.experiment.getBlock(this.blockNumber);
+			// Enable the page interaction again
+			document.body.style.pointerEvents = "auto";
+		});
+	}
 
-    if (currentBlock) {
-      if (currentBlock.hasNext(this.trialNumber)) {
-        this.getNextTrial();
-      } else if (this.experiment.hasNext(this.blockNumber)) {
-        this.getNextBlock();
-      } else {
-        // Last trial and block completed
-        this.experimentFinished();
-      }
-    } else {
-      console.error("Invalid block number:", this.blockNumber);
-    }
-  }
+	trialCompleted() {
+		const currentBlock = this.experiment.getBlock(this.blockNumber);
 
-  getNextTrial() {
-    this.trialNumber++;
-    this.showTrial();
-  }
+		if (currentBlock) {
+			if (currentBlock.hasNext(this.trialNumber)) {
+				this.getNextTrial();
+			} else if (this.experiment.hasNext(this.blockNumber)) {
+				this.getNextBlock();
+			} else {
+				// Last trial and block completed
+				this.experimentFinished();
+			}
+		} else {
+			console.error("Invalid block number:", this.blockNumber);
+		}
+	}
 
-  getNextBlock() {
-    this.blockNumber++;
-    this.trialNumber = 1;
-    this.showTrial();
-  }
+	getNextTrial() {
+		this.trialNumber++;
+		this.showTrial();
+	}
 
-  showIndexes() {
-    const currentTrialIndexEl = document.getElementById("currentTrialIndex");
-    currentTrialIndexEl.innerText = this.trialNumber;
+	getNextBlock() {
+		this.blockNumber++;
+		this.trialNumber = 1;
+		this.showTrial();
+	}
 
-    const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
-    currentBlockIndexEl.innerText = this.getTotalTrials();
-    
-    const  trialsToBlockIndexEI= document.getElementById("trialsToBreakIndex");
-    trialsToBlockIndexEI.innerText = this.getRemainingTrials();
-  }
+	showIndexes() {
+		const currentTrialIndexEl = document.getElementById("currentTrialIndex");
+		currentTrialIndexEl.innerText = this.trialNumber;
 
-  experimentFinished() {
-    // Check if it's the last block
-    const isLastBlock = this.blockNumber === this.totalBlocks;
+		const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
+		currentBlockIndexEl.innerText = this.getTotalTrials();
 
-    if (isLastBlock) {
-      
-      // Close the browser window
-      window.close();
-  }
-  }
+		const trialsToBlockIndexEI = document.getElementById("trialsToBreakIndex");
+		trialsToBlockIndexEI.innerText = this.getRemainingTrials();
+	}
 
-  getTotalTrials() {
-    let totalTrials = 0;
-    for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
-      const block = this.experiment.getBlock(i + 1);
-      totalTrials += block.trialsNum;
-    }
-    return totalTrials;
-  }
+	experimentFinished() {
+		// Check if it's the last block
+		const isLastBlock = this.blockNumber === this.totalBlocks;
 
-  getRemainingTrials(){
-    const remainingTrialsToBreak = this.trialsPerBreak - (this.trialNumber % this.trialsPerBreak);
-    return remainingTrialsToBreak;
-  }
+		if (isLastBlock) {
+			// Close the browser window
+			window.close();
+		}
+	}
 
-  // print all of the trials on the console
-  printAllTrials() {
-    for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
-      const block = this.experiment.getBlock(i + 1);
-      
-      for (let j = 0; j < block.trialsNum; j++) {
-        const trial = block.getTrial(j + 1);
-        console.log(trial);
-      }
-    }
-  }
+	getTotalTrials() {
+		let totalTrials = 0;
+		for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
+			const block = this.experiment.getBlock(i + 1);
+			totalTrials += block.trialsNum;
+		}
+		return totalTrials;
+	}
 
+	getRemainingTrials() {
+		const remainingTrialsToBreak = this.trialsPerBreak - (this.trialNumber % this.trialsPerBreak);
+		return remainingTrialsToBreak;
+	}
+
+	// print all of the trials on the console
+	printAllTrials() {
+		for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
+			const block = this.experiment.getBlock(i + 1);
+
+			for (let j = 0; j < block.trialsNum; j++) {
+				const trial = block.getTrial(j + 1);
+				console.log(trial);
+			}
+		}
+	}
 }
