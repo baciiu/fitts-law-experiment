@@ -23,7 +23,6 @@ class STRectsDrawing {
 	showRects() {
 		const canvas = document.getElementById("canvas");
 		const context = canvas.getContext("2d");
-
 		let startSizePx = 0;
 
 		let startX = 0;
@@ -55,14 +54,9 @@ class STRectsDrawing {
 		if (this.shape === "rectangle") {
 			context.strokeRect(startX - startSizePx / 2, startY - startSizePx / 2, startSizePx, startSizePx);
 			context.fillRect(startX - startSizePx / 2, startY - startSizePx / 2, startSizePx, startSizePx);
-		} else if (this.shape === "circle") {
-			context.beginPath();
-			context.arc(startX, startY, startSizePx / 2, 0, 2 * Math.PI);
-			context.stroke();
-			context.fill();
 		}
 
-		const targetColor = "rgba(255, 102, 102, 0.8)";
+		const targetColor = "rgba(255, 102, 102, 0.8)"; // pink
 		context.fillStyle = targetColor;
 
 		const targetX = centerX + amplitudePx * Math.cos(this.targetIndex * angle);
@@ -74,19 +68,12 @@ class STRectsDrawing {
 
 			context.strokeRect(targetX - this.targetWidthPx / 2, targetY - this.targetHeightPx / 2, this.targetWidthPx, this.targetHeightPx);
 			context.fillRect(targetX - this.targetWidthPx / 2, targetY - this.targetHeightPx / 2, this.targetWidthPx, this.targetHeightPx);
-		} else if (this.shape === "circle") {
-			targetSize = mm2px(this.targetWidth);
-			context.beginPath();
-			context.arc(targetX, targetY, targetSize / 2, 0, 2 * Math.PI);
-			context.stroke();
-			context.fill();
 		}
 		this.printToConsole();
 	}
 
 	handleCanvasClick(event) {
 		const canvas = document.getElementById("canvas");
-		const context = canvas.getContext("2d");
 		const rect = canvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
@@ -109,17 +96,6 @@ class STRectsDrawing {
 		const distanceToStart = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
 
 		if (!this.startClicked && distanceToStart < startPx / 2) {
-			// Clicked on the start
-			context.fillStyle = "rgba(0, 0, 139, 0.8)"; // Dark blue color
-
-			context.beginPath();
-			if (this.shape === "rectangle") {
-				context.fillRect(targetX - targetWidthPx / 2, targetY - targetHeightPx / 2, targetWidthPx, targetHeightPx);
-			} else if (this.shape === "circle") {
-				const startSizePx = mm2px(this.startSize) / 2;
-				context.arc(startX, startY, startSizePx, 0, 2 * Math.PI);
-				context.fill();
-			}
 			this.startClicked = true;
 		} else {
 			// Clicked outside the start
@@ -130,16 +106,6 @@ class STRectsDrawing {
 			const distanceToTarget = Math.sqrt((x - targetX) ** 2 + (y - targetY) ** 2);
 
 			if (this.startClicked && !this.isTargetClicked && distanceToTarget < targetSize) {
-				// Clicked on the target
-				context.beginPath();
-				if (this.shape === "rectangle") {
-					context.fillStyle = "rgba(0, 0, 139, 0.8)"; // Dark blue color for target
-					context.fillRect(targetX - this.targetWidthPX / 2, targetY - this.targetHeightPX / 2, this.targetWidthPX, this.targetHeightpX);
-				} else if (this.shape === "circle") {
-					context.fillStyle = "rgba(0, 0, 139, 0.8)"; // Dark blue color for target
-					context.arc(targetX, targetY, targetSize, 0, 2 * Math.PI);
-					context.fill();
-				}
 				this.onTargetClicked();
 				this.isTargetClicked = true;
 			}
@@ -162,40 +128,6 @@ class STRectsDrawing {
 			this.trialDirection
 		);
 		console.log(this.click);
-		/*
-		console.log(
-			"\n Trial Number: " +
-				this.trialNumber +
-				" | Trial ID: " +
-				this.trialId +
-				" | Click X: " +
-				x +
-				" | Click Y: " +
-				y +
-				" | Distance to Start: " +
-				distanceToStart +
-				" | Distance to Target: " +
-				this.distanceTotarget +
-				" | Target Clicked: " +
-				this.isTargetClicked +
-				" | Start Coordinates X: " +
-				startX +
-				" | Start Coordinates Y: " +
-				startY +
-				" | Start Clicked: " +
-				this.startClicked +
-				" | Target Coordinates X: " +
-				targetX +
-				" | Target Coordinates Y: " +
-				targetY +
-				" | TargetHeightPx: " +
-				targetHeightPx +
-				" | TargetHeightPx: " +
-				targetWidthPx +
-				" | Trial Direction: " +
-				this.trialDirection +
-				"\n"
-		);*/
 	}
 
 	printToConsole() {
