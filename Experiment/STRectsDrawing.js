@@ -17,7 +17,26 @@ class STRectsDrawing {
 		this.handleCanvasClick = this.handleCanvasClick.bind(this);
 		this.trialNumber = trialNumber;
 		this.intDevice = trial.intDevice;
-		this.click = click;
+
+		this.clicks = [];
+		this.startTime = null; // Timestamp when the start shape is clicked.
+		this.endTime = null; // Timestamp when the target shape is clicked.
+		this.timeInterval = null; // Difference between start and end times.
+
+		this.pressDuration = 0;
+		this.mouseIsDown = false; // flag indicating whether the mouse button is currently pressed
+		this.lastMouseDown = null; // stores the last mousedown event timestamp
+	}
+
+	// Modify handleMouseDown not to calculate duration, but to record the state and time.
+	handleMouseDown(event) {
+		this.mouseIsDown = true;
+		this.lastMouseDown = new Date().getTime();
+	}
+
+	// Modify handleMouseUp just to update the state.
+	handleMouseUp(event) {
+		this.mouseIsDown = false;
 	}
 
 	showRects() {
@@ -74,14 +93,25 @@ class STRectsDrawing {
 		} else {
 		}
 
+		// Add event listeners for the mouse down and up events
+		canvas.addEventListener("mousedown", this.handleMouseDown);
+		canvas.addEventListener("mouseup", this.handleMouseUp);
+
 		this.printToConsole();
+	}
+
+	isClickInsideRectangle(clickX, clickY, rectX, rectY, rectWidth, rectHeight) {
+		return clickX >= rectX - rectWidth / 2 && clickX <= rectX + rectWidth / 2 && clickY >= rectY - rectHeight / 2 && clickY <= rectY + rectHeight / 2;
 	}
 
 	handleCanvasClick(event) {
 		const canvas = document.getElementById("canvas");
 		const rect = canvas.getBoundingClientRect();
+
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
+
+		console.log(`Click registered at: (${x}, ${y}), Start clicked: ${this.startClicked}, Target clicked: ${this.isTargetClicked}`);
 
 		const centerX = canvas.width / 2;
 		const centerY = canvas.height / 2;
@@ -100,39 +130,52 @@ class STRectsDrawing {
 		const distanceTotarget = Math.sqrt((x - targetX) ** 2 + (y - targetY) ** 2);
 		const distanceToStart = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
 
-		if (!this.startClicked && distanceToStart < startPx / 2) {
-			this.startClicked = true;
-		} else {
-			// Clicked outside the start
-			const targetX = centerX + amplitudePx * Math.cos(this.targetIndex * angle);
-			const targetY = centerY + amplitudePx * Math.sin(this.targetIndex * angle);
+		const clickedStart = this.isClickInsideRectangle(x, y, startX, startY, startPx, startPx);
+		// Assuming start is also a rectangle here.
+		const clickedTarget = this.isClickInsideRectangle(x, y, targetX, targetY, targetWidthPx, targetHeightPx);
 
-			const targetSize = this.shape === "rectangle" ? Math.max(mm2px(this.targetWidth), mm2px(this.targetHeight)) : mm2px(this.targetWidth) / 2;
-			const distanceToTarget = Math.sqrt((x - targetX) ** 2 + (y - targetY) ** 2);
+		if (this.lastMouseDown) {
+			const clickTime = new Date().getTime(); // current time
+			this.pressDuration = clickTime - this.lastMouseDown; // calculate how long the button was down
+			console.log(`Press duration: ${pressDuration} ms`);
 
-			if (this.startClicked && !this.isTargetClicked && distanceToTarget < targetSize) {
-				this.onTargetClicked();
-				this.isTargetClicked = true;
-			}
+			// Reset the lastMouseDown because we've handled this mousedown -> mouseup cycle
+			this.lastMouseDown = null;
 		}
-		this.click = new Click(
-			this.trialNumber,
-			this.trialId,
-			x,
-			y,
-			distanceToStart,
-			distanceTotarget,
-			startX,
-			startY,
-			this.startClicked,
-			this.isTargetClicked,
-			targetX,
-			targetY,
-			this.targetHeightPx,
-			this.targetWidthPx,
-			this.trialDirection
+
+		if (!this.startClicked && clickedStart) {
+			this.startClicked = true;
+			this.startTime = new Date(); // Capture the current time when the start shape is clicked.
+		} else if (this.startClicked && !this.isTargetClicked && clickedTarget) {
+			this.endTime = new Date(); // Capture the time when the target shape is clicked.
+			this.timeInterval = this.endTime - this.startTime;
+			this.onTargetClicked();
+			this.isTargetClicked = true;
+		}
+
+		this.clicks.push(
+			new Click(
+				this.trialNumber,
+				this.trialId,
+				x,
+				y,
+				distanceToStart,
+				distanceTotarget,
+				startX,
+				startY,
+				this.startClicked,
+				this.isTargetClicked,
+				targetX,
+				targetY,
+				this.targetHeightPx,
+				this.targetWidthPx,
+				this.trialDirection,
+				this.timeInterval,
+				this.pressDuration,
+				this.getTimeFormat(Date.now())
+			)
 		);
-		console.log(this.click);
+		//console.log(this.click);
 	}
 
 	printToConsole() {
@@ -163,7 +206,22 @@ class STRectsDrawing {
 		);
 	}
 
+	getTimeFormat(date) {
+		// Get the individual components of the date.
+		const now = new Date(date);
+		const year = now.getFullYear();
+		const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0 in JavaScript
+		const day = String(now.getDate()).padStart(2, "0");
+		const hour = String(now.getHours()).padStart(2, "0");
+		const minutes = String(now.getMinutes()).padStart(2, "0");
+		const seconds = String(now.getSeconds()).padStart(2, "0");
+		const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
+
+		// Construct the formatted timestamp string.
+		return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}.${milliseconds}`;
+	}
+
 	getClicks() {
-		return this.click;
+		return this.clicks;
 	}
 }

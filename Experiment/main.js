@@ -20,7 +20,8 @@ function startExperiment() {
 	document.body.style.pointerEvents = "auto";
 
 	// Request full-screen mode for the document body
-	const docBody = document.documentElement;
+
+	/*const docBody = document.documentElement;
 	if (docBody.requestFullscreen) {
 		docBody.requestFullscreen();
 	} else if (docBody.mozRequestFullScreen) {
@@ -29,7 +30,7 @@ function startExperiment() {
 		docBody.webkitRequestFullscreen();
 	} else if (docBody.msRequestFullscreen) {
 		docBody.msRequestFullscreen();
-	}
+	}*/
 
 	// Start the experiment
 	experimentFrame.showTrial();

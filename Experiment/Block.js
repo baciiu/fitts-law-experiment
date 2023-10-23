@@ -4,7 +4,8 @@ class Block {
 		this.targetHeight = [4, 8, 10, 15, 6, 8, 10, 12, 16, 20, 15, 20, 25, 4, 4, 4, 8, 8, 8, 10, 10, 10];
 		this.targetWidth = [4, 8, 10, 15, 4, 4, 4, 8, 8, 8, 10, 10, 10, 6, 8, 10, 12, 16, 20, 15, 20, 25];
 		this.amplitude = [54, 110];
-		this.trialDirection = ["Left", "Up", "Right", "Down", "Up-Right", "Up-Left", "Down-Left", "Down-Right"]; //  Direction of the required interaction
+		this.trialDirection = ["Left", "Up", "Right", "Down"];
+		//  ["Left", "Up", "Right", "Down", "Up-Right", "Up-Left", "Down-Left", "Down-Right"];
 		this.intDevice = intDevice;
 		this.blockNumber = blockNumber;
 		this.experimentType = experimentType;
@@ -51,7 +52,7 @@ class Block {
 						this.startIndex = 6;
 						this.targetIndex = 2;
 					}
-
+					/*
 					if (this.trialDirection[j] == "Up-Right") {
 						this.startIndex = 1;
 						this.targetIndex = 5; // adjusted assuming 5 is Down-Left, which is 180 degrees from Up-Right
@@ -67,7 +68,7 @@ class Block {
 					if (this.trialDirection[j] == "Down-Left") {
 						this.startIndex = 5;
 						this.targetIndex = 1;
-					}
+					}*/
 
 					// Create a trial object with the current combination of values
 					const trial = new Trial(

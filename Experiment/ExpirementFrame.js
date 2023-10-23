@@ -8,6 +8,7 @@ class ExperimentFrame {
 		this.breakWindow = document.getElementById("breakWindow");
 		this.continueButton = document.getElementById("continueButton");
 		this.setupContinueButton();
+		this.allClicks = [];
 	}
 
 	setupContinueButton() {
@@ -26,6 +27,8 @@ class ExperimentFrame {
 		const trial = this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber);
 		const STRectDrawing = new STRectsDrawing(trial, this.trialNumber, this.experiment.rectSize, this.experiment.numRects, () => {
 			this.trialCompleted();
+			const clicks = STRectDrawing.getClicks();
+			this.allClicks.push(...clicks);
 		});
 
 		STRectDrawing.showRects();
@@ -51,6 +54,10 @@ class ExperimentFrame {
 
 		if (currentBlock.hasNext(this.trialNumber)) {
 			this.trialNumber++;
+
+			if (this.trialNumber == this.trialsPerBreak) {
+				this.exportClicksToCSV();
+			}
 		} else if (this.experiment.hasNext(this.blockNumber)) {
 			this.blockNumber++;
 			this.trialNumber = 1;
@@ -70,6 +77,7 @@ class ExperimentFrame {
 
 	experimentFinished() {
 		if (this.blockNumber === this.totalBlocks) {
+			this.exportClicksToCSV();
 			window.close();
 		}
 	}
@@ -88,5 +96,70 @@ class ExperimentFrame {
 			const block = this.experiment.getBlock(i + 1);
 			Array.from({ length: block.trialsNum }, (_, j) => console.log(block.getTrial(j + 1)));
 		});
+	}
+
+	exportClicksToCSV() {
+		const header = [
+			"Counter",
+			"BlockNumber",
+			"TrialNumber",
+			"X",
+			"Y",
+			"DistanceToStart",
+			"DistanceToTarget",
+			"StartX",
+			"StartY",
+			"StartClicked",
+			"IsTargetClicked",
+			"TargetX",
+			"TargetY",
+			"TargetHeightPx",
+			"TargetWidthPx",
+			"TrialDirection",
+			"TrialId",
+			"TimeIntervalMilliseconds",
+			"TimeIntervalSeconds",
+			"ClickDuration",
+			"Timestamp",
+		];
+
+		// Map through all clicks, but also use the index for the counter.
+		const rows = this.allClicks.map((click, index) => {
+			return [
+				index + 1,
+				click.blockNumber,
+				click.trialNumber,
+				click.x,
+				click.y,
+				click.distanceToStart,
+				click.distanceToTarget,
+				click.startX,
+				click.startY,
+				click.startClicked,
+				click.isTargetClicked,
+				click.targetX,
+				click.targetY,
+				click.targetHeightPx,
+				click.targetWidthPx,
+				click.trialDirection,
+				click.trialId,
+				click.timeIntervalMilisecond,
+				click.timeIntervalSeconds,
+				click.clickDuration,
+				click.timeStamp,
+			].join(",");
+		});
+
+		const csvContent = [header.join(","), ...rows].join("\n");
+
+		// Trigger the download of the CSV file.
+		const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+		const link = document.createElement("a");
+		const url = URL.createObjectURL(blob);
+		link.setAttribute("href", url);
+		link.setAttribute("download", "experiment_clicks_data.csv"); // You might want to name the file relevant to its content.
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
 	}
 }

@@ -1,5 +1,24 @@
 class Click {
-	constructor(trialNumber, trialId, x, y, distanceToStart, distanceTotarget, startX, startY, startClicked, isTargetClicked, targetX, targetY, targetHeightPx, targetWidthPx, trialDirection) {
+	constructor(
+		trialNumber,
+		trialId,
+		x,
+		y,
+		distanceToStart,
+		distanceTotarget,
+		startX,
+		startY,
+		startClicked,
+		isTargetClicked,
+		targetX,
+		targetY,
+		targetHeightPx,
+		targetWidthPx,
+		trialDirection,
+		timeInterval,
+		clickDuration,
+		timeStamp
+	) {
 		this.x = x;
 		this.y = y;
 		this.distanceToStart = distanceToStart;
@@ -15,5 +34,9 @@ class Click {
 		this.trialDirection = trialDirection;
 		this.trialNumber = trialNumber;
 		this.trialId = trialId;
+		this.timeIntervalMilisecond = timeInterval;
+		this.timeIntervalSeconds = Math.floor((this.timeIntervalMilisecond / 1000) % 60);
+		this.clickDuration = clickDuration;
+		this.timeStamp = timeStamp;
 	}
 }

@@ -1,0 +1,7 @@
+Planning: 
+
+-	make the canvas responsive. 
+-	draw squares on canvas 
+-	draw the squares given the 4 directions 
+-	make sure the given amplitudes are correctly implemented 
+
