@@ -4,7 +4,7 @@ class Block {
 		this.targetHeight = [4, 8, 10, 15, 6, 8, 10, 12, 16, 20, 15, 20, 25, 4, 4, 4, 8, 8, 8, 10, 10, 10];
 		this.targetWidth = [4, 8, 10, 15, 4, 4, 4, 8, 8, 8, 10, 10, 10, 6, 8, 10, 12, 16, 20, 15, 20, 25];
 		this.amplitude = [54, 110];
-		this.trialDirection = ["Left", "Up", "Right", "Down"]; //  Direction of the required interaction
+		this.trialDirection = ["Left", "Up", "Right", "Down", "Up-Right", "Up-Left", "Down-Left", "Down-Right"]; //  Direction of the required interaction
 		this.intDevice = intDevice;
 		this.blockNumber = blockNumber;
 		this.experimentType = experimentType;
@@ -33,22 +33,40 @@ class Block {
 				for (var j = 0; j < this.trialDirection.length; j++) {
 					// loop to go through interaction direction
 
-					// check and assign startIndex, and TargetIndex for each direction
+					// Check and assign startIndex, and targetIndex for each direction
+
 					if (this.trialDirection[j] == "Up") {
-						this.startIndex = 1;
-						this.targetIndex = 3;
+						this.startIndex = 0;
+						this.targetIndex = 4;
 					}
 					if (this.trialDirection[j] == "Down") {
-						this.startIndex = 3;
-						this.targetIndex = 1;
+						this.startIndex = 4;
+						this.targetIndex = 0;
 					}
 					if (this.trialDirection[j] == "Right") {
 						this.startIndex = 2;
-						this.targetIndex = 0;
+						this.targetIndex = 6;
 					}
 					if (this.trialDirection[j] == "Left") {
-						this.startIndex = 0;
+						this.startIndex = 6;
 						this.targetIndex = 2;
+					}
+
+					if (this.trialDirection[j] == "Up-Right") {
+						this.startIndex = 1;
+						this.targetIndex = 5; // adjusted assuming 5 is Down-Left, which is 180 degrees from Up-Right
+					}
+					if (this.trialDirection[j] == "Up-Left") {
+						this.startIndex = 7;
+						this.targetIndex = 3; // adjusted assuming 3 is Down-Right, which is 180 degrees from Up-Left
+					}
+					if (this.trialDirection[j] == "Down-Right") {
+						this.startIndex = 3;
+						this.targetIndex = 7; // adjusted assuming 7 is Up-Left, which is 180 degrees from Down-Right
+					}
+					if (this.trialDirection[j] == "Down-Left") {
+						this.startIndex = 5;
+						this.targetIndex = 1;
 					}
 
 					// Create a trial object with the current combination of values
@@ -74,7 +92,7 @@ class Block {
 		// Shuffle the trials array randomly
 		this.shuffleArray(this.trials);
 
-		exportTrialToCSV(this.trials);
+		//exportTrialToCSV(this.trials);
 	}
 
 	// return trial

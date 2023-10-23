@@ -51,9 +51,11 @@ class STRectsDrawing {
 		startX = centerX + amplitudePx * Math.cos(this.startIndex * angle);
 		startY = centerY + amplitudePx * Math.sin(this.startIndex * angle);
 
+		// draw start shape
 		if (this.shape === "rectangle") {
 			context.strokeRect(startX - startSizePx / 2, startY - startSizePx / 2, startSizePx, startSizePx);
 			context.fillRect(startX - startSizePx / 2, startY - startSizePx / 2, startSizePx, startSizePx);
+		} else {
 		}
 
 		const targetColor = "rgba(255, 102, 102, 0.8)"; // pink
@@ -62,13 +64,16 @@ class STRectsDrawing {
 		const targetX = centerX + amplitudePx * Math.cos(this.targetIndex * angle);
 		const targetY = centerY + amplitudePx * Math.sin(this.targetIndex * angle);
 
+		// draw target shape
 		if (this.shape === "rectangle") {
 			this.targetWidthPx = mm2px(this.targetWidth);
 			this.targetHeightPx = mm2px(this.targetHeight);
 
 			context.strokeRect(targetX - this.targetWidthPx / 2, targetY - this.targetHeightPx / 2, this.targetWidthPx, this.targetHeightPx);
 			context.fillRect(targetX - this.targetWidthPx / 2, targetY - this.targetHeightPx / 2, this.targetWidthPx, this.targetHeightPx);
+		} else {
 		}
+
 		this.printToConsole();
 	}
 
