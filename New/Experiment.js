@@ -6,8 +6,8 @@ class Experiment {
 		this.startSize = 10;
 		this.rectSize = this.startSize; // set the size of the other reectangles
 		this.blocks = [];
-		this.numBlocks = 2;
-		this.numRects = 4;
+		this.numBlocks = 1;
+		this.numRects = 8;
 		let block = 1;
 
 		for (let i = 0; i < this.numBlocks; i++) {

@@ -1,6 +1,6 @@
 // Calculate the radius in pixels
 function mm2px(mm) {
-	const dpi = window.devicePixelRatio * 50; // 96
+	const dpi = window.devicePixelRatio * 96; // 96 // 50
 	const mmPerInch = 25.4;
 	const px = (mm * dpi) / mmPerInch;
 	return px;

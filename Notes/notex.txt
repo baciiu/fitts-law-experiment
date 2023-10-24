@@ -4,4 +4,100 @@ Planning:
 -	draw squares on canvas 
 -	draw the squares given the 4 directions 
 -	make sure the given amplitudes are correctly implemented 
+- 
+
+
+- REFACTOR THE CODE
+- make a list of all data that should be in the csv tables. !!
+
+
+Feature: 
+- make the canvas resposive 
+
+Feature: 
+- retrieve random canvas point for showing the shapes. currently only showed in the center of the canvas 
+    Subtask:    
+    - make sure that all points are within the canvas.
+
+Feature 
+- make more possible shapes in different sizes.
+
+
+Feature 
+- make another type of randomized algorithm for retrieving the trials
+
+Feature
+- add diagonal directions 
+
+
+Amplitude: center of start to center of target
+
+pixels ratio to display fix and make sure you can use the linear to check the pixels . 
+
+Feature 
+flag for choosing the center of the canvas as point 
+flag for choosing random point on the canvas 
+
+choose a maxim distance for the next start from the last target. THis should be a parameter. 
+
+
+make a big(a parameter input) circle around target. Find poitions where this circle fits the screen. Then store the posible points on the radius(given the directions) and retrieve them as random. 
+
+Lange strecke minimieren
+
+
+Start shape shoulkd didsasaper and target should get another color.
+
+
+
+!!!
+Block ii set cu alta ordine. tot atatea trials.
+
+WICHTIG:
+
+if the click meant for target was made too close to start shape, 
+if ( )
+if ditance from click to target is smaller than (half the amplitude or a given variable)
+then add another trial to the set because it might have been a failure/ will not be considered.
+
+the trial should be added just to that block, but not the next trial (only if the trial was the last one.)
+
+Loggging
+
+wo is start 
+wo is target 
+size of target 
+4 timestamps:
+- time 0 mouse press start und x,y
+- time 1 mouse release start und x,y
+- time 2  mouse press target und x,y
+- time 3 mouse release target und x,y
+
+- add all distances combinations please. 
+Example
+- user number test if 144 randuro
+- trial nummer test of 144
+- block number 
+- Trial in block
+- Amplitude mm  
+(width and heugth )
+- amplitude in px 
+(width and heugth )
+- diagonal number 
+- time 0 local time WElt uhr zeit in long  / system.getTime. in java 
+- for all time 
+- t1-t0 from press to release in target 
+- ...
+- t3-t0 from press in start to release in target 
+
+- distances for all combination as well
+
+
+- press in traget 0 oder 1 
+- releaae in traget 0 oder 1 
+- same for start 
+
+
+Resolution:
+https://pixelcalculator.com/en
 
