@@ -36,19 +36,19 @@ class Block {
 
 					// Check and assign startIndex, and targetIndex for each direction
 
-					if (this.trialDirection[j] == "Up") {
+					if (this.trialDirection[j] == "Left") {
 						this.startIndex = 0;
 						this.targetIndex = 4;
 					}
-					if (this.trialDirection[j] == "Down") {
+					if (this.trialDirection[j] == "Right") {
 						this.startIndex = 4;
 						this.targetIndex = 0;
 					}
-					if (this.trialDirection[j] == "Right") {
+					if (this.trialDirection[j] == "Up") {
 						this.startIndex = 2;
 						this.targetIndex = 6;
 					}
-					if (this.trialDirection[j] == "Left") {
+					if (this.trialDirection[j] == "Down") {
 						this.startIndex = 6;
 						this.targetIndex = 2;
 					}
