@@ -1,5 +1,5 @@
 class STRectsDrawing {
-	constructor(trial, trialNumber, Size, nums, onTargetClicked, click) {
+	constructor(trial, trialNumber, Size, nums, onTargetClicked) {
 		this.shape = trial.shape;
 		this.startClicked = false;
 		this.isTargetClicked = false;
@@ -17,13 +17,31 @@ class STRectsDrawing {
 		this.handleCanvasClick = this.handleCanvasClick.bind(this);
 		this.trialNumber = trialNumber;
 		this.intDevice = trial.intDevice;
-		this.click = click;
+
+		this.clicks = [];
+		this.startTime = null; // Timestamp when the start shape is clicked.
+		this.endTime = null; // Timestamp when the target shape is clicked.
+		this.timeInterval = null; // Difference between start and end times.
+
+		this.pressDuration = 0;
+		this.mouseIsDown = false; // flag indicating whether the mouse button is currently pressed
+		this.lastMouseDown = null; // stores the last mousedown event timestamp
+	}
+
+	// Modify handleMouseDown not to calculate duration, but to record the state and time.
+	handleMouseDown(event) {
+		this.mouseIsDown = true;
+		this.lastMouseDown = new Date().getTime();
+	}
+
+	// Modify handleMouseUp just to update the state.
+	handleMouseUp(event) {
+		this.mouseIsDown = false;
 	}
 
 	showRects() {
 		const canvas = document.getElementById("canvas");
 		const context = canvas.getContext("2d");
-
 		let startSizePx = 0;
 
 		let startX = 0;
@@ -52,45 +70,86 @@ class STRectsDrawing {
 		startX = centerX + amplitudePx * Math.cos(this.startIndex * angle);
 		startY = centerY + amplitudePx * Math.sin(this.startIndex * angle);
 
+		// draw start shape
 		if (this.shape === "rectangle") {
 			context.strokeRect(startX - startSizePx / 2, startY - startSizePx / 2, startSizePx, startSizePx);
 			context.fillRect(startX - startSizePx / 2, startY - startSizePx / 2, startSizePx, startSizePx);
-		} else if (this.shape === "circle") {
-			context.beginPath();
-			context.arc(startX, startY, startSizePx / 2, 0, 2 * Math.PI);
-			context.stroke();
-			context.fill();
+		} else {
 		}
 
-		const targetColor = "rgba(255, 102, 102, 0.8)";
+		const targetColor = "rgba(255, 102, 102, 0.8)"; // pink
 		context.fillStyle = targetColor;
 
 		const targetX = centerX + amplitudePx * Math.cos(this.targetIndex * angle);
 		const targetY = centerY + amplitudePx * Math.sin(this.targetIndex * angle);
 
+		// draw target shape
 		if (this.shape === "rectangle") {
 			this.targetWidthPx = mm2px(this.targetWidth);
 			this.targetHeightPx = mm2px(this.targetHeight);
 
 			context.strokeRect(targetX - this.targetWidthPx / 2, targetY - this.targetHeightPx / 2, this.targetWidthPx, this.targetHeightPx);
 			context.fillRect(targetX - this.targetWidthPx / 2, targetY - this.targetHeightPx / 2, this.targetWidthPx, this.targetHeightPx);
-		} else if (this.shape === "circle") {
-			targetSize = mm2px(this.targetWidth);
-			context.beginPath();
-			context.arc(targetX, targetY, targetSize / 2, 0, 2 * Math.PI);
-			context.stroke();
-			context.fill();
 		}
-		this.printToConsole();
+
+		// Add event listeners for the mouse down and up events
+		canvas.addEventListener("mousedown", this.handleMouseDown);
+		canvas.addEventListener("mouseup", this.handleMouseUp);
+	}
+
+	isClickInsideRectangle(clickX, clickY, rectX, rectY, rectWidth, rectHeight) {
+		return clickX >= rectX - rectWidth / 2 && clickX <= rectX + rectWidth / 2 && clickY >= rectY - rectHeight / 2 && clickY <= rectY + rectHeight / 2;
 	}
 
 	handleCanvasClick(event) {
+		// Get the click coordinates relative to the canvas.
+		const clickCoords = this.getClickCoordinates(event);
+		const { x, y } = clickCoords;
+		let clickedStart = false;
+		let clickedTarget = false;
+
+		console.log(`Click registered at: (${x}, ${y}), start clicked: (${this.startClicked}),target clicked: (${this.targetClicked})`);
+
+		// Calculate geometry and positions.
+		const geometry = this.calculateGeometry();
+		const { startX, startY, targetX, targetY, startPx, targetWidthPx, targetHeightPx } = geometry;
+
+		this.logClickData(geometry, x, y);
+
+		// Check if the click is on the Start or Target area.
+		clickedStart = this.isClickInsideRectangle(x, y, startX, startY, startPx, startPx);
+		clickedTarget = this.isClickInsideRectangle(x, y, targetX, targetY, targetWidthPx, targetHeightPx);
+
+		// Check if the start rectangle was clicked.
+		if (!this.startClicked && clickedStart) {
+			console.log("Start was clicked.");
+			this.startClicked = true;
+			this.startTime = new Date(); // Capture the current time when the start shape is clicked.
+		} else if (this.startClicked && !this.isTargetClicked && clickedTarget) {
+			console.log("Target was clicked.");
+			this.endTime = new Date(); // Capture the time when the target shape is clicked.
+			this.timeInterval = this.endTime - this.startTime;
+			this.onTargetClicked(); // This should signal that the target was clicked.
+			this.isTargetClicked = true;
+		}
+
+		// Handle the logic for clicking on Start or Target.
+		//this.processClickOnShapes(clickedStart, clickedTarget);
+
+		//this.logClickData(geometry, x, y);
+	}
+
+	getClickCoordinates(event) {
 		const canvas = document.getElementById("canvas");
-		const context = canvas.getContext("2d");
 		const rect = canvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
+		return { x, y };
+	}
 
+	calculateGeometry() {
+		// All the calculations related to geometry and positions of shapes.
+		const canvas = document.getElementById("canvas");
 		const centerX = canvas.width / 2;
 		const centerY = canvas.height / 2;
 		const amplitudePx = mm2px(this.amplitude);
@@ -102,131 +161,84 @@ class STRectsDrawing {
 		const targetY = centerY + amplitudePx * Math.sin(this.targetIndex * angle);
 
 		const startPx = mm2px(this.startSize);
-		const targetWidthPx = mm2px(this.targetWidth); // Width of the target rectangle
-		const targetHeightPx = mm2px(this.targetHeight); // Height of the target rectangle
+		const targetWidthPx = mm2px(this.targetWidth);
+		const targetHeightPx = mm2px(this.targetHeight);
 
-		const distanceTotarget = Math.sqrt((x - targetX) ** 2 + (y - targetY) ** 2);
-		const distanceToStart = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
+		return { startX, startY, targetX, targetY, startPx, targetWidthPx, targetHeightPx };
+	}
 
-		if (!this.startClicked && distanceToStart < startPx / 2) {
-			// Clicked on the start
-			context.fillStyle = "rgba(0, 0, 139, 0.8)"; // Dark blue color
-
-			context.beginPath();
-			if (this.shape === "rectangle") {
-				context.fillRect(targetX - targetWidthPx / 2, targetY - targetHeightPx / 2, targetWidthPx, targetHeightPx);
-			} else if (this.shape === "circle") {
-				const startSizePx = mm2px(this.startSize) / 2;
-				context.arc(startX, startY, startSizePx, 0, 2 * Math.PI);
-				context.fill();
-			}
-			this.startClicked = true;
-		} else {
-			// Clicked outside the start
-			const targetX = centerX + amplitudePx * Math.cos(this.targetIndex * angle);
-			const targetY = centerY + amplitudePx * Math.sin(this.targetIndex * angle);
-
-			const targetSize = this.shape === "rectangle" ? Math.max(mm2px(this.targetWidth), mm2px(this.targetHeight)) : mm2px(this.targetWidth) / 2;
-			const distanceToTarget = Math.sqrt((x - targetX) ** 2 + (y - targetY) ** 2);
-
-			if (this.startClicked && !this.isTargetClicked && distanceToTarget < targetSize) {
-				// Clicked on the target
-				context.beginPath();
-				if (this.shape === "rectangle") {
-					context.fillStyle = "rgba(0, 0, 139, 0.8)"; // Dark blue color for target
-					context.fillRect(targetX - this.targetWidthPX / 2, targetY - this.targetHeightPX / 2, this.targetWidthPX, this.targetHeightpX);
-				} else if (this.shape === "circle") {
-					context.fillStyle = "rgba(0, 0, 139, 0.8)"; // Dark blue color for target
-					context.arc(targetX, targetY, targetSize, 0, 2 * Math.PI);
-					context.fill();
-				}
-				this.onTargetClicked();
-				this.isTargetClicked = true;
-			}
+	processClickOnShapes(clickedStart, clickedTarget) {
+		if (!this.startClicked && clickedStart) {
+			this.handleStartClick();
+		} else if (this.startClicked && !this.isTargetClicked && clickedTarget) {
+			this.handleTargetClick();
 		}
-		this.click = new Click(
+	}
+
+	handleStartClick() {
+		this.startClicked = true;
+		this.startTime = new Date();
+	}
+
+	handleTargetClick() {
+		this.endTime = new Date();
+		this.timeInterval = this.endTime - this.startTime;
+		this.onTargetClicked();
+		this.isTargetClicked = true;
+	}
+
+	calculateDistances(x, y, startX, startY, targetX, targetY) {
+		const distanceToStart = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
+		const distanceToTarget = Math.sqrt((x - targetX) ** 2 + (y - targetY) ** 2);
+		return { distanceToStart, distanceToTarget };
+	}
+
+	logClickData(geometry, x, y) {
+		const { startX, startY, targetX, targetY, targetHeightPx, targetWidthPx } = geometry;
+
+		// You need to calculate the distances before creating the Click object.
+		const { distanceToStart, distanceToTarget } = this.calculateDistances(x, y, startX, startY, targetX, targetY);
+
+		const newClick = new Click(
 			this.trialNumber,
 			this.trialId,
 			x,
 			y,
 			distanceToStart,
-			distanceTotarget,
+			distanceToTarget,
 			startX,
 			startY,
 			this.startClicked,
 			this.isTargetClicked,
 			targetX,
 			targetY,
-			this.targetHeightPx,
-			this.targetWidthPx,
-			this.trialDirection
+			targetHeightPx,
+			targetWidthPx,
+			this.trialDirection,
+			this.timeInterval,
+			this.pressDuration,
+			this.getTimeFormat(Date.now())
 		);
-		console.log(this.click);
-		/*
-		console.log(
-			"\n Trial Number: " +
-				this.trialNumber +
-				" | Trial ID: " +
-				this.trialId +
-				" | Click X: " +
-				x +
-				" | Click Y: " +
-				y +
-				" | Distance to Start: " +
-				distanceToStart +
-				" | Distance to Target: " +
-				this.distanceTotarget +
-				" | Target Clicked: " +
-				this.isTargetClicked +
-				" | Start Coordinates X: " +
-				startX +
-				" | Start Coordinates Y: " +
-				startY +
-				" | Start Clicked: " +
-				this.startClicked +
-				" | Target Coordinates X: " +
-				targetX +
-				" | Target Coordinates Y: " +
-				targetY +
-				" | TargetHeightPx: " +
-				targetHeightPx +
-				" | TargetHeightPx: " +
-				targetWidthPx +
-				" | Trial Direction: " +
-				this.trialDirection +
-				"\n"
-		);*/
+
+		this.clicks.push(newClick);
 	}
 
-	printToConsole() {
-		console.log(
-			"Information from Drawing: " +
-				"Trial Number: " +
-				this.trialNumber +
-				" | Trial ID: " +
-				this.trialId +
-				" | Shape: " +
-				this.shape +
-				" | Interaction Device: " +
-				this.intDevice +
-				" | Start Size: " +
-				this.startSize +
-				" | Start Index: " +
-				this.startIndex +
-				" | Target Index: " +
-				this.targetIndex +
-				" | Amplitude: " +
-				this.amplitude +
-				" | Target Width: " +
-				this.targetWidth +
-				" | Target Height: " +
-				this.targetHeight +
-				" | Trail Direction: " +
-				this.trialDirection
-		);
+	getTimeFormat(date) {
+		// Get the individual components of the date.
+		const now = new Date(date);
+		const year = now.getFullYear();
+		const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0 in JavaScript
+		const day = String(now.getDate()).padStart(2, "0");
+		const hour = String(now.getHours()).padStart(2, "0");
+		const minutes = String(now.getMinutes()).padStart(2, "0");
+		const seconds = String(now.getSeconds()).padStart(2, "0");
+		const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
+
+		// Construct the formatted timestamp string.
+		return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}.${milliseconds}`;
 	}
 
 	getClicks() {
-		return this.click;
+		return this.clicks;
 	}
 }
