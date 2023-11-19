@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Open start.html",
-            "file": "/Users/alebaciu/Downloads/Documents/GitHub/fitts-law-experiment/new_new/start.html"
+            "file": "./GitHub/fitts-law-experiment/new_new/start.html"
         }
     ]
 }
