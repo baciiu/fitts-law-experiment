@@ -1,9 +1,13 @@
 class Block {
 	constructor(blockNumber, experimentType, shape, intDevice, rectsize, startSize, numRects) {
 		this.shape = shape;
-		this.targetHeight = [4, 8, 10, 15, 6, 8, 10, 12, 16, 20, 15, 20, 25, 4, 4, 4, 8, 8, 8, 10, 10, 10];
-		this.targetWidth = [4, 8, 10, 15, 4, 4, 4, 8, 8, 8, 10, 10, 10, 6, 8, 10, 12, 16, 20, 15, 20, 25];
-		this.amplitude = [54, 110];
+		//this.targetHeight = [4, 8, 10, 15, 6, 8, 10, 12, 16, 20, 15, 20, 25, 4, 4, 4, 8, 8, 8, 10, 10, 10];
+		//this.targetWidth = [4, 8, 10, 15, 4, 4, 4, 8, 8, 8, 10, 10, 10, 6, 8, 10, 12, 16, 20, 15, 20, 25];
+		//this.amplitude = [54, 110];
+		this.targetHeight = [20, 20, 5];
+		this.targetWidth = [10, 20, 5];
+		this.amplitude = [100, 100, 50];
+
 		this.trialDirection = ["Left", "Up", "Right", "Down"];
 		//  ["Left", "Up", "Right", "Down", "Up-Right", "Up-Left", "Down-Left", "Down-Right"];
 		this.intDevice = intDevice;

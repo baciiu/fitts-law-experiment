@@ -215,6 +215,7 @@ class ExperimentFrame {
 
 		const csvContent = [header.join(","), ...rows].join("\n");
 
+		/*
 		// Trigger the download of the CSV file.
 		const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 		const link = document.createElement("a");
@@ -223,6 +224,6 @@ class ExperimentFrame {
 		link.setAttribute("download", "experiment_clicks_data.csv"); // You might want to name the file relevant to its content.
 		document.body.appendChild(link);
 		link.click();
-		document.body.removeChild(link);
+		document.body.removeChild(link);*/
 	}
 }

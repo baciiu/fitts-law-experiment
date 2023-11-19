@@ -7,15 +7,24 @@ class Experiment {
 		this.rectSize = this.startSize; // set the size of the other reectangles
 		this.blocks = [];
 		this.numBlocks = 2;
-		this.numRects = 4;
+		this.directionCount = 8;
 		let block = 1;
 
+		this.breakWindow = document.getElementById("breakWindow");
+		this.continueButton = document.getElementById("continueButton");
+		this.setupContinueButton();
+
 		for (let i = 0; i < this.numBlocks; i++) {
-			this.blocks.push(new Block(block, this.experimentType, this.shape, this.intDevice, this.rectSize, this.startSize, this.numRects));
+			this.blocks.push(new Block(i, this.experimentType, this.shape, this.intDevice, this.rectsize, this.startSize, this.directionCount));
 			block++;
 		}
 	}
-
+	setupContinueButton() {
+		this.continueButton.addEventListener("click", () => {
+			this.breakWindow.style.display = "none";
+			document.body.style.pointerEvents = "auto";
+		});
+	}
 	getNumBlocks() {
 		return this.blocks.length;
 	}
