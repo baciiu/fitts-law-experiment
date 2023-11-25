@@ -75,7 +75,7 @@ size of target
 
 - add all distances combinations please. 
 Example
-- user number test if 144 randuro
+- user number test of 144 randuri
 - trial nummer test of 144
 - block number 
 - Trial in block

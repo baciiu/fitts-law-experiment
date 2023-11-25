@@ -94,6 +94,9 @@ class Block {
 		}
 		// Shuffle the trials array randomly
 		this.shuffleArray(this.trials);
+
+		this.firstClickDone = false;
+		this.secondClickData = null;
 	}
 
 	// return trial
@@ -131,12 +134,14 @@ class Block {
 		var start = document.getElementById("start");
 		var target = document.getElementById("target");
 
+		start.style.display = "block";
 		start.style.width = mmToPixels(trial.startSize) + "px";
 		start.style.height = mmToPixels(trial.startSize) + "px";
 		start.style.left = window.innerWidth / 2 + "px"; // X coordinate
 		start.style.top = window.innerHeight / 2 - 100 + "px"; // Y coordinate
 		start.style.position = "absolute";
 
+		target.style.display = "block";
 		target.style.width = mmToPixels(trial.targetWidth) + "px";
 		target.style.height = mmToPixels(trial.targetHeight) + "px";
 		target.style.left = window.innerWidth / 2 + "px"; // X coordinate
@@ -151,22 +156,25 @@ class Block {
 		console.log("setupEventHandlers()");
 		const start = document.getElementById("start");
 		const target = document.getElementById("target");
+		const body = document.getElementsByTagName("body")[0];
 
 		// Use bind to ensure 'this' inside the handlers refers to the Block instance
 		start.addEventListener("mousedown", this.handleStartPress.bind(this));
 		start.addEventListener("mouseup", this.handleStartRelease.bind(this));
 		target.addEventListener("mousedown", this.handleTargetPress.bind(this));
-
 		target.addEventListener("mouseup", this.handleTargetRelease.bind(this));
+		body.addEventListener("mousedown", this.handleBodyPress.bind(this));
 	}
 
 	handleStartPress(event) {
 		console.log("handleStartPress");
-		if (event.button === 0) {
+		if (event.button === 0 && !this.firstClickDone) {
 			// Left mouse button
 			this.trialStartTime = Date.now();
 			this.trialStarted = true;
 			target.style.backgroundColor = "green";
+
+			this.firstClickDone = true;
 
 			if (this.isCursorInsideStart) {
 				this.successSound = new Audio("./sounds/success.wav");
@@ -186,12 +194,14 @@ class Block {
 			this.errorSound = new Audio("./sounds/err1.wav");
 			this.errorSound.play();
 		}
+		start.style.display = "none";
 	}
 
 	handleTargetPress(event) {
 		console.log("handleTargetPress");
 		console.log("trial Started: " + this.trialStarted);
 	}
+
 	handleTargetRelease(event) {
 		console.log("handleTargetRelease");
 		console.log("trial Started: " + this.trialStarted);
@@ -205,7 +215,7 @@ class Block {
 				this.errorSound.play();
 			}
 		}
-
+		target.style.display = "none";
 		this.endTrial();
 	}
 
