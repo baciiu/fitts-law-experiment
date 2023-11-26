@@ -1,34 +1,42 @@
-class Trial{
-    constructor(trialId,trialDirection,intDevice,startIndex,targetIndex,startSize,targetWidth,targetHeight,amplitude,isDone) {
+class Trial {
+  constructor(
+    trialId,
+    trialDirection,
+    intDevice,
+    startIndex,
+    targetIndex,
+    startSize,
+    targetWidth,
+    targetHeight,
+    amplitude,
+    isDone,
+  ) {
+    this.trialId = trialId;
+    this.trialDirection = trialDirection;
+    this.intDevice = intDevice;
+    this.startIndex = startIndex;
+    this.targetIndex = targetIndex;
+    this.startSize = startIndex;
+    this.targetWidth = targetWidth;
+    this.targetHeight = targetHeight;
+    this.amplitude = amplitude;
+    this.isDone = isDone;
 
-         this.trialId = trialId;
-            this.trialDirection = trialDirection;
-            this.intDevice = intDevice;
-            this.startIndex = startIndex;
-            this.targetIndex = targetIndex;
-            this.startSize = startIndex;
-            this.targetWidth= targetWidth;
-            this.targetHeight= targetHeight;
-            this.amplitude = amplitude;
-            this.isDone = isDone;
+    // Shuffle position on the screen randomly
+    //this.shuffleArray();
 
-        // Shuffle position on the screen randomly
-        //this.shuffleArray();
+    this.start = document.getElementById("start");
+    this.target = document.getElementById("target");
+    this.body = document.getElementById("body");
 
-        this.start = document.getElementById("start");
-        this.target = document.getElementById("target");
-        this.body= document.getElementById("body");
+    this.firstClickDone = false;
+    this.firstClickData = false;
+    this.targetClickData = null;
+    this.bodyClickData = null;
+    this.trialCompleted = false;
+  }
 
-        this.firstClickDone = false;
-        this.firstClickData = false;
-        this.targetClickData = null;
-        this.bodyClickData = null;
-        this.trialCompleted = false;
-    }
-
-
-
-    drawShapes() {
+  drawShapes() {
     this.trialCompleted = false;
     console.log("drawShapes");
 
@@ -46,15 +54,14 @@ class Trial{
     this.target.style.top = window.innerHeight / 2 + "px"; // Y coordinate
     this.target.style.position = "absolute";
 
-
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
     this.body.style.height = window.innerHeight + "px";
 
     this.setupEventHandlers();
-}
+  }
 
-setupEventHandlers() {
+  setupEventHandlers() {
     console.log("setupEventHandlers()");
     this.boundHandleStartPress = this.handleStartPress.bind(this);
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
@@ -64,110 +71,134 @@ setupEventHandlers() {
     // Use bind to ensure 'this' inside the handlers refers to the Block instance
     this.start.addEventListener("mousedown", this.boundHandleStartPress);
     this.start.addEventListener("mouseup", this.boundHandleStartRelease);
-}
+  }
 
-handleStartPress(event) {
+  handleStartPress(event) {
     console.log("handleStartPress");
     if (event.button === 0 && !this.firstClickDone) {
-        // Left mouse button
-        this.trialStartTime = Date.now();
-        this.trialStarted = true;
-        this.target.style.backgroundColor = "green";
-        this.firstClickData =  {name:'start', x: event.clientX, y: event.clientY, time: Date.now(), startHit:this.isCursorInsideShape(event,this.start)};
-        console.log(this.firstClickData);
-        this.firstClickDone = true;
+      // Left mouse button
+      this.trialStartTime = Date.now();
+      this.trialStarted = true;
+      this.target.style.backgroundColor = "green";
+      this.firstClickData = {
+        name: "start",
+        x: event.clientX,
+        y: event.clientY,
+        time: Date.now(),
+        startHit: this.isCursorInsideShape(event, this.start),
+      };
+      console.log(this.firstClickData);
+      this.firstClickDone = true;
 
-        if (this.firstClickData.startHit) {
-            this.successSound = new Audio("./sounds/success.wav");
-            this.successSound.play();
-        }
+      if (this.firstClickData.startHit) {
+        this.successSound = new Audio("./sounds/success.wav");
+        this.successSound.play();
+      }
     }
+  }
 
-}
-
-handleStartRelease(event) {
+  handleStartRelease(event) {
     console.log("handleStartRelease");
     console.log("trial Started: " + this.trialStarted);
 
     if (!this.trialStarted) {
-        this.errorSound = new Audio("./sounds/err1.wav");
-        this.errorSound.play();
+      this.errorSound = new Audio("./sounds/err1.wav");
+      this.errorSound.play();
     }
     this.start.style.display = "none";
     this.target.addEventListener("mousedown", this.boundHandleTargetPress);
     this.target.addEventListener("mouseup", this.boundHandleTargetRelease);
     this.body.addEventListener("mousedown", this.boundHandleBodyPress);
-}
-handleTargetRelease(event) {
+  }
+
+  handleTargetRelease(event) {
     console.log("handleTargetRelease");
     console.log("trial Started: " + this.trialStarted);
 
     if (!this.trialStarted) {
-        this.errorSound = new Audio("./sounds/err1.wav");
-        this.errorSound.play();
+      this.errorSound = new Audio("./sounds/err1.wav");
+      this.errorSound.play();
     }
     this.start.style.display = "none";
-}
+  }
 
-handleTargetPress(event) {
+  handleTargetPress(event) {
     console.log("handleTargetPress");
     console.log("trial Started: " + this.trialStarted);
 
-    if (event.button === 0 && this.firstClickDone && this.bodyClickData == null) {
+    if (
+      event.button === 0 &&
+      this.firstClickDone &&
+      this.bodyClickData == null
+    ) {
+      this.targetClickData = {
+        name: "target",
+        x: event.clientX,
+        y: event.clientY,
+        time: Date.now(),
+        targetHit: this.isCursorInsideShape(event, this.target),
+      };
 
+      console.log(this.targetClickData);
 
-        this.targetClickData ={name:'target', x: event.clientX, y: event.clientY, time: Date.now(), targetHit:this.isCursorInsideShape(event,this.target)};
+      if (this.targetClickData.targetHit) {
+        this.successSound = new Audio("./sounds/success.wav");
+        this.successSound.play();
+      } else {
+        this.errorSound = new Audio("./sounds/err1.wav");
+        this.errorSound.play();
+      }
 
-        console.log(this.targetClickData);
-
-        if (this.targetClickData.targetHit) {
-            this.successSound = new Audio("./sounds/success.wav");
-            this.successSound.play();
-        } else {
-            this.errorSound = new Audio("./sounds/err1.wav");
-            this.errorSound.play();
-        }
-
-        this.target.style.display = "none";
+      this.target.style.display = "none";
     }
 
-    this.body.removeEventListener("mousedown",this.boundHandleBodyPress);
+    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.endTrial();
-}
+  }
 
-handleBodyPress(event) {
+  handleBodyPress(event) {
     console.log("handleBodyPress");
 
-    if (event.button === 0 && this.firstClickDone && this.firstClickData != null && this.targetClickData == null ) {
+    if (
+      event.button === 0 &&
+      this.firstClickDone &&
+      this.firstClickData != null &&
+      this.targetClickData == null
+    ) {
+      this.bodyClickData = {
+        name: "body",
+        x: event.clientX,
+        y: event.clientY,
+        time: Date.now(),
+        bodyHit: this.isCursorInsideShape(event, this.body),
+      };
+      console.log(this.bodyClickData);
 
-        this.bodyClickData = {name:'body', x: event.clientX, y: event.clientY, time: Date.now(), bodyHit:this.isCursorInsideShape(event,this.body)};
-        console.log(this.bodyClickData);
-
-        if (this.bodyClickData.bodyHit ) {
-            this.errorSound = new Audio("./sounds/err1.wav");
-            this.errorSound.play();
-        }
-        this.target.style.display = "none";
+      if (this.bodyClickData.bodyHit) {
+        this.errorSound = new Audio("./sounds/err1.wav");
+        this.errorSound.play();
+      }
+      this.target.style.display = "none";
     }
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mousedown", this.boundHandleTargetRelease);
 
     this.endTrial();
-}
+  }
 
-isCursorInsideShape(event,shape){
+  isCursorInsideShape(event, shape) {
     console.log("isCursorInside" + shape);
     const rect = shape.getBoundingClientRect();
     return (
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
     );
-}
+  }
 
-endTrial() {
+  endTrial() {
     console.log("EndTrial");
 
     // Resetting the variables
@@ -176,22 +207,22 @@ endTrial() {
     this.firstClickData = null;
     this.bodyClickData = null;
     this.trialStarted = false;
-    this.trialsNum = 0 ;
+    this.trialsNum = 0;
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mouseup", this.boundHandleTargetRelease);
     this.start.removeEventListener("mousedown", this.boundHandleStartPress);
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
-    this.body.removeEventListener("mousedown",this.boundHandleBodyPress)
+    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.trialCompleted = true;
     experimentFrame.trialCompleted();
-}
-isTrialCompleted(){
+  }
+
+  isTrialCompleted() {
     return this.trialCompleted;
-}
+  }
 
-
-getTimeFormat(date) {
+  getTimeFormat(date) {
     // Get the individual components of the date.
     const now = new Date(date);
     const year = now.getFullYear();
@@ -204,33 +235,33 @@ getTimeFormat(date) {
 
     // Construct the formatted timestamp string.
     return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}.${milliseconds}`;
-}
+  }
 
-formatDuration = (ms) => {
+  formatDuration = (ms) => {
     if (ms < 0) ms = -ms;
     const time = {
-        day: Math.floor(ms / 86400000),
-        hour: Math.floor(ms / 3600000) % 24,
-        minute: Math.floor(ms / 60000) % 60,
-        second: Math.floor(ms / 1000) % 60,
-        millisecond: Math.floor(ms) % 1000,
+      day: Math.floor(ms / 86400000),
+      hour: Math.floor(ms / 3600000) % 24,
+      minute: Math.floor(ms / 60000) % 60,
+      second: Math.floor(ms / 1000) % 60,
+      millisecond: Math.floor(ms) % 1000,
     };
     return Object.entries(time)
-        .filter((val) => val[1] !== 0)
-        .map(([key, val]) => `${val} ${key}${val !== 1 ? "s" : ""}`)
-        .join(", ");
-};
+      .filter((val) => val[1] !== 0)
+      .map(([key, val]) => `${val} ${key}${val !== 1 ? "s" : ""}`)
+      .join(", ");
+  };
 }
 
 function mmToPixels(mm) {
-    // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-    const screenWidth = 1512; // Screen width in pixels
-    const screenHeight = 982; // Screen height in pixels
-    const screenDiagonal = 14.42; // Screen diagonal in pixel
+  // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
+  const screenWidth = 1512; // Screen width in pixels
+  const screenHeight = 982; // Screen height in pixels
+  const screenDiagonal = 14.42; // Screen diagonal in pixel
 
-    const inches = mm / 25.4;
-    return inches * 125.2;
+  const inches = mm / 25.4;
+  return inches * 125.2;
 
-    // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1
-    // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20
+  // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1
+  // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20
 }

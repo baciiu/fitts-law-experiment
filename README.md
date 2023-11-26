@@ -1,1 +1,0 @@
-# fitts-law-experiment
