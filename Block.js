@@ -2,11 +2,11 @@ class Block {
 	constructor(blockNumber, experimentType, shape, intDevice, rectsize, startSize, directionCount) {
 		this.shape = shape;
 		this.targetDimens = [
-			{ width: 4, height: 4 },
-			{ width: 8, height: 8 },
-			{ width: 10, height: 15 },
-			{ width: 20, height: 10 },
-			{ width: 25, height: 10 },
+			{width: 4, height: 4},
+			{width: 8, height: 8},
+			{width: 10, height: 15},
+			{width: 20, height: 10},
+			{width: 25, height: 10},
 		];
 
 		this.amplitude = [54, 110];
@@ -30,15 +30,16 @@ class Block {
 
 		this.trialStarted = false;
 		this.trialStartTime;
+		this.isDone = false;
 
 		// Initialize an empty array to store the trials
 		this.trials = [];
 		let trialId = 1; // Increment the trial number
 
 		// Nested loops to generate the trials
-		for (var dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
+		for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
 			// loop to go through Amplitude
-			for (var directionIdx = 0; directionIdx < this.trialDirection.length; directionIdx++) {
+			for (let directionIdx = 0; directionIdx < this.trialDirection.length; directionIdx++) {
 				// loop to go through interaction direction
 
 				// Check and assign startIndex, and targetIndex for each direction
@@ -61,109 +62,115 @@ class Block {
 				}
 
 				// Create a trial object with the current combination of values
-				const trial = {
-					trialId: trialId++,
-					shape: this.shape,
-					trialDirection: this.trialDirection[directionIdx],
-					intDevice: this.intDevice,
-					startIndex: this.startIndex,
-					targetIndex: this.targetIndex,
-					startSize: this.startSize,
-					targetWidth: this.targetDimens[dimenIdx].width,
-					targetHeight: this.targetDimens[dimenIdx].height,
-					amplitude: this.amplitude[0],
-				};
+				const trial = new Trial(
+					trialId++,
+					this.shape,
+					this.trialDirection[directionIdx],
+					this.intDevice,
+					this.startIndex,
+					this.targetIndex,
+					this.startSize,
+					this.targetDimens[dimenIdx].width,
+					this.targetDimens[dimenIdx].height,
+					this.amplitude[0]);
 
 				// Add the trial object to the trials array
 				this.trials.push(trial);
 
-				const trial2 = {
-					trialId: trialId++,
-					shape: this.shape,
-					trialDirection: this.trialDirection[directionIdx],
-					intDevice: this.intDevice,
-					startIndex: this.startIndex,
-					targetIndex: this.targetIndex,
-					startSize: this.startSize,
-					targetWidth: this.targetDimens[dimenIdx].width,
-					targetHeight: this.targetDimens[dimenIdx].height,
-					amplitude: this.amplitude[1],
-				};
-				this.trials.push(trial2);
+				const trial2 = new Trial(
+					trialId++,
+					this.shape,
+					this.trialDirection[directionIdx],
+					this.intDevice,
+					this.startIndex,
+					this.targetIndex,
+					this.startSize,
+					this.targetDimens[dimenIdx].width,
+					this.targetDimens[dimenIdx].height,
+					this.amplitude[1]);
+
+				this.trials.push(trial2)
 			}
 		}
 		// Shuffle the trials array randomly
 		this.shuffleArray(this.trials);
-
-		this.firstClickDone = false;
-		this.secondClickData = null;
 	}
 
-	// return trial
-	getTrial(trialNumber) {
-		return this.trials[trialNumber - 1];
-	}
 
-	//check if the block has another trial
-	hasNext(trialNumber) {
-		return this.trialsNum - trialNumber > 0;
-	}
 
-	// Shuffling function using Fisher-Yates algorithm
-	shuffleArray(array) {
-		var currentIndex = array.length;
-		var temporaryValue, randomIndex;
-
-		// While there remain elements to shuffle
-		while (currentIndex !== 0) {
-			// Pick a remaining element
-			randomIndex = Math.floor(Math.random() * currentIndex);
-			currentIndex -= 1;
-
-			// Swap it with the current element
-			temporaryValue = array[currentIndex];
-			array[currentIndex] = array[randomIndex];
-			array[randomIndex] = temporaryValue;
+		// return trial
+		getTrial(trialNumber)
+		{
+			return this.trials[trialNumber - 1];
 		}
 
-		return array;
-	}
+		//check if the block has another trial
+		hasNext(trialNumber)
+		{
+			return this.trialsNum - trialNumber > 0;
+		}
 
+		// Shuffling function using Fisher-Yates algorithm
+		shuffleArray(array)
+		{
+			let currentIndex = array.length;
+			let temporaryValue, randomIndex;
+
+			// While there remain elements to shuffle
+			while (currentIndex !== 0) {
+				// Pick a remaining element
+				randomIndex = Math.floor(Math.random() * currentIndex);
+				currentIndex -= 1;
+
+				// Swap it with the current element
+				temporaryValue = array[currentIndex];
+				array[currentIndex] = array[randomIndex];
+				array[randomIndex] = temporaryValue;
+			}
+
+			return array;
+		}
+
+
+
+}
+	/*
 	drawShapes(trial) {
+		this.trialCompleted = false;
 		console.log("drawShapes");
-		var start = document.getElementById("start");
-		var target = document.getElementById("target");
 
-		start.style.display = "block";
-		start.style.width = mmToPixels(trial.startSize) + "px";
-		start.style.height = mmToPixels(trial.startSize) + "px";
-		start.style.left = window.innerWidth / 2 + "px"; // X coordinate
-		start.style.top = window.innerHeight / 2 - 100 + "px"; // Y coordinate
-		start.style.position = "absolute";
+		this.start.style.display = "block";
+		this.start.style.width = mmToPixels(trial.startSize) + "px";
+		this.start.style.height = mmToPixels(trial.startSize) + "px";
+		this.start.style.left = window.innerWidth / 2 + "px"; // X coordinate
+		this.start.style.top = window.innerHeight / 2 - 100 + "px"; // Y coordinate
+		this.start.style.position = "absolute";
 
-		target.style.display = "block";
-		target.style.width = mmToPixels(trial.targetWidth) + "px";
-		target.style.height = mmToPixels(trial.targetHeight) + "px";
-		target.style.left = window.innerWidth / 2 + "px"; // X coordinate
-		target.style.top = window.innerHeight / 2 + "px"; // Y coordinate
-		target.style.position = "absolute";
+		this.target.style.display = "block";
+		this.target.style.width = mmToPixels(trial.targetWidth) + "px";
+		this.target.style.height = mmToPixels(trial.targetHeight) + "px";
+		this.target.style.left = window.innerWidth / 2 + "px"; // X coordinate
+		this.target.style.top = window.innerHeight / 2 + "px"; // Y coordinate
+		this.target.style.position = "absolute";
+
+
+		this.body.style.display = "block";
+		this.body.style.width = window.innerWidth + "px";
+		this.body.style.height = window.innerHeight + "px";
+
 		this.setupEventHandlers();
-		console.log(start);
-		console.log(target);
 	}
 
 	setupEventHandlers() {
 		console.log("setupEventHandlers()");
-		const start = document.getElementById("start");
-		const target = document.getElementById("target");
-		const body = document.getElementsByTagName("body")[0];
-
+		this.boundHandleStartPress = this.handleStartPress.bind(this);
+		this.boundHandleStartRelease = this.handleStartRelease.bind(this);
+		this.boundHandleTargetPress = this.handleTargetPress.bind(this);
+		this.boundHandleTargetRelease = this.handleTargetRelease.bind(this);
+		this.boundHandleBodyPress = this.handleBodyPress.bind(this);
 		// Use bind to ensure 'this' inside the handlers refers to the Block instance
-		start.addEventListener("mousedown", this.handleStartPress.bind(this));
-		start.addEventListener("mouseup", this.handleStartRelease.bind(this));
-		target.addEventListener("mousedown", this.handleTargetPress.bind(this));
-		target.addEventListener("mouseup", this.handleTargetRelease.bind(this));
-		body.addEventListener("mousedown", this.handleBodyPress.bind(this));
+		this.start.addEventListener("mousedown", this.boundHandleStartPress);
+		this.start.addEventListener("mouseup", this.boundHandleStartRelease);
 	}
 
 	handleStartPress(event) {
@@ -172,18 +179,17 @@ class Block {
 			// Left mouse button
 			this.trialStartTime = Date.now();
 			this.trialStarted = true;
-			target.style.backgroundColor = "green";
-
+			this.target.style.backgroundColor = "green";
+			this.firstClickData =  {name:'start', x: event.clientX, y: event.clientY, time: Date.now(), startHit:this.isCursorInsideShape(event,this.start)};
+			console.log(this.firstClickData);
 			this.firstClickDone = true;
 
-			if (this.isCursorInsideStart) {
+			if (this.firstClickData.startHit) {
 				this.successSound = new Audio("./sounds/success.wav");
 				this.successSound.play();
-			} else {
-				this.errorSound = new Audio("./sounds/err1.wav");
-				this.errorSound.play();
 			}
 		}
+
 	}
 
 	handleStartRelease(event) {
@@ -194,53 +200,102 @@ class Block {
 			this.errorSound = new Audio("./sounds/err1.wav");
 			this.errorSound.play();
 		}
-		start.style.display = "none";
+		this.start.style.display = "none";
+		this.target.addEventListener("mousedown", this.boundHandleTargetPress);
+		this.target.addEventListener("mouseup", this.boundHandleTargetRelease);
+		this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+	}
+	handleTargetRelease(event) {
+		console.log("handleTargetRelease");
+		console.log("trial Started: " + this.trialStarted);
+
+		if (!this.trialStarted) {
+			this.errorSound = new Audio("./sounds/err1.wav");
+			this.errorSound.play();
+		}
+		this.start.style.display = "none";
 	}
 
 	handleTargetPress(event) {
 		console.log("handleTargetPress");
 		console.log("trial Started: " + this.trialStarted);
-	}
 
-	handleTargetRelease(event) {
-		console.log("handleTargetRelease");
-		console.log("trial Started: " + this.trialStarted);
+		if (event.button === 0 && this.firstClickDone && this.bodyClickData == null) {
 
-		if (this.trialStarted && event.button === 0) {
-			if (this.isCursorInsideTarget) {
-				this.hit = new Audio("./sounds/hit.wav");
-				this.hit.play();
+
+			this.targetClickData ={name:'target', x: event.clientX, y: event.clientY, time: Date.now(), targetHit:this.isCursorInsideShape(event,this.target)};
+
+			console.log(this.targetClickData);
+
+			if (this.targetClickData.targetHit) {
+				this.successSound = new Audio("./sounds/success.wav");
+				this.successSound.play();
 			} else {
 				this.errorSound = new Audio("./sounds/err1.wav");
 				this.errorSound.play();
 			}
+
+			this.target.style.display = "none";
 		}
-		target.style.display = "none";
+
+		this.body.removeEventListener("mousedown",this.boundHandleBodyPress);
 		this.endTrial();
+	}
+
+	handleBodyPress(event) {
+		console.log("handleBodyPress");
+
+		if (event.button === 0 && this.firstClickDone && this.firstClickData != null && this.targetClickData == null ) {
+
+			this.bodyClickData = {name:'body', x: event.clientX, y: event.clientY, time: Date.now(), bodyHit:this.isCursorInsideShape(event,this.body)};
+			console.log(this.bodyClickData);
+
+			if (this.bodyClickData.bodyHit ) {
+				this.errorSound = new Audio("./sounds/err1.wav");
+				this.errorSound.play();
+			}
+			this.target.style.display = "none";
+		}
+
+		this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
+		this.target.removeEventListener("mousedown", this.boundHandleTargetRelease);
+
+		this.endTrial();
+	}
+
+	isCursorInsideShape(event,shape){
+		console.log("isCursorInside" + shape);
+		const rect = shape.getBoundingClientRect();
+		return (
+			event.clientX >= rect.left &&
+			event.clientX <= rect.right &&
+			event.clientY >= rect.top &&
+			event.clientY <= rect.bottom
+		);
 	}
 
 	endTrial() {
 		console.log("EndTrial");
+
+		// Resetting the variables
+		this.firstClickDone = false;
+		this.targetClickData = null;
+		this.firstClickData = null;
+		this.bodyClickData = null;
 		this.trialStarted = false;
-		const trialEndTime = Date.now();
-		const trialDuration = trialEndTime - this.trialStartTime;
-		console.log(trialDuration);
-		console.log(this.formatDuration(trialDuration));
-		// Handle trial end logic
-		// Move target to a new position
+		this.trialsNum = 0 ;
+
+		this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
+		this.target.removeEventListener("mouseup", this.boundHandleTargetRelease);
+		this.start.removeEventListener("mousedown", this.boundHandleStartPress);
+		this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
+		this.body.removeEventListener("mousedown",this.boundHandleBodyPress)
+		this.trialCompleted = true;
+	}
+	isTrialCompleted(){
+		return this.trialCompleted;
 	}
 
-	isCursorInsideStart(event) {
-		console.log("isCursorInsideStart");
-		// Implement logic to check if the cursor is inside the start element
-		return false;
-	}
-
-	isCursorInsideTarget(event) {
-		console.log("isCursorInsideTarget");
-		// Implement logic to check if the cursor is inside the target element
-		return false;
-	}
 
 	getTimeFormat(date) {
 		// Get the individual components of the date.
@@ -272,16 +327,4 @@ class Block {
 			.join(", ");
 	};
 }
-
-function mmToPixels(mm) {
-	// https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-	const screenWidth = 1512; // Screen width in pixels
-	const screenHeight = 982; // Screen height in pixels
-	const screenDiagonal = 14.42; // Screen diagonal in pixel
-
-	const inches = mm / 25.4;
-	return inches * 125.2;
-
-	// resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1
-	// resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20
-}
+*/

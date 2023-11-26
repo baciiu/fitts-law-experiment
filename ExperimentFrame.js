@@ -1,4 +1,8 @@
 class ExperimentFrame {
+	trialDirection;
+	intDevice;
+	startIndex;
+	targetIndex;
 	constructor() {
 		this.blockNumber = 1;
 		this.trialNumber = 1;
@@ -19,76 +23,124 @@ class ExperimentFrame {
 	}
 
 	showTrial() {
+		const trial = this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber);
+
 		if (!this.printedFirstBlock) {
 			this.printedFirstBlock = true;
+			this.printAllTrials();
 		}
-		console.log(this.printedFirstBlock);
 
-		const trial = this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber);
-		console.log(trial);
+		this.showIndexes();
+		trial.drawShapes();
 
-		this.experiment.getBlock(this.blockNumber).drawShapes(trial);
-
-		this.updateIndexes();
-
+		// Check if it's time for a break
 		if (this.trialNumber % this.trialsPerBreak === 0) {
+			// Display the break window
 			this.displayBreakWindow();
 		}
 	}
 
+	// Function to display the break window
 	displayBreakWindow() {
-		this.breakWindow.style.display = "block";
+		// Get the break window modal
+		const breakWindow = document.getElementById("breakWindow");
+		// Show the modal
+		breakWindow.style.display = "block";
+
+		// Disable the rest of the page interaction while the break window is visible
 		document.body.style.pointerEvents = "none";
+
+		// Get the continue button
+		const continueButton = document.getElementById("continueButton");
+
+		// Event listener for the continue button
+		continueButton.addEventListener("click", () => {
+			// Hide the break window modal
+			breakWindow.style.display = "none";
+
+			// Enable the page interaction again
+			document.body.style.pointerEvents = "auto";
+		});
 	}
 
 	trialCompleted() {
 		const currentBlock = this.experiment.getBlock(this.blockNumber);
 
-		if (!currentBlock) {
-			console.error("Invalid block number:", this.blockNumber);
-			return;
-		}
-		if (currentBlock.hasNext(this.trialNumber)) {
-			this.trialNumber++;
-		} else if (this.experiment.hasNext(this.blockNumber)) {
-			this.blockNumber++;
-			this.trialNumber = 1;
+		if (currentBlock) {
+			if (currentBlock.hasNext(this.trialNumber)) {
+				this.getNextTrial();
+			} else if (this.experiment.hasNext(this.blockNumber)) {
+				this.getNextBlock();
+			} else {
+				// Last trial and block completed
+				this.experimentFinished();
+			}
 		} else {
-			this.experimentFinished();
-			return;
+			console.error("Invalid block number:", this.blockNumber);
 		}
 
+		if (this.experiment.hasNext(this.blockNumber) || this.experiment.getBlock(this.blockNumber).hasNext(this.trialNumber)) {
+			this.showTrial();
+		} else {
+			this.experimentFinished();
+		}
+	}
+
+	getNextTrial() {
+		this.trialNumber++;
 		this.showTrial();
 	}
 
-	updateIndexes() {
-		document.getElementById("currentTrialIndex").innerText = this.trialNumber;
-		document.getElementById("totalTrialsIndex").innerText = this.getTotalTrials();
-		document.getElementById("trialsToBreakIndex").innerText = this.getRemainingTrials();
+	getNextBlock() {
+		this.blockNumber++;
+		this.trialNumber = 1;
+		this.showTrial(this.trialNumber);
+	}
+
+	showIndexes() {
+		const currentTrialIndexEl = document.getElementById("currentTrialIndex");
+		currentTrialIndexEl.innerText = this.trialNumber;
+
+		const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
+		currentBlockIndexEl.innerText = this.getTotalTrials() + "";
+
+		const trialsToBlockIndexEI = document.getElementById("trialsToBreakIndex");
+		trialsToBlockIndexEI.innerText = this.getRemainingTrials() + "";
 	}
 
 	experimentFinished() {
-		if (this.blockNumber === this.totalBlocks) {
-			this.exportClicksToCSV();
-			//exported
-			window.close();
+		// Check if it's the last block
+		const isLastBlock = this.blockNumber === this.totalBlocks;
+
+		if (isLastBlock) {
+			// Close the browser window
+		//	window.close();
 		}
 	}
 
 	getTotalTrials() {
-		return Array.from({ length: this.experiment.getNumBlocks() }, (_, i) => this.experiment.getBlock(i + 1).trialsNum).reduce((acc, num) => acc + num, 0);
+		let totalTrials = 0;
+		for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
+			const block = this.experiment.getBlock(i + 1);
+			totalTrials += block.trialsNum;
+		}
+		return totalTrials;
 	}
 
 	getRemainingTrials() {
-		return this.trialsPerBreak - (this.trialNumber % this.trialsPerBreak);
+		const remainingTrialsToBreak = this.trialsPerBreak - (this.trialNumber % this.trialsPerBreak);
+		return remainingTrialsToBreak;
 	}
 
 	printAllTrials() {
-		// This function could be potentially moved to the Experiment class to maintain the separation of concerns.
-		Array.from({ length: this.experiment.getNumBlocks() }, (_, i) => {
+		for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
 			const block = this.experiment.getBlock(i + 1);
-			Array.from({ length: block.trialsNum }, (_, j) => console.log(block.getTrial(j + 1)));
-		});
+
+			for (let j = 0; j < block.trialsNum; j++) {
+				const trial = block.getTrial(j + 1);
+				console.log(trial);
+			}
+		}
 	}
 
 	collectAllTrials() {

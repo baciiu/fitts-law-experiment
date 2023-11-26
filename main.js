@@ -29,10 +29,11 @@ function startExperiment() {
 	experimentFrame = new ExperimentFrame();
 	experimentFrame.showTrial();
 
-	/*
-	var experiment = new Experiment();
+
+		/*
+	let experiment = new Experiment();
 	let delay = 0;
-	const delayIncrement = 1000; // 1 second
+	const delayIncrement = 5000; // 1 second
 
 	experiment.blocks.forEach((block) => {
 		block.trials.forEach((trial) => {

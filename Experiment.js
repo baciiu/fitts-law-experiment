@@ -15,7 +15,7 @@ class Experiment {
 		this.setupContinueButton();
 
 		for (let i = 0; i < this.numBlocks; i++) {
-			this.blocks.push(new Block(i, this.experimentType, this.shape, this.intDevice, this.rectsize, this.startSize, this.directionCount));
+			this.blocks.push(new Block(i, this.experimentType, this.shape, this.intDevice, this.rectSize, this.startSize, this.directionCount));
 			block++;
 		}
 	}
@@ -37,14 +37,6 @@ class Experiment {
 
 	hasNext(blockNumber) {
 		return this.numBlocks - blockNumber > 0;
-	}
-
-	setTargetHeight(targetHeight) {
-		this.targetHeight = targetHeight;
-	}
-
-	setTargetWidth(targetWidth) {
-		this.targetWidth = targetWidth;
 	}
 
 	getRandomNonRepeat() {
