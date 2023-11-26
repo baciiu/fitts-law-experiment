@@ -1,9 +1,4 @@
 class ExperimentFrame {
-  trialDirection;
-  intDevice;
-  startIndex;
-  targetIndex;
-
   constructor() {
     this.blockNumber = 1;
     this.trialNumber = 1;
@@ -30,10 +25,11 @@ class ExperimentFrame {
 
     if (!this.printedFirstBlock) {
       this.printedFirstBlock = true;
-      this.printAllTrials();
+      //this.printAllTrials();
     }
 
     this.showIndexes();
+    console.log(trial);
     trial.drawShapes();
 
     // Check if it's time for a break
@@ -58,15 +54,6 @@ class ExperimentFrame {
     } else {
       console.error("Invalid block number:", this.blockNumber);
     }
-
-    if (
-      this.experiment.hasNext(this.blockNumber) ||
-      this.experiment.getBlock(this.blockNumber).hasNext(this.trialNumber)
-    ) {
-      this.showTrial();
-    } else {
-      this.experimentFinished();
-    }
   }
 
   getNextTrial() {
@@ -76,8 +63,7 @@ class ExperimentFrame {
 
   getNextBlock() {
     this.blockNumber++;
-    this.trialNumber = 1;
-    this.showTrial(this.trialNumber);
+    this.showTrial();
   }
 
   showIndexes() {
@@ -97,7 +83,8 @@ class ExperimentFrame {
 
     if (isLastBlock) {
       // Close the browser window
-      //	window.close();
+      //window.close();
+      console.log("finished! :) ");
     }
   }
 
@@ -133,7 +120,9 @@ class ExperimentFrame {
   }
 
   getRemainingTrials() {
-    return this.trialsPerBreak - (this.trialNumber % this.trialsPerBreak);
+    const a = this.trialNumber % this.trialsPerBreak;
+    const b = this.trialsPerBreak;
+    return b - a;
   }
 
   printAllTrials() {

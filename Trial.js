@@ -215,7 +215,7 @@ class Trial {
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.trialCompleted = true;
-    experimentFrame.trialCompleted();
+    this.isDone = experimentFrame.trialCompleted();
   }
 
   isTrialCompleted() {

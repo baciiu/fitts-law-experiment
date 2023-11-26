@@ -54,7 +54,8 @@ class Experiment {
   getRandomNonRepeat() {
     this.rectIndices = [];
     this.usedIndices = [];
-    for (let i = 0; i < this.numRects; i++) {
+
+    for (let i = 0; i < this.numBlocks; i++) {
       this.rectIndices.push(i);
     }
     const availableIndices = this.rectIndices.filter(
