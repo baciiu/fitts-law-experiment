@@ -55,7 +55,9 @@ class Trial {
     this.target.style.backgroundColor = "yellow";
 
     //this.getPositionOnScreen();
-    const pos = this.getPositionShapes();
+    //const pos = this.getPositionShapes();
+    const pos1 = this.generateSquarePositions();
+    let pos = pos1.at(0);
 
     this.start.style.left = pos.start.x + "px";
     this.start.style.top = pos.start.y + "px";
@@ -294,6 +296,60 @@ class Trial {
         y: targetY,
       },
     };
+  }
+
+  generateSquarePositions() {
+    const startSize = mmToPixels(this.startSize);
+    const targetWidth = mmToPixels(this.targetWidth);
+    const targetHeight = mmToPixels(this.targetHeight);
+    const amplitude = mmToPixels(this.amplitude);
+    const distanceX =
+      amplitude -
+      mmToPixels(this.startSize / 2) -
+      mmToPixels(this.targetWidth / 2);
+    const distanceY =
+      amplitude -
+      mmToPixels(this.startSize / 2) -
+      mmToPixels(this.targetHeight / 2);
+
+    const positions = [];
+
+    for (let i = 0; i < 5; i++) {
+      // Generate a random position for the start square
+      let startX = Math.random() * (window.innerWidth - startSize);
+      let startY = Math.random() * (window.innerHeight - startSize);
+
+      // Calculate the possible positions for the target square
+      let possibleTargetPositions = [
+        { x: startX, y: startY - distanceY - targetHeight }, // Above
+        { x: startX, y: startY + distanceY + startSize }, // Below
+        { x: startX - distanceX - targetWidth, y: startY }, // Left
+        { x: startX + distanceX + startSize, y: startY }, // Right
+      ];
+
+      // Filter out positions where the target square would be outside the window
+      possibleTargetPositions = possibleTargetPositions.filter((pos) => {
+        return (
+          pos.x >= 0 &&
+          pos.x <= window.innerWidth - targetWidth &&
+          pos.y >= 0 &&
+          pos.y <= window.innerHeight - targetHeight
+        );
+      });
+
+      // Choose a random target position from the remaining valid positions
+      if (possibleTargetPositions.length > 0) {
+        let targetPos =
+          possibleTargetPositions[
+            Math.floor(Math.random() * possibleTargetPositions.length)
+          ];
+        positions.push({
+          start: { x: startX, y: startY },
+          target: { x: targetPos.x, y: targetPos.y },
+        });
+      }
+    }
+    return positions;
   }
 }
 
