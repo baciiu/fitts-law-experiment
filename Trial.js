@@ -22,8 +22,11 @@ class Trial {
     this.amplitude = amplitude;
     this.isDone = isDone;
 
+    this.successSound = new Audio("./sounds/success.wav");
+    this.errorSound = new Audio("./sounds/err1.wav");
+
     // Shuffle position on the screen randomly
-    //this.shuffleArray();
+    this.getPositionOnScreen();
 
     this.start = document.getElementById("start");
     this.target = document.getElementById("target");
@@ -38,14 +41,13 @@ class Trial {
 
   drawShapes() {
     this.trialCompleted = false;
-    console.log("drawShapes");
-
     this.start.style.display = "block";
     this.start.style.width = mmToPixels(this.startSize) + "px";
     this.start.style.height = mmToPixels(this.startSize) + "px";
     this.start.style.left = window.innerWidth / 2 + "px"; // X coordinate
     this.start.style.top = window.innerHeight / 2 - 100 + "px"; // Y coordinate
     this.start.style.position = "absolute";
+    this.start.style.backgroundColor = "gray";
 
     this.target.style.display = "block";
     this.target.style.width = mmToPixels(this.targetWidth) + "px";
@@ -53,6 +55,7 @@ class Trial {
     this.target.style.left = window.innerWidth / 2 + "px"; // X coordinate
     this.target.style.top = window.innerHeight / 2 + "px"; // Y coordinate
     this.target.style.position = "absolute";
+    this.target.style.backgroundColor = "yellow";
 
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
@@ -62,7 +65,6 @@ class Trial {
   }
 
   setupEventHandlers() {
-    console.log("setupEventHandlers()");
     this.boundHandleStartPress = this.handleStartPress.bind(this);
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
     this.boundHandleTargetPress = this.handleTargetPress.bind(this);
@@ -74,9 +76,7 @@ class Trial {
   }
 
   handleStartPress(event) {
-    console.log("handleStartPress");
     if (event.button === 0 && !this.firstClickDone) {
-      // Left mouse button
       this.trialStartTime = Date.now();
       this.trialStarted = true;
       this.target.style.backgroundColor = "green";
@@ -91,18 +91,13 @@ class Trial {
       this.firstClickDone = true;
 
       if (this.firstClickData.startHit) {
-        this.successSound = new Audio("./sounds/success.wav");
         this.successSound.play();
       }
     }
   }
 
   handleStartRelease(event) {
-    console.log("handleStartRelease");
-    console.log("trial Started: " + this.trialStarted);
-
     if (!this.trialStarted) {
-      this.errorSound = new Audio("./sounds/err1.wav");
       this.errorSound.play();
     }
     this.start.style.display = "none";
@@ -112,20 +107,13 @@ class Trial {
   }
 
   handleTargetRelease(event) {
-    console.log("handleTargetRelease");
-    console.log("trial Started: " + this.trialStarted);
-
     if (!this.trialStarted) {
-      this.errorSound = new Audio("./sounds/err1.wav");
       this.errorSound.play();
     }
     this.start.style.display = "none";
   }
 
   handleTargetPress(event) {
-    console.log("handleTargetPress");
-    console.log("trial Started: " + this.trialStarted);
-
     if (
       event.button === 0 &&
       this.firstClickDone &&
@@ -142,23 +130,18 @@ class Trial {
       console.log(this.targetClickData);
 
       if (this.targetClickData.targetHit) {
-        this.successSound = new Audio("./sounds/success.wav");
         this.successSound.play();
       } else {
-        this.errorSound = new Audio("./sounds/err1.wav");
         this.errorSound.play();
       }
 
       this.target.style.display = "none";
     }
-
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.endTrial();
   }
 
   handleBodyPress(event) {
-    console.log("handleBodyPress");
-
     if (
       event.button === 0 &&
       this.firstClickDone &&
@@ -175,7 +158,6 @@ class Trial {
       console.log(this.bodyClickData);
 
       if (this.bodyClickData.bodyHit) {
-        this.errorSound = new Audio("./sounds/err1.wav");
         this.errorSound.play();
       }
       this.target.style.display = "none";
@@ -188,7 +170,6 @@ class Trial {
   }
 
   isCursorInsideShape(event, shape) {
-    console.log("isCursorInside" + shape);
     const rect = shape.getBoundingClientRect();
     return (
       event.clientX >= rect.left &&
@@ -199,9 +180,6 @@ class Trial {
   }
 
   endTrial() {
-    console.log("EndTrial");
-
-    // Resetting the variables
     this.firstClickDone = false;
     this.targetClickData = null;
     this.firstClickData = null;
@@ -216,10 +194,6 @@ class Trial {
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.trialCompleted = true;
     this.isDone = experimentFrame.trialCompleted();
-  }
-
-  isTrialCompleted() {
-    return this.trialCompleted;
   }
 
   getTimeFormat(date) {
@@ -251,6 +225,8 @@ class Trial {
       .map(([key, val]) => `${val} ${key}${val !== 1 ? "s" : ""}`)
       .join(", ");
   };
+
+  getPositionOnScreen() {}
 }
 
 function mmToPixels(mm) {

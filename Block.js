@@ -1,13 +1,8 @@
 class Block {
-  constructor(
-    blockNumber,
-    experimentType,
-    shape,
-    intDevice,
-    rectsize,
-    startSize,
-    directionCount,
-  ) {
+  constructor(blockNumber, experimentType, shape, intDevice) {
+    this.blockNumber = blockNumber;
+    this.experimentType = experimentType;
+    this.startSize = 10;
     this.shape = shape;
     this.targetDimens = [
       { width: 4, height: 4 },
@@ -18,34 +13,27 @@ class Block {
     ];
 
     this.amplitude = [54, 110];
-    this.trialDirection = ["Left", "Up", "Right", "Down"];
-
+    this.trialDirection = ["Right", "Left", "Up", "Down"];
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
-    this.startSize = startSize;
-    this.directionCount = directionCount;
-    this.rectsize = rectsize;
+
     this.trialId = 1;
 
-    this.currentstartIndex = null;
-    this.currentTargetIndex = null;
     this.trialsNum =
       this.targetDimens.length *
       this.trialDirection.length *
       this.amplitude.length;
+
     this.usedIndices = [];
     this.rectIndices = [];
-    for (let i = 0; i < this.numRects; i++) {
+
+    for (let i = 0; i < this.targetDimens.length; i++) {
       this.rectIndices.push(i);
     }
 
-    this.trialStarted = false;
-    this.trialStartTime;
-
-    // Initialize an empty array to store the trials
     this.trials = [];
-    let trialId = 1; // Increment the trial number
+    let trialId = 1;
 
     // Nested loops to generate the trials
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
@@ -59,19 +47,19 @@ class Block {
 
         // Check and assign startIndex, and targetIndex for each direction
 
-        if (this.trialDirection[directionIdx] == "Left") {
+        if (this.trialDirection[directionIdx] === "Left") {
           this.startIndex = 0;
           this.targetIndex = 4;
         }
-        if (this.trialDirection[directionIdx] == "Right") {
+        if (this.trialDirection[directionIdx] === "Right") {
           this.startIndex = 4;
           this.targetIndex = 0;
         }
-        if (this.trialDirection[directionIdx] == "Up") {
+        if (this.trialDirection[directionIdx] === "Up") {
           this.startIndex = 2;
           this.targetIndex = 6;
         }
-        if (this.trialDirection[directionIdx] == "Down") {
+        if (this.trialDirection[directionIdx] === "Down") {
           this.startIndex = 6;
           this.targetIndex = 2;
         }
@@ -107,9 +95,12 @@ class Block {
     return this.trials[trialNumber - 1];
   }
 
-  //check if the block has another trial
   hasNext(trialNumber) {
     return this.trialsNum - trialNumber > 0;
+  }
+
+  getTrialsNumber() {
+    return this.trials.length;
   }
 
   // Shuffling function using Fisher-Yates algorithm

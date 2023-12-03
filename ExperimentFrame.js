@@ -2,9 +2,17 @@ class ExperimentFrame {
   constructor() {
     this.blockNumber = 1;
     this.trialNumber = 1;
-    this.experiment = new Experiment();
-    this.totalBlocks = this.experiment.getNumBlocks();
+    this.totalBlocks = 3;
     this.trialsPerBreak = 7;
+    this.experimentType = "STS"; //
+    this.shape = "rectangle"; // rectangle or circle
+    this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
+    this.experiment = new Experiment(
+      this.experimentType,
+      this.shape,
+      this.intDevice,
+      this.totalBlocks,
+    );
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
     this.setupContinueButton();
@@ -19,6 +27,9 @@ class ExperimentFrame {
   }
 
   showTrial() {
+    console.log(
+      "BLOCK: " + this.blockNumber + "\n" + "TRIAL: " + this.trialNumber + "\n",
+    );
     const trial = this.experiment
       .getBlock(this.blockNumber)
       .getTrial(this.trialNumber);
@@ -29,19 +40,18 @@ class ExperimentFrame {
     }
 
     this.showIndexes();
-    console.log(trial);
     trial.drawShapes();
 
-    // Check if it's time for a break
+    // Time for a break
     if (this.trialNumber % this.trialsPerBreak === 0) {
-      // Display the break window
       this.displayBreakWindow();
     }
   }
 
   trialCompleted() {
     const currentBlock = this.experiment.getBlock(this.blockNumber);
-
+    console.log("blocks: ");
+    console.log(this.experiment.blocks);
     if (currentBlock) {
       if (currentBlock.hasNext(this.trialNumber)) {
         this.getNextTrial();
@@ -63,6 +73,7 @@ class ExperimentFrame {
 
   getNextBlock() {
     this.blockNumber++;
+    this.trialNumber = 1;
     this.showTrial();
   }
 
@@ -112,8 +123,8 @@ class ExperimentFrame {
 
   getTotalTrials() {
     let totalTrials = 0;
-    for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
-      const block = this.experiment.getBlock(i + 1);
+    for (let i = 1; i < this.experiment.numBlocks; i++) {
+      const block = this.experiment.getBlock(i);
       totalTrials += block.trialsNum;
     }
     return totalTrials;
