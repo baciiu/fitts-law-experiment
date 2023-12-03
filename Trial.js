@@ -312,12 +312,19 @@ class Trial {
       mmToPixels(this.startSize / 2) -
       mmToPixels(this.targetHeight / 2);
 
+    const topMargin = mmToPixels(7);
+    const sideMargin = mmToPixels(2);
+
     const positions = [];
 
-    for (let i = 0; i < 5; i++) {
-      // Generate a random position for the start square
-      let startX = Math.random() * (window.innerWidth - startSize);
-      let startY = Math.random() * (window.innerHeight - startSize);
+    for (let i = 0; i < 10; i++) {
+      let startX =
+        sideMargin +
+        Math.random() * (window.innerWidth - startSize - 2 * sideMargin);
+      let startY =
+        topMargin +
+        Math.random() *
+          (window.innerHeight - startSize - topMargin - sideMargin);
 
       // Calculate the possible positions for the target square
       let possibleTargetPositions = [
@@ -327,13 +334,12 @@ class Trial {
         { x: startX + distanceX + startSize, y: startY }, // Right
       ];
 
-      // Filter out positions where the target square would be outside the window
       possibleTargetPositions = possibleTargetPositions.filter((pos) => {
         return (
-          pos.x >= 0 &&
-          pos.x <= window.innerWidth - targetWidth &&
-          pos.y >= 0 &&
-          pos.y <= window.innerHeight - targetHeight
+          pos.x >= sideMargin &&
+          pos.x <= window.innerWidth - targetWidth - sideMargin &&
+          pos.y >= topMargin &&
+          pos.y <= window.innerHeight - targetHeight - sideMargin
         );
       });
 
