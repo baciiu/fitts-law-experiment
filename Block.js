@@ -6,16 +6,16 @@ class Block {
     this.shape = shape;
     this.targetDimens = [
       //{ width: 4, height: 4 },
-      { width: 8, height: 8 },
-      { width: 10, height: 15 },
-      { width: 20, height: 10 },
-      { width: 25, height: 10 },
+      //{ width: 8, height: 8 },
+      //{ width: 10, height: 15 },
+      //{ width: 20, height: 10 },
+      //{ width: 25, height: 10 },
       { width: 40, height: 20 },
     ];
 
-    this.amplitude = [54, 110];
-    //this.trialDirection = ["Right", "Left", "Up", "Down"];
-    this.trialDirection = [0, 1, 2, 3];
+    this.amplitude = [54];
+    this.trialDirection = this.getAngles(90);
+    //
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
@@ -45,27 +45,6 @@ class Block {
         directionIdx < this.trialDirection.length;
         directionIdx++
       ) {
-        // loop to go through interaction direction
-
-        // Check and assign startIndex, and targetIndex for each direction
-
-        if (this.trialDirection[directionIdx] == 0) {
-          this.startIndex = 0;
-          this.targetIndex = 4;
-        }
-        if (this.trialDirection[directionIdx] == 1) {
-          this.startIndex = 4;
-          this.targetIndex = 0;
-        }
-        if (this.trialDirection[directionIdx] == 2) {
-          this.startIndex = 2;
-          this.targetIndex = 6;
-        }
-        if (this.trialDirection[directionIdx] == 3) {
-          this.startIndex = 6;
-          this.targetIndex = 2;
-        }
-
         for (
           let amplIndex = 0;
           amplIndex < this.amplitude.length;
@@ -76,8 +55,6 @@ class Block {
               trialId++,
               this.trialDirection[directionIdx],
               this.intDevice,
-              this.startIndex,
-              this.targetIndex,
               this.startSize,
               this.targetDimens[dimenIdx].width,
               this.targetDimens[dimenIdx].height,
@@ -91,13 +68,23 @@ class Block {
     this.shuffleArray(this.trials);
   }
 
+  getAngles(stepSize) {
+    const startAngle = 0;
+    const endAngle = 360;
+    let angles = [];
+    for (let angle = startAngle; angle < endAngle; angle += stepSize) {
+      angles.push(angle);
+    }
+    return angles;
+  }
+
   // return trial
   getTrial(trialNumber) {
     return this.trials[trialNumber - 1];
   }
 
-  hasNext(trialNumber) {
-    return this.trialsNum - trialNumber > 0;
+  hasNextTrial(trialNumber) {
+    return this.trialsNum > trialNumber;
   }
 
   getTrialsNumber() {
@@ -120,7 +107,6 @@ class Block {
       array[currentIndex] = array[randomIndex];
       array[randomIndex] = temporaryValue;
     }
-
     return array;
   }
 }

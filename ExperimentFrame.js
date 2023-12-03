@@ -2,7 +2,7 @@ class ExperimentFrame {
   constructor() {
     this.blockNumber = 1;
     this.trialNumber = 1;
-    this.totalBlocks = 3;
+    this.totalBlocks = 2;
     this.trialsPerBreak = 7;
     this.experimentType = "STS"; //
     this.shape = "rectangle"; // rectangle or circle
@@ -27,9 +27,6 @@ class ExperimentFrame {
   }
 
   showTrial() {
-    console.log(
-      "BLOCK: " + this.blockNumber + "\n" + "TRIAL: " + this.trialNumber + "\n",
-    );
     const trial = this.experiment
       .getBlock(this.blockNumber)
       .getTrial(this.trialNumber);
@@ -50,15 +47,13 @@ class ExperimentFrame {
 
   trialCompleted() {
     const currentBlock = this.experiment.getBlock(this.blockNumber);
-    console.log("blocks: ");
-    console.log(this.experiment.blocks);
+
     if (currentBlock) {
-      if (currentBlock.hasNext(this.trialNumber)) {
+      if (currentBlock.hasNextTrial(this.trialNumber)) {
         this.getNextTrial();
-      } else if (this.experiment.hasNext(this.blockNumber)) {
+      } else if (this.experiment.hasNextBlock(this.blockNumber)) {
         this.getNextBlock();
       } else {
-        // Last trial and block completed
         this.experimentFinished();
       }
     } else {
@@ -89,14 +84,8 @@ class ExperimentFrame {
   }
 
   experimentFinished() {
-    // Check if it's the last block
-    const isLastBlock = this.blockNumber === this.totalBlocks;
-
-    if (isLastBlock) {
-      // Close the browser window
-      //window.close();
-      console.log("finished! :) ");
-    }
+    //window.close();
+    console.log("finished! :) ");
   }
 
   displayBreakWindow() {
@@ -123,7 +112,7 @@ class ExperimentFrame {
 
   getTotalTrials() {
     let totalTrials = 0;
-    for (let i = 1; i < this.experiment.numBlocks; i++) {
+    for (let i = 1; i <= this.experiment.numBlocks; i++) {
       const block = this.experiment.getBlock(i);
       totalTrials += block.trialsNum;
     }

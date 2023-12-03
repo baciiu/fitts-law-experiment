@@ -3,8 +3,6 @@ class Trial {
     trialId,
     trialDirection,
     intDevice,
-    startIndex,
-    targetIndex,
     startSize,
     targetWidth,
     targetHeight,
@@ -14,8 +12,6 @@ class Trial {
     this.trialId = trialId;
     this.trialDirection = trialDirection;
     this.intDevice = intDevice;
-    this.startIndex = startIndex;
-    this.targetIndex = targetIndex;
     this.startSize = startSize;
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
@@ -24,9 +20,6 @@ class Trial {
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
-
-    // Shuffle position on the screen randomly
-    //this.getRandomScreenIndex();
 
     this.start = document.getElementById("start");
     this.target = document.getElementById("target");
@@ -40,7 +33,6 @@ class Trial {
   }
 
   drawShapes() {
-    console.log("amplitude" + this.amplitude);
     this.trialCompleted = false;
     this.start.style.display = "block";
     this.start.style.width = mmToPixels(this.startSize) + "px";
@@ -56,13 +48,13 @@ class Trial {
 
     //this.getPositionOnScreen();
     //const pos = this.getPositionShapes();
-    const pos1 = this.generateSquarePositions();
-    let pos = pos1.at(0);
+    const pos = this.generateSquarePositions();
 
     this.start.style.left = pos.start.x + "px";
     this.start.style.top = pos.start.y + "px";
     this.target.style.left = pos.target.x + "px";
     this.target.style.top = pos.target.y + "px";
+    console.log(pos.direction);
 
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
@@ -172,7 +164,6 @@ class Trial {
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mousedown", this.boundHandleTargetRelease);
-
     this.endTrial();
   }
 
@@ -232,92 +223,21 @@ class Trial {
       .join(", ");
   };
 
-  getRandomNumber(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  getPositionShapes() {
-    // Assuming the center of the first shape must be within a region that allows the second shape
-    // to be fully within the canvas at the given amplitude distance
-    console.log(this);
-    const startShapeHeight = mmToPixels(this.startSize);
-    const startShapeWidth = mmToPixels(this.startSize);
-
-    const targetShapeWidth = mmToPixels(this.targetWidth);
-    const targetShapeHeight = mmToPixels(this.targetHeight);
-
-    console.log("target w size mm:  " + this.targetWidth);
-    console.log("target w px:  " + targetShapeWidth);
-
-    console.log("target h mm:  " + this.targetHeight);
-    console.log("target h px:  " + targetShapeHeight);
-
-    const amplitude = mmToPixels(this.amplitude);
-
-    console.log("amplitude mm : " + this.amplitude);
-    console.log("amplitude px : " + amplitude);
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const orientation = "vertical"; //"horizontal";
-
-    let startX, startY, targetY, targetX, distance;
-
-    switch (orientation) {
-      case "vertical":
-        startX = centerX;
-        startY = centerY;
-        distance =
-          amplitude -
-          mmToPixels(this.startSize / 2) -
-          mmToPixels(this.targetHeight / 2);
-        targetX = centerX;
-        targetY = centerY + distance + startShapeHeight;
-        break;
-      case "horizontal":
-        startX = centerX;
-        startY = centerY;
-        distance =
-          amplitude -
-          mmToPixels(this.startSize / 2) -
-          mmToPixels(this.targetWidth / 2);
-        targetX = centerX + distance + startShapeWidth;
-        targetY = centerY;
-        break;
-    }
-
-    return {
-      start: {
-        x: startX,
-        y: startY,
-      },
-      target: {
-        x: targetX,
-        y: targetY,
-      },
-    };
-  }
-
   generateSquarePositions() {
     const startSize = mmToPixels(this.startSize);
     const targetWidth = mmToPixels(this.targetWidth);
     const targetHeight = mmToPixels(this.targetHeight);
     const amplitude = mmToPixels(this.amplitude);
-    const distanceX =
-      amplitude -
-      mmToPixels(this.startSize / 2) -
-      mmToPixels(this.targetWidth / 2);
-    const distanceY =
-      amplitude -
-      mmToPixels(this.startSize / 2) -
-      mmToPixels(this.targetHeight / 2);
+    const angle = this.trialDirection;
+
+    // Calculate distances
+    const distanceX = amplitude + startSize - startSize / 2 - targetWidth / 2;
+    const distanceY = amplitude + startSize - startSize / 2 - targetHeight / 2;
 
     const topMargin = mmToPixels(7);
     const sideMargin = mmToPixels(2);
 
-    const positions = [];
-
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       let startX =
         sideMargin +
         Math.random() * (window.innerWidth - startSize - 2 * sideMargin);
@@ -325,37 +245,60 @@ class Trial {
         topMargin +
         Math.random() *
           (window.innerHeight - startSize - topMargin - sideMargin);
+      let direction = "";
 
-      // Calculate the possible positions for the target square
-      let possibleTargetPositions = [
-        { x: startX, y: startY - distanceY - targetHeight }, // Above
-        { x: startX, y: startY + distanceY + startSize }, // Below
-        { x: startX - distanceX - targetWidth, y: startY }, // Left
-        { x: startX + distanceX + startSize, y: startY }, // Right
-      ];
+      const getTargetPosition = () => {
+        const angleRadians = (angle * Math.PI) / 180; // Convert angle to radians
+        let diagonalX, diagonalY;
 
-      possibleTargetPositions = possibleTargetPositions.filter((pos) => {
+        if (angle === 0) {
+          diagonalX = startX + distanceX * Math.cos(angleRadians);
+          diagonalY = startY + (startSize - targetHeight) / 2; // Center on the same Y axis
+          direction = "right";
+        } else if (angle === 90) {
+          diagonalX = startX + (startSize - targetWidth) / 2; // Center on the same X axis
+          diagonalY = startY + distanceY * Math.sin(angleRadians);
+          direction = "up";
+        } else if (angle === 180) {
+          diagonalX = startX + distanceX * Math.cos(angleRadians);
+          diagonalY = startY + (startSize - targetHeight) / 2; // Center on the same Y axis
+          direction = "left";
+        } else if (angle === 270) {
+          diagonalX = startX + (startSize - targetWidth) / 2; // Center on the same X axis
+          diagonalY = startY + distanceY * Math.sin(angleRadians);
+          direction = "down";
+        } else {
+          diagonalX = startX + distanceX * Math.cos(angleRadians);
+          diagonalY = startY + distanceY * Math.sin(angleRadians);
+          direction = "diagonal";
+        }
+        return { x: diagonalX, y: diagonalY, z: direction };
+      };
+
+      // Iterate over angleSet if it's an array, or just use it directly if it's a single value
+      let possiblePositions = [getTargetPosition()];
+
+      // Filtering logic
+      let validPositions = possiblePositions.filter((pos) => {
         return (
           pos.x >= sideMargin &&
           pos.x <= window.innerWidth - targetWidth - sideMargin &&
           pos.y >= topMargin &&
-          pos.y <= window.innerHeight - targetHeight - sideMargin
+          pos.y <= window.innerHeight - targetHeight - sideMargin &&
+          pos.z != ""
         );
       });
 
-      // Choose a random target position from the remaining valid positions
-      if (possibleTargetPositions.length > 0) {
+      if (validPositions.length > 0) {
         let targetPos =
-          possibleTargetPositions[
-            Math.floor(Math.random() * possibleTargetPositions.length)
-          ];
-        positions.push({
+          validPositions[Math.floor(Math.random() * validPositions.length)];
+        return {
           start: { x: startX, y: startY },
           target: { x: targetPos.x, y: targetPos.y },
-        });
+          direction: targetPos.z,
+        };
       }
     }
-    return positions;
   }
 }
 

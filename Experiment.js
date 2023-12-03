@@ -10,7 +10,7 @@ class Experiment {
     this.continueButton = document.getElementById("continueButton");
     this.setupContinueButton();
 
-    for (let i = 1; i < this.numBlocks; i++) {
+    for (let i = 1; i <= this.numBlocks; i++) {
       this.blocks.push(
         new Block(i, this.experimentType, this.shape, this.intDevice),
       );
@@ -34,8 +34,8 @@ class Experiment {
     }
   }
 
-  hasNext(blockNumber) {
-    return this.numBlocks - blockNumber > 0;
+  hasNextBlock(blockNumber) {
+    return this.numBlocks > blockNumber;
   }
 
   getRandomNonRepeat() {
