@@ -116,9 +116,11 @@ button {
 }
 
 #start {
+    color: white;
     margin: 0;
 }
 
 #target {
+    color: white;
     margin: 0;
 }

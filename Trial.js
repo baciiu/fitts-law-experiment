@@ -16,7 +16,7 @@ class Trial {
     this.intDevice = intDevice;
     this.startIndex = startIndex;
     this.targetIndex = targetIndex;
-    this.startSize = startIndex;
+    this.startSize = startSize;
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
@@ -26,7 +26,7 @@ class Trial {
     this.errorSound = new Audio("./sounds/err1.wav");
 
     // Shuffle position on the screen randomly
-    this.getPositionOnScreen();
+    //this.getRandomScreenIndex();
 
     this.start = document.getElementById("start");
     this.target = document.getElementById("target");
@@ -40,22 +40,27 @@ class Trial {
   }
 
   drawShapes() {
+    console.log("amplitude" + this.amplitude);
     this.trialCompleted = false;
     this.start.style.display = "block";
     this.start.style.width = mmToPixels(this.startSize) + "px";
     this.start.style.height = mmToPixels(this.startSize) + "px";
-    this.start.style.left = window.innerWidth / 2 + "px"; // X coordinate
-    this.start.style.top = window.innerHeight / 2 - 100 + "px"; // Y coordinate
     this.start.style.position = "absolute";
     this.start.style.backgroundColor = "gray";
 
     this.target.style.display = "block";
     this.target.style.width = mmToPixels(this.targetWidth) + "px";
     this.target.style.height = mmToPixels(this.targetHeight) + "px";
-    this.target.style.left = window.innerWidth / 2 + "px"; // X coordinate
-    this.target.style.top = window.innerHeight / 2 + "px"; // Y coordinate
     this.target.style.position = "absolute";
     this.target.style.backgroundColor = "yellow";
+
+    //this.getPositionOnScreen();
+    const pos = this.getPositionShapes();
+
+    this.start.style.left = pos.start.x + "px";
+    this.start.style.top = pos.start.y + "px";
+    this.target.style.left = pos.target.x + "px";
+    this.target.style.top = pos.target.y + "px";
 
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
@@ -185,7 +190,6 @@ class Trial {
     this.firstClickData = null;
     this.bodyClickData = null;
     this.trialStarted = false;
-    this.trialsNum = 0;
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mouseup", this.boundHandleTargetRelease);
@@ -226,7 +230,71 @@ class Trial {
       .join(", ");
   };
 
-  getPositionOnScreen() {}
+  getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  getPositionShapes() {
+    // Assuming the center of the first shape must be within a region that allows the second shape
+    // to be fully within the canvas at the given amplitude distance
+    console.log(this);
+    const startShapeHeight = mmToPixels(this.startSize);
+    const startShapeWidth = mmToPixels(this.startSize);
+
+    const targetShapeWidth = mmToPixels(this.targetWidth);
+    const targetShapeHeight = mmToPixels(this.targetHeight);
+
+    console.log("target w size mm:  " + this.targetWidth);
+    console.log("target w px:  " + targetShapeWidth);
+
+    console.log("target h mm:  " + this.targetHeight);
+    console.log("target h px:  " + targetShapeHeight);
+
+    const amplitude = mmToPixels(this.amplitude);
+
+    console.log("amplitude mm : " + this.amplitude);
+    console.log("amplitude px : " + amplitude);
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const orientation = "vertical"; //"horizontal";
+
+    let startX, startY, targetY, targetX, distance;
+
+    switch (orientation) {
+      case "vertical":
+        startX = centerX;
+        startY = centerY;
+        distance =
+          amplitude -
+          mmToPixels(this.startSize / 2) -
+          mmToPixels(this.targetHeight / 2);
+        targetX = centerX;
+        targetY = centerY + distance + startShapeHeight;
+        break;
+      case "horizontal":
+        startX = centerX;
+        startY = centerY;
+        distance =
+          amplitude -
+          mmToPixels(this.startSize / 2) -
+          mmToPixels(this.targetWidth / 2);
+        targetX = centerX + distance + startShapeWidth;
+        targetY = centerY;
+        break;
+    }
+
+    return {
+      start: {
+        x: startX,
+        y: startY,
+      },
+      target: {
+        x: targetX,
+        y: targetY,
+      },
+    };
+  }
 }
 
 function mmToPixels(mm) {
@@ -236,7 +304,7 @@ function mmToPixels(mm) {
   const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  return inches * 125.2;
+  return inches * 125;
 
   // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1
   // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20
