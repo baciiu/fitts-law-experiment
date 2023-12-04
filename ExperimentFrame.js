@@ -86,26 +86,21 @@ class ExperimentFrame {
   experimentFinished() {
     //window.close();
     console.log("finished! :) ");
+    showFinishWindow();
   }
 
   displayBreakWindow() {
-    // Get the break window modal
     const breakWindow = document.getElementById("breakWindow");
-    // Show the modal
+
     breakWindow.style.display = "block";
 
     // Disable the rest of the page interaction while the break window is visible
     document.body.style.pointerEvents = "none";
 
-    // Get the continue button
     const continueButton = document.getElementById("continueButton");
 
-    // Event listener for the continue button
     continueButton.addEventListener("click", () => {
-      // Hide the break window modal
       breakWindow.style.display = "none";
-
-      // Enable the page interaction again
       document.body.style.pointerEvents = "auto";
     });
   }

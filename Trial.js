@@ -258,7 +258,7 @@ class Trial {
         } else if (angle === 90) {
           diagonalX = startX + (startSize - targetWidth) / 2; // Center on the same X axis
           diagonalY = startY + distanceY * Math.sin(angleRadians);
-          direction = "up";
+          direction = "down";
         } else if (angle === 180) {
           diagonalX = startX + distanceX * Math.cos(angleRadians);
           diagonalY = startY + (startSize - targetHeight) / 2; // Center on the same Y axis
@@ -266,7 +266,7 @@ class Trial {
         } else if (angle === 270) {
           diagonalX = startX + (startSize - targetWidth) / 2; // Center on the same X axis
           diagonalY = startY + distanceY * Math.sin(angleRadians);
-          direction = "down";
+          direction = "up";
         } else {
           diagonalX = startX + distanceX * Math.cos(angleRadians);
           diagonalY = startY + distanceY * Math.sin(angleRadians);
