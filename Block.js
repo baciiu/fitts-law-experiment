@@ -13,7 +13,7 @@ class Block {
       { width: 40, height: 20 },
     ];
 
-    this.amplitude = [54];
+    this.amplitude = [54, 100];
     this.trialDirection = this.getAngles(90);
     //
     this.intDevice = intDevice;

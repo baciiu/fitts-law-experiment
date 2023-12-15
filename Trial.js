@@ -46,20 +46,19 @@ class Trial {
     this.target.style.position = "absolute";
     this.target.style.backgroundColor = "yellow";
 
-    //this.getPositionOnScreen();
-    //const pos = this.getPositionShapes();
-    const pos = this.generateSquarePositions();
-
+    const pos = this.generateDiagonalPositions();
+    console.log(this.trialDirection);
+    console.log(this.getDirection());
     this.start.style.left = pos.start.x + "px";
     this.start.style.top = pos.start.y + "px";
     this.target.style.left = pos.target.x + "px";
     this.target.style.top = pos.target.y + "px";
-    console.log(pos.direction);
 
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
     this.body.style.height = window.innerHeight + "px";
 
+    this.testDiagonalPositions(this);
     this.setupEventHandlers();
   }
 
@@ -223,81 +222,97 @@ class Trial {
       .join(", ");
   };
 
-  generateSquarePositions() {
-    const startSize = mmToPixels(this.startSize);
-    const targetWidth = mmToPixels(this.targetWidth);
-    const targetHeight = mmToPixels(this.targetHeight);
-    const amplitude = mmToPixels(this.amplitude);
-    const angle = this.trialDirection;
+  getDirection() {
+    switch (this.trialDirection) {
+      case 0:
+        return "right";
+      case 90:
+        return "down";
+      case 180:
+        return "left";
+      case 270:
+        return "up";
+      default:
+        return "diagonal";
+    }
+    return "wrong direction!";
+  }
 
-    // Calculate distances
-    const distanceX = amplitude + startSize - startSize / 2 - targetWidth / 2;
-    const distanceY = amplitude + startSize - startSize / 2 - targetHeight / 2;
+  getDistance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  }
 
-    const topMargin = mmToPixels(7);
-    const sideMargin = mmToPixels(2);
+  generateDiagonalPositions() {
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+    let amplitude = mmToPixels(this.amplitude);
+    let width1 = mmToPixels(this.startSize);
+    let height1 = mmToPixels(this.startSize);
+    let width2 = mmToPixels(this.targetWidth);
+    let height2 = mmToPixels(this.targetHeight);
+    let topMargin = mmToPixels(5);
+    let otherMargins = mmToPixels(3);
+    let start, target, x1, y1, x2, y2;
 
-    for (let i = 0; i < 20; i++) {
-      let startX =
-        sideMargin +
-        Math.random() * (window.innerWidth - startSize - 2 * sideMargin);
-      let startY =
-        topMargin +
-        Math.random() *
-          (window.innerHeight - startSize - topMargin - sideMargin);
-      let direction = "";
+    do {
+      x1 =
+        Math.random() * (canvasWidth - width1 - 2 * otherMargins) +
+        width1 / 2 +
+        otherMargins;
+      y1 =
+        Math.random() * (canvasHeight - height1 - topMargin - otherMargins) +
+        height1 / 2 +
+        topMargin;
 
-      const getTargetPosition = () => {
-        const angleRadians = (angle * Math.PI) / 180; // Convert angle to radians
-        let diagonalX, diagonalY;
+      let angle = this.trialDirection;
+      // Calculate the center of the second rectangle
+      x2 = x1 + amplitude * Math.cos((angle * Math.PI) / 180);
+      y2 = y1 + amplitude * Math.sin((angle * Math.PI) / 180);
 
-        if (angle === 0) {
-          diagonalX = startX + distanceX * Math.cos(angleRadians);
-          diagonalY = startY + (startSize - targetHeight) / 2; // Center on the same Y axis
-          direction = "right";
-        } else if (angle === 90) {
-          diagonalX = startX + (startSize - targetWidth) / 2; // Center on the same X axis
-          diagonalY = startY + distanceY * Math.sin(angleRadians);
-          direction = "down";
-        } else if (angle === 180) {
-          diagonalX = startX + distanceX * Math.cos(angleRadians);
-          diagonalY = startY + (startSize - targetHeight) / 2; // Center on the same Y axis
-          direction = "left";
-        } else if (angle === 270) {
-          diagonalX = startX + (startSize - targetWidth) / 2; // Center on the same X axis
-          diagonalY = startY + distanceY * Math.sin(angleRadians);
-          direction = "up";
-        } else {
-          diagonalX = startX + distanceX * Math.cos(angleRadians);
-          diagonalY = startY + distanceY * Math.sin(angleRadians);
-          direction = "diagonal";
-        }
-        return { x: diagonalX, y: diagonalY, z: direction };
-      };
-
-      // Iterate over angleSet if it's an array, or just use it directly if it's a single value
-      let possiblePositions = [getTargetPosition()];
-
-      // Filtering logic
-      let validPositions = possiblePositions.filter((pos) => {
-        return (
-          pos.x >= sideMargin &&
-          pos.x <= window.innerWidth - targetWidth - sideMargin &&
-          pos.y >= topMargin &&
-          pos.y <= window.innerHeight - targetHeight - sideMargin &&
-          pos.z != ""
-        );
-      });
-
-      if (validPositions.length > 0) {
-        let targetPos =
-          validPositions[Math.floor(Math.random() * validPositions.length)];
-        return {
-          start: { x: startX, y: startY },
-          target: { x: targetPos.x, y: targetPos.y },
-          direction: targetPos.z,
-        };
+      // Check if the distance is correct and the second rectangle is within bounds
+      if (
+        this.getDistance(x1, y1, x2, y2) === amplitude &&
+        x2 - width2 / 2 > otherMargins &&
+        x2 + width2 / 2 < canvasWidth - otherMargins &&
+        y2 - height2 / 2 > topMargin &&
+        y2 + height2 / 2 < canvasHeight - otherMargins
+      ) {
+        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        return { start, target };
       }
+    } while (!start || !target); // Repeat if a valid position was not found
+
+    return { start, target };
+  }
+
+  testDiagonalPositions() {
+    // Generate the positions
+    const positions = this.generateDiagonalPositions();
+
+    // Extract the centers of the start and target rectangles
+    const centerX1 = positions.start.x + mmToPixels(this.startSize) / 2;
+    const centerY1 = positions.start.y + mmToPixels(this.startSize) / 2;
+    const centerX2 = positions.target.x + mmToPixels(this.targetWidth) / 2;
+    const centerY2 = positions.target.y + mmToPixels(this.targetHeight) / 2;
+
+    // Calculate the distance between the centers
+    const distance = this.getDistance(centerX1, centerY1, centerX2, centerY2);
+
+    // Convert the amplitude from millimeters to pixels
+    const amplitudeInPixels = mmToPixels(this.amplitude);
+
+    console.log(distance - amplitudeInPixels);
+    // Check if the distance is equal to the amplitude
+    if (Math.abs(distance - amplitudeInPixels) < 1e-5) {
+      // Using a small threshold to account for floating point inaccuracies
+      console.log(
+        "Test passed: The distance between the centers is approximately equal to the amplitude.",
+      );
+    } else {
+      console.error(
+        "Test failed: The distance between the centers is not equal to the amplitude.",
+      );
     }
   }
 }
@@ -309,7 +324,10 @@ function mmToPixels(mm) {
   const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  return inches * 125;
+  let result = inches * 125;
+  result = result.toFixed(2);
+  let res = Number(result);
+  return res;
 
   // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1
   // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20
