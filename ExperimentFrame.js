@@ -17,6 +17,7 @@ class ExperimentFrame {
     this.continueButton = document.getElementById("continueButton");
     this.setupContinueButton();
     this.allClicks = [];
+    this.endTrialPos = null;
   }
 
   setupContinueButton() {
@@ -27,6 +28,11 @@ class ExperimentFrame {
   }
 
   showTrial() {
+    this.experiment
+      .getBlock(this.blockNumber)
+      .getTrial(this.trialNumber)
+      .setPreviousTrialPosition(this.endTrialPos);
+
     const trial = this.experiment
       .getBlock(this.blockNumber)
       .getTrial(this.trialNumber);
@@ -35,9 +41,9 @@ class ExperimentFrame {
       this.printedFirstBlock = true;
       //this.printAllTrials();
     }
-
     this.showIndexes();
     trial.drawShapes();
+    this.endTrialPos = trial.getEndTrialPosition();
 
     // Time for a break
     if (this.trialNumber % this.trialsPerBreak === 0) {

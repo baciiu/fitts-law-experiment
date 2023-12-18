@@ -14,7 +14,7 @@ class Block {
     ];
 
     this.amplitude = [54, 100];
-    this.trialDirection = this.getAngles(90);
+    this.trialDirection = this.getAngles(45);
     //
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
@@ -26,6 +26,9 @@ class Block {
       this.targetDimens.length *
       this.trialDirection.length *
       this.amplitude.length;
+
+    this.maxScreenPercentage = 30;
+    this.previousTrialEnd = null;
 
     this.usedIndices = [];
     this.rectIndices = [];
@@ -59,6 +62,7 @@ class Block {
               this.targetDimens[dimenIdx].width,
               this.targetDimens[dimenIdx].height,
               this.amplitude[amplIndex],
+              this.maxScreenPercentage,
             ),
           );
         }
@@ -66,6 +70,61 @@ class Block {
     }
     // Shuffle the trials array randomly
     this.shuffleArray(this.trials);
+  }
+
+  generateDiagonalPositions(trial) {
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+    let maxDistanceWidth = (this.maxScreenPercentage * canvasWidth) / 100;
+    let maxDistanceHeight = (this.maxScreenPercentage * canvasHeight) / 100;
+    let amplitude = mmToPixels(this.amplitude);
+    let width1 = mmToPixels(this.startSize);
+    let height1 = mmToPixels(this.startSize);
+    let width2 = mmToPixels(trial.targetWidth);
+    let height2 = mmToPixels(trial.targetHeight);
+    console.log("width target" + trial.targetWidth);
+    let topMargin = mmToPixels(5);
+    let otherMargins = mmToPixels(3);
+    let start, target, x1, y1, x2, y2;
+
+    do {
+      x1 =
+        Math.random() * (canvasWidth - width1 - 2 * otherMargins) +
+        width1 / 2 +
+        otherMargins;
+      y1 =
+        Math.random() * (canvasHeight - height1 - topMargin - otherMargins) +
+        height1 / 2 +
+        topMargin;
+
+      let angle = this.trialDirection;
+      // Calculate the center of the second rectangle
+      x2 = x1 + amplitude * Math.cos((angle * Math.PI) / 180);
+      y2 = y1 + amplitude * Math.sin((angle * Math.PI) / 180);
+
+      // Check if the distance is correct and the second rectangle is within bounds
+      if (
+        this.getDistance(x1, y1, x2, y2) === amplitude &&
+        x2 - width2 / 2 > otherMargins &&
+        x2 + width2 / 2 < canvasWidth - otherMargins &&
+        y2 - height2 / 2 > topMargin &&
+        y2 + height2 / 2 < canvasHeight - otherMargins
+      ) {
+        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        return { start, target };
+      }
+      // If previousEnd is not null, check the distance constraint
+      if (
+        this.previousTrialEnd &&
+        (Math.abs(this.start.x - this.previousTrialEnd.x) > maxDistanceWidth ||
+          Math.abs(this.start.y - this.previousTrialEnd.y) > maxDistanceHeight)
+      ) {
+        continue; // Skip this iteration and generate new positions
+      }
+    } while (!start || !target); // Repeat if a valid position was not found
+
+    return { start, target };
   }
 
   getAngles(stepSize) {

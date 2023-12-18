@@ -116,11 +116,13 @@ button {
 }
 
 #start {
-    color: white;
+    color: #000000;
+    text-align: center;
     margin: 0;
 }
 
 #target {
-    color: white;
+    color: #000000;
+    text-align: center;
     margin: 0;
 }
