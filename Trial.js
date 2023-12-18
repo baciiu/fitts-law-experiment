@@ -34,6 +34,13 @@ class Trial {
     this.targetClickData = null;
     this.bodyClickData = null;
     this.trialCompleted = false;
+
+    this.startCoords = { x: null, y: null };
+    this.targetCoords = { x: null, y: null };
+
+    this.clicks = [];
+
+    this.mouseEvents = [];
   }
 
   drawShapes() {
@@ -57,7 +64,9 @@ class Trial {
     this.start.style.top = pos.start.y + "px";
     this.target.style.left = pos.target.x + "px";
     this.target.style.top = pos.target.y + "px";
-    this.setEndTrialPosition(pos.target);
+
+    this.startCoords = pos.start;
+    this.targetCoords = pos.target;
 
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
@@ -74,6 +83,7 @@ class Trial {
     this.boundHandleTargetPress = this.handleTargetPress.bind(this);
     this.boundHandleTargetRelease = this.handleTargetRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
+    this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
     // Use bind to ensure 'this' inside the handlers refers to the Block instance
     this.start.addEventListener("mousedown", this.boundHandleStartPress);
     this.start.addEventListener("mouseup", this.boundHandleStartRelease);
@@ -81,7 +91,6 @@ class Trial {
 
   handleStartPress(event) {
     if (event.button === 0 && !this.firstClickDone) {
-      this.trialStartTime = Date.now();
       this.trialStarted = true;
       this.target.style.backgroundColor = "green";
       this.firstClickData = {
@@ -96,6 +105,7 @@ class Trial {
 
       if (this.firstClickData.startHit) {
         this.successSound.play();
+        this.clicks.push("start press: " + Date.now());
       }
     }
   }
@@ -104,17 +114,20 @@ class Trial {
     if (!this.trialStarted) {
       this.errorSound.play();
     }
+    this.clicks.push("start release: " + Date.now());
     this.start.style.display = "none";
     this.target.addEventListener("mousedown", this.boundHandleTargetPress);
     this.target.addEventListener("mouseup", this.boundHandleTargetRelease);
     this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+    this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
   }
 
   handleTargetRelease(event) {
     if (!this.trialStarted) {
       this.errorSound.play();
     }
-    this.start.style.display = "none";
+    this.clicks.push("target release: " + Date.now());
+    this.endTrial();
   }
 
   handleTargetPress(event) {
@@ -130,7 +143,7 @@ class Trial {
         time: Date.now(),
         targetHit: this.isCursorInsideShape(event, this.target),
       };
-
+      this.clicks.push("traget press: " + Date.now());
       console.log(this.targetClickData);
 
       if (this.targetClickData.targetHit) {
@@ -138,11 +151,7 @@ class Trial {
       } else {
         this.errorSound.play();
       }
-
-      this.target.style.display = "none";
     }
-    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-    this.endTrial();
   }
 
   handleBodyPress(event) {
@@ -160,6 +169,7 @@ class Trial {
         bodyHit: this.isCursorInsideShape(event, this.body),
       };
       console.log(this.bodyClickData);
+      this.clicks.push("body press: " + Date.now());
 
       if (this.bodyClickData.bodyHit) {
         this.errorSound.play();
@@ -169,7 +179,13 @@ class Trial {
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mousedown", this.boundHandleTargetRelease);
-    this.endTrial();
+  }
+
+  handleBodyRelease(event) {
+    if (!this.targetClickData && this.bodyClickData) {
+      this.clicks.push("body release: " + Date.now());
+      this.endTrial();
+    }
   }
 
   isCursorInsideShape(event, shape) {
@@ -195,6 +211,7 @@ class Trial {
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.trialCompleted = true;
+    console.log(this.clicks);
     this.isDone = experimentFrame.trialCompleted();
   }
 
@@ -250,10 +267,6 @@ class Trial {
 
   getEndTrialPosition() {
     return this.targetPosition;
-  }
-
-  setEndTrialPosition(t) {
-    this.targetPosition = t;
   }
 
   getDistance(x1, y1, x2, y2) {
@@ -372,6 +385,42 @@ class Trial {
       );
     }
     return actualDistance <= screenWidth;
+  }
+
+  logMouseEvent(event, eventType) {
+    this.mouseEvents.push({
+      time: Date.now(),
+      x: event.clientX,
+      y: event.clientY,
+      eventType: eventType,
+    });
+  }
+
+  calculateDistances() {
+    // Implement logic to calculate distances between various points
+  }
+
+  getExportDataTrial() {
+    this.calculateDistances();
+
+    const trialLog = {
+      userNumber: this.userNumber,
+      trialNumber: this.trialNumber,
+      trialNumberInBlock: this.trialNumberInBlock,
+      blockNumber: this.blockNumber,
+      amplitudeMm: this.amplitudeMm,
+      amplitudePx: this.amplitudePx,
+      directionDegree: this.directionDegree,
+      startCoords: this.startCoords,
+      startSize: this.startSize,
+      targetCoords: this.targetCoords,
+      targetSize: this.targetSize,
+      hitOrMiss: this.checkHitOrMiss(), // Implement this method
+      mouseEvents: this.mouseEvents,
+      distances: this.calculateDistances(),
+    };
+
+    console.log("Trial Data:", trialLog);
   }
 }
 
