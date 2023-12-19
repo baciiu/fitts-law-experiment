@@ -225,7 +225,6 @@ class Trial {
   }
 
   getTimeFormat(date) {
-    // Get the individual components of the date.
     const now = new Date(date);
     const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0 in JavaScript
     const day = String(now.getDate()).padStart(2, "0");
@@ -238,27 +237,12 @@ class Trial {
   }
 
   getOnlyTimeFormat(date) {
-    // Get the individual components of the date.
     const now = new Date(date);
     const seconds = String(now.getSeconds()).padStart(2, "0");
     const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
 
     return `${seconds}.${milliseconds}`;
   }
-
-  formatDuration = (ms) => {
-    if (ms < 0) ms = -ms;
-    const time = {
-      day: Math.floor(ms / 86400000),
-      hour: Math.floor(ms / 3600000) % 24,
-      minute: Math.floor(ms / 60000) % 60,
-      second: Math.floor(ms / 1000) % 60,
-      millisecond: Math.floor(ms) % 1000,
-    };
-    return Object.entries(time)
-      .map(([key, val]) => `${val} ${key}${val !== 1 ? "s" : ""}`)
-      .join(", ");
-  };
 
   getDirection() {
     switch (this.trialDirection) {
