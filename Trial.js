@@ -19,7 +19,6 @@ class Trial {
     this.amplitude = amplitude;
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
-    this.targetPosition;
     this.isDone = isDone;
 
     this.successSound = new Audio("./sounds/success.wav");
@@ -37,8 +36,10 @@ class Trial {
 
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
+    this.HIT = null;
 
-    this.clicks = [];
+    this.clicksTime = [];
+    this.clicksCoords = [];
 
     this.mouseEvents = [];
   }
@@ -58,8 +59,7 @@ class Trial {
     this.target.style.backgroundColor = "yellow";
 
     const pos = this.generateDiagonalPositions();
-    console.log(this.trialDirection);
-    console.log(this.getDirection());
+
     this.start.style.left = pos.start.x + "px";
     this.start.style.top = pos.start.y + "px";
     this.target.style.left = pos.target.x + "px";
@@ -73,7 +73,7 @@ class Trial {
     this.body.style.height = window.innerHeight + "px";
 
     this.testDiagonalPositions(this);
-    this.testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    //this.testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -100,12 +100,11 @@ class Trial {
         time: Date.now(),
         startHit: this.isCursorInsideShape(event, this.start),
       };
-      console.log(this.firstClickData);
       this.firstClickDone = true;
-
       if (this.firstClickData.startHit) {
         this.successSound.play();
-        this.clicks.push("start press: " + Date.now());
+
+        this.logMouseEvent(event);
       }
     }
   }
@@ -114,7 +113,9 @@ class Trial {
     if (!this.trialStarted) {
       this.errorSound.play();
     }
-    this.clicks.push("start release: " + Date.now());
+
+    this.logMouseEvent(event);
+
     this.start.style.display = "none";
     this.target.addEventListener("mousedown", this.boundHandleTargetPress);
     this.target.addEventListener("mouseup", this.boundHandleTargetRelease);
@@ -126,7 +127,9 @@ class Trial {
     if (!this.trialStarted) {
       this.errorSound.play();
     }
-    this.clicks.push("target release: " + Date.now());
+
+    this.logMouseEvent(event);
+
     this.endTrial();
   }
 
@@ -143,12 +146,13 @@ class Trial {
         time: Date.now(),
         targetHit: this.isCursorInsideShape(event, this.target),
       };
-      this.clicks.push("traget press: " + Date.now());
-      console.log(this.targetClickData);
+      this.logMouseEvent(event);
 
       if (this.targetClickData.targetHit) {
+        this.HIT = this.targetClickData.targetHit;
         this.successSound.play();
       } else {
+        this.HIT = 0;
         this.errorSound.play();
       }
     }
@@ -168,10 +172,11 @@ class Trial {
         time: Date.now(),
         bodyHit: this.isCursorInsideShape(event, this.body),
       };
-      console.log(this.bodyClickData);
-      this.clicks.push("body press: " + Date.now());
+
+      this.logMouseEvent(event);
 
       if (this.bodyClickData.bodyHit) {
+        this.HIT = 0;
         this.errorSound.play();
       }
       this.target.style.display = "none";
@@ -183,7 +188,8 @@ class Trial {
 
   handleBodyRelease(event) {
     if (!this.targetClickData && this.bodyClickData) {
-      this.clicks.push("body release: " + Date.now());
+      this.logMouseEvent(event);
+
       this.endTrial();
     }
   }
@@ -199,6 +205,7 @@ class Trial {
   }
 
   endTrial() {
+    this.getExportDataTrial();
     this.firstClickDone = false;
     this.targetClickData = null;
     this.firstClickData = null;
@@ -211,7 +218,7 @@ class Trial {
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.trialCompleted = true;
-    console.log(this.clicks);
+
     this.isDone = experimentFrame.trialCompleted();
   }
 
@@ -240,7 +247,6 @@ class Trial {
       millisecond: Math.floor(ms) % 1000,
     };
     return Object.entries(time)
-      .filter((val) => val[1] !== 0)
       .map(([key, val]) => `${val} ${key}${val !== 1 ? "s" : ""}`)
       .join(", ");
   };
@@ -266,7 +272,7 @@ class Trial {
   }
 
   getEndTrialPosition() {
-    return this.targetPosition;
+    return this.targetCoords;
   }
 
   getDistance(x1, y1, x2, y2) {
@@ -325,26 +331,15 @@ class Trial {
   }
 
   testDiagonalPositions() {
-    // Generate the positions
     const positions = this.generateDiagonalPositions();
-
-    // Extract the centers of the start and target rectangles
     const centerX1 = positions.start.x + mmToPixels(this.startSize) / 2;
     const centerY1 = positions.start.y + mmToPixels(this.startSize) / 2;
     const centerX2 = positions.target.x + mmToPixels(this.targetWidth) / 2;
     const centerY2 = positions.target.y + mmToPixels(this.targetHeight) / 2;
 
-    // Calculate the distance between the centers
     const distance = this.getDistance(centerX1, centerY1, centerX2, centerY2);
-
-    // Convert the amplitude from millimeters to pixels
     const amplitudeInPixels = mmToPixels(this.amplitude);
-    console.log("amplitudepx:" + amplitudeInPixels);
-    console.log("amplitudemm:" + this.amplitude);
-    console.log("distancepx:" + distance);
-    console.log("distancemm:" + pxToMM(distance));
 
-    // Check if the distance is equal to the amplitude
     if (Math.abs(distance - amplitudeInPixels) < 1e-5) {
       // Using a small threshold to account for floating point inaccuracies
     } else {
@@ -361,7 +356,6 @@ class Trial {
       return;
     }
 
-    // Calculate the screen width
     let screenWidth = (this.maxScreenPercentage * window.innerWidth) / 100;
 
     // Calculate the distance between the previous trial's end (target) and current trial's start
@@ -372,8 +366,6 @@ class Trial {
       this.previousTrialEnd.y,
     );
 
-    console.log("MAX WIDTH: " + screenWidth);
-    console.log("actual distance: " + actualDistance);
     // Check if the actual distance is within the screen width
     if (actualDistance <= screenWidth) {
       console.log(
@@ -387,12 +379,11 @@ class Trial {
     return actualDistance <= screenWidth;
   }
 
-  logMouseEvent(event, eventType) {
-    this.mouseEvents.push({
-      time: Date.now(),
+  logMouseEvent(event) {
+    this.clicksTime.push(Date.now());
+    this.clicksCoords.push({
       x: event.clientX,
       y: event.clientY,
-      eventType: eventType,
     });
   }
 
@@ -404,22 +395,89 @@ class Trial {
     this.calculateDistances();
 
     const trialLog = {
-      userNumber: this.userNumber,
-      trialNumber: this.trialNumber,
-      trialNumberInBlock: this.trialNumberInBlock,
-      blockNumber: this.blockNumber,
-      amplitudeMm: this.amplitudeMm,
-      amplitudePx: this.amplitudePx,
-      directionDegree: this.directionDegree,
-      startCoords: this.startCoords,
-      startSize: this.startSize,
-      targetCoords: this.targetCoords,
-      targetSize: this.targetSize,
-      hitOrMiss: this.checkHitOrMiss(), // Implement this method
-      mouseEvents: this.mouseEvents,
-      distances: this.calculateDistances(),
-    };
+      /*userNumber: this.userNumber,
+                                                                                                                                                                                                                                                                                                                                          trialNumber: this.trialNumber,
+                                                                                                                                                                                                                                                                                                                                          trialNumberInBlock: this.trialNumberInBlock,
+                                                                                                                                                                                                                                                                                                                                          blockNumber: this.blockNumber,
+                                                                                                                                                                                                                                                                                                                                           */
+      amplitudeMM: this.amplitude,
+      amplitudePx: mmToPixels(this.amplitude),
+      directionDegree: this.trialDirection,
+      direction: this.getDirection(this.trialDirection),
 
+      startX: this.startCoords.x,
+      startY: this.startCoords.y,
+      startWidthPx: mmToPixels(this.startSize),
+      startHeightPx: mmToPixels(this.startSize),
+
+      targetX: this.targetCoords.x,
+      targetY: this.targetCoords.y,
+      targetWidthPx: mmToPixels(this.targetWidth),
+      targetHeightPx: mmToPixels(this.targetHeight),
+
+      HIT: this.HIT ? 1 : 0,
+
+      T0: this.clicksTime.at(0),
+      T1: this.clicksTime.at(1),
+      T2: this.clicksTime.at(2),
+      T3: this.clicksTime.at(3),
+
+      "T1-T0": this.clicksTime.at(1) - this.clicksTime.at(0),
+      "T2-T0": this.clicksTime.at(2) - this.clicksTime.at(0),
+      "T3-T0": this.clicksTime.at(3) - this.clicksTime.at(0),
+      "T2-T1": this.clicksTime.at(2) - this.clicksTime.at(1),
+      "T3-T1": this.clicksTime.at(3) - this.clicksTime.at(1),
+      "T3-T2": this.clicksTime.at(3) - this.clicksTime.at(2),
+
+      "Click T0 X": this.clicksCoords.at(0).x,
+      "Click T0 Y": this.clicksCoords.at(0).y,
+
+      "Click T1 X": this.clicksCoords.at(1).x,
+      "Click T1 Y": this.clicksCoords.at(1).y,
+
+      "Click T2 X": this.clicksCoords.at(2).x,
+      "Click T2 Y": this.clicksCoords.at(2).y,
+
+      "Click T3 X": this.clicksCoords.at(3).x,
+      "Click T3 Y": this.clicksCoords.at(3).y,
+
+      "Distance T1 to T0 ": this.getDistance(
+        this.clicksCoords.at(0).x,
+        this.clicksCoords.at(0).y,
+        this.clicksCoords.at(1).x,
+        this.clicksCoords.at(1).y,
+      ),
+      "Distance T2 toT0 ": this.getDistance(
+        this.clicksCoords.at(0).x,
+        this.clicksCoords.at(0).y,
+        this.clicksCoords.at(2).x,
+        this.clicksCoords.at(2).y,
+      ),
+      "Distance T3 to T0 ": this.getDistance(
+        this.clicksCoords.at(0).x,
+        this.clicksCoords.at(0).y,
+        this.clicksCoords.at(3).x,
+        this.clicksCoords.at(3).y,
+      ),
+      "Distance T2 to T1 ": this.getDistance(
+        this.clicksCoords.at(1).x,
+        this.clicksCoords.at(1).y,
+        this.clicksCoords.at(2).x,
+        this.clicksCoords.at(2).y,
+      ),
+      "Distance T3 to T1 ": this.getDistance(
+        this.clicksCoords.at(1).x,
+        this.clicksCoords.at(1).y,
+        this.clicksCoords.at(3).x,
+        this.clicksCoords.at(3).y,
+      ),
+      "Distance T3 to T2 ": this.getDistance(
+        this.clicksCoords.at(2).x,
+        this.clicksCoords.at(2).y,
+        this.clicksCoords.at(3).x,
+        this.clicksCoords.at(3).y,
+      ),
+    };
     console.log("Trial Data:", trialLog);
   }
 }
