@@ -1,5 +1,5 @@
 class ExperimentFrame {
-  constructor() {
+  constructor(userNumber) {
     this.blockNumber = 1;
     this.trialNumber = 1;
     this.totalBlocks = 2;
@@ -18,6 +18,9 @@ class ExperimentFrame {
     this.setupContinueButton();
     this.allClicks = [];
     this.endTrialPos = null;
+    this.trial = null;
+    this.trialsData = [];
+    this.userNumber = userNumber;
   }
 
   setupContinueButton() {
@@ -33,7 +36,7 @@ class ExperimentFrame {
       .getTrial(this.trialNumber)
       .setPreviousTrialPosition(this.endTrialPos);
 
-    const trial = this.experiment
+    this.trial = this.experiment
       .getBlock(this.blockNumber)
       .getTrial(this.trialNumber);
 
@@ -42,8 +45,7 @@ class ExperimentFrame {
       //this.printAllTrials();
     }
     this.showIndexes();
-    trial.drawShapes();
-    this.endTrialPos = trial.getEndTrialPosition();
+    this.trial.drawShapes();
 
     // Time for a break
     if (this.trialNumber % this.trialsPerBreak === 0) {
@@ -52,6 +54,16 @@ class ExperimentFrame {
   }
 
   trialCompleted() {
+    this.endTrialPos = this.trial.getEndTrialPosition();
+
+    let data = this.trial.getExportDataTrial();
+    data.userNumber = this.userNumber;
+    data.trialNumber = this.trialNumber;
+    data.blockNumber = this.blockNumber;
+    data.experimentType = this.experimentType;
+
+    this.trialsData.push(data);
+
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
     if (currentBlock) {
@@ -91,8 +103,41 @@ class ExperimentFrame {
 
   experimentFinished() {
     //window.close();
+    console.log(this.trialsData);
+
+    this.downloadCSV(this.trialsData);
     console.log("finished! :) ");
     showFinishWindow();
+  }
+
+  downloadCSV(data) {
+    let filename = "trial_" + "USER_" + this.userNumber + ".csv";
+    const csvContent = this.convertToCSV(data);
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  convertToCSV(array) {
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    // Add header row
+    if (array.length > 0) {
+      const headers = Object.keys(array[0]).join(",");
+      csvContent += headers + "\r\n";
+    }
+
+    // Add data rows
+    array.forEach((obj) => {
+      const row = Object.values(obj).join(",");
+      csvContent += row + "\r\n";
+    });
+
+    return csvContent;
   }
 
   displayBreakWindow() {

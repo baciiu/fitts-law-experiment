@@ -206,6 +206,7 @@ class Trial {
 
   endTrial() {
     this.getExportDataTrial();
+    experimentFrame.data = this.getExportDataTrial();
     this.firstClickDone = false;
     this.targetClickData = null;
     this.firstClickData = null;
@@ -275,6 +276,20 @@ class Trial {
     return this.targetCoords;
   }
 
+  isFailed() {
+    // start coordfinates
+    const centerX1 = this.startCoords.x;
+    const centerY1 = this.startCoords.y;
+    // target click
+    const centerX2 = this.clicksCoords.at(2).x;
+    const centerY2 = this.clicksCoords.at(2).y;
+
+    let distance = this.getDistance(centerX1, centerY1, centerX2, centerY2);
+    console.log(distance);
+    return distance < mmToPixels(this.amplitude) / 2;
+  }
+
+  // Euclidean distance takes 2 points (x1,y1) and (x2,y2) and returns the straight-line distance between them
   getDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   }
@@ -323,6 +338,7 @@ class Trial {
       ) {
         start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        console.log(start);
         return { start, target };
       }
     } while (!start || !target); // Repeat if a valid position was not found
@@ -387,19 +403,13 @@ class Trial {
     });
   }
 
-  calculateDistances() {
-    // Implement logic to calculate distances between various points
-  }
-
   getExportDataTrial() {
-    this.calculateDistances();
-
     const trialLog = {
-      /*userNumber: this.userNumber,
-                                                                                                                                                                                                                                                                                                                                          trialNumber: this.trialNumber,
-                                                                                                                                                                                                                                                                                                                                          trialNumberInBlock: this.trialNumberInBlock,
-                                                                                                                                                                                                                                                                                                                                          blockNumber: this.blockNumber,
-                                                                                                                                                                                                                                                                                                                                           */
+      userNumber: null,
+      blockNumber: null,
+      trialNumber: null,
+      experimentType: null,
+
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),
       directionDegree: this.trialDirection,
@@ -416,6 +426,7 @@ class Trial {
       targetHeightPx: mmToPixels(this.targetHeight),
 
       HIT: this.HIT ? 1 : 0,
+      isFailed: this.isFailed(),
 
       T0: this.clicksTime.at(0),
       T1: this.clicksTime.at(1),
@@ -478,7 +489,7 @@ class Trial {
         this.clicksCoords.at(3).y,
       ),
     };
-    console.log("Trial Data:", trialLog);
+    return trialLog;
   }
 }
 
