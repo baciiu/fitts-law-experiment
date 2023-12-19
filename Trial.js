@@ -20,6 +20,7 @@ class Trial {
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
     this.isDone = isDone;
+    this.isFailedNumber = 4;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -97,7 +98,7 @@ class Trial {
         name: "start",
         x: event.clientX,
         y: event.clientY,
-        time: Date.now(),
+        time: new Date(),
         startHit: this.isCursorInsideShape(event, this.start),
       };
       this.firstClickDone = true;
@@ -143,7 +144,7 @@ class Trial {
         name: "target",
         x: event.clientX,
         y: event.clientY,
-        time: Date.now(),
+        time: new Date(),
         targetHit: this.isCursorInsideShape(event, this.target),
       };
       this.logMouseEvent(event);
@@ -169,7 +170,7 @@ class Trial {
         name: "body",
         x: event.clientX,
         y: event.clientY,
-        time: Date.now(),
+        time: new Date(),
         bodyHit: this.isCursorInsideShape(event, this.body),
       };
 
@@ -226,7 +227,6 @@ class Trial {
   getTimeFormat(date) {
     // Get the individual components of the date.
     const now = new Date(date);
-    const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0 in JavaScript
     const day = String(now.getDate()).padStart(2, "0");
     const hour = String(now.getHours()).padStart(2, "0");
@@ -234,8 +234,16 @@ class Trial {
     const seconds = String(now.getSeconds()).padStart(2, "0");
     const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
 
-    // Construct the formatted timestamp string.
-    return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}.${milliseconds}`;
+    return `${day}.${month} T ${hour}:${minutes}:${seconds}.${milliseconds}`;
+  }
+
+  getOnlyTimeFormat(date) {
+    // Get the individual components of the date.
+    const now = new Date(date);
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
+
+    return `${seconds}.${milliseconds}`;
   }
 
   formatDuration = (ms) => {
@@ -285,8 +293,7 @@ class Trial {
     const centerY2 = this.clicksCoords.at(2).y;
 
     let distance = this.getDistance(centerX1, centerY1, centerX2, centerY2);
-    console.log(distance);
-    return distance < mmToPixels(this.amplitude) / 2;
+    return distance < mmToPixels(this.amplitude) / this.isFailedNumber;
   }
 
   // Euclidean distance takes 2 points (x1,y1) and (x2,y2) and returns the straight-line distance between them
@@ -338,7 +345,6 @@ class Trial {
       ) {
         start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-        console.log(start);
         return { start, target };
       }
     } while (!start || !target); // Repeat if a valid position was not found
@@ -396,7 +402,7 @@ class Trial {
   }
 
   logMouseEvent(event) {
-    this.clicksTime.push(Date.now());
+    this.clicksTime.push(new Date());
     this.clicksCoords.push({
       x: event.clientX,
       y: event.clientY,
@@ -428,17 +434,29 @@ class Trial {
       HIT: this.HIT ? 1 : 0,
       isFailed: this.isFailed(),
 
-      T0: this.clicksTime.at(0),
-      T1: this.clicksTime.at(1),
-      T2: this.clicksTime.at(2),
-      T3: this.clicksTime.at(3),
+      T0: this.getTimeFormat(this.clicksTime.at(0)), //this.clicksTime.at(0),
+      T1: this.getTimeFormat(this.clicksTime.at(1)),
+      T2: this.getTimeFormat(this.clicksTime.at(2)),
+      T3: this.getTimeFormat(this.clicksTime.at(3)),
 
-      "T1-T0": this.clicksTime.at(1) - this.clicksTime.at(0),
-      "T2-T0": this.clicksTime.at(2) - this.clicksTime.at(0),
-      "T3-T0": this.clicksTime.at(3) - this.clicksTime.at(0),
-      "T2-T1": this.clicksTime.at(2) - this.clicksTime.at(1),
-      "T3-T1": this.clicksTime.at(3) - this.clicksTime.at(1),
-      "T3-T2": this.clicksTime.at(3) - this.clicksTime.at(2),
+      "T1-T0": this.getOnlyTimeFormat(
+        this.clicksTime.at(1) - this.clicksTime.at(0),
+      ),
+      "T2-T0": this.getOnlyTimeFormat(
+        this.clicksTime.at(2) - this.clicksTime.at(0),
+      ),
+      "T3-T0": this.getOnlyTimeFormat(
+        this.clicksTime.at(3) - this.clicksTime.at(0),
+      ),
+      "T2-T1": this.getOnlyTimeFormat(
+        this.clicksTime.at(2) - this.clicksTime.at(1),
+      ),
+      "T3-T1": this.getOnlyTimeFormat(
+        this.clicksTime.at(3) - this.clicksTime.at(1),
+      ),
+      "T3-T2": this.getOnlyTimeFormat(
+        this.clicksTime.at(3) - this.clicksTime.at(2),
+      ),
 
       "Click T0 X": this.clicksCoords.at(0).x,
       "Click T0 Y": this.clicksCoords.at(0).y,

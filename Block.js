@@ -8,8 +8,8 @@ class Block {
       //{ width: 4, height: 4 },
       //{ width: 8, height: 8 },
       //{ width: 10, height: 15 },
-      //{ width: 20, height: 10 },
-      //{ width: 25, height: 10 },
+      { width: 20, height: 10 },
+      { width: 25, height: 10 },
       { width: 40, height: 20 },
     ];
 
@@ -67,7 +67,7 @@ class Block {
       }
     }
     // Shuffle the trials array randomly
-    this.shuffleArray(this.trials);
+    //this.shuffleArray(this.trials);
   }
 
   getAngles(stepSize) {
@@ -90,6 +90,10 @@ class Block {
 
   getTrialsNumber() {
     return this.trials.length;
+  }
+
+  getTrials() {
+    return this.trials;
   }
 
   // Shuffling function using Fisher-Yates algorithm
