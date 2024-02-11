@@ -3,15 +3,17 @@ class ExperimentFrame {
     this.blockNumber = 1;
     this.trialNumber = 1;
     this.totalBlocks = 2;
-    this.trialsPerBreak = 7;
+    this.trialsPerBreak = 4;
     this.experimentType = "STS"; //
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
+    this.repetitonPerTrial = 3;
     this.experiment = new Experiment(
       this.experimentType,
       this.shape,
       this.intDevice,
       this.totalBlocks,
+      this.repetitonPerTrial,
     );
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
