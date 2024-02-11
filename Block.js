@@ -1,9 +1,10 @@
 class Block {
-  constructor(blockNumber, experimentType, shape, intDevice) {
+  constructor(blockNumber, experimentType, shape, intDevice, repTrial) {
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
     this.startSize = 10;
     this.shape = shape;
+    this.repetitionTrial = repTrial;
     this.targetDimens = [
       //{ width: 4, height: 4 },
       //{ width: 8, height: 8 },
@@ -15,31 +16,20 @@ class Block {
 
     this.amplitude = [100];
     this.trialDirection = this.getAngles(180);
-    //
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
 
     this.trialId = 1;
+    this.trials = [];
 
-    this.trialsNum =
-      this.targetDimens.length *
-      this.trialDirection.length *
-      this.amplitude.length;
+    this.generateTrials();
+    this.trialsNum = this.trials.length;
 
     this.maxScreenPercentage = 30;
-    this.previousTrialEnd = null;
+  }
 
-    this.usedIndices = [];
-    this.rectIndices = [];
-
-    for (let i = 0; i < this.targetDimens.length; i++) {
-      this.rectIndices.push(i);
-    }
-
-    this.trials = [];
-    let trialId = 1;
-
+  generateTrials() {
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
       for (
         let directionIdx = 0;
@@ -51,18 +41,20 @@ class Block {
           amplIndex < this.amplitude.length;
           amplIndex++
         ) {
-          this.trials.push(
-            new Trial(
-              trialId++,
-              this.trialDirection[directionIdx],
-              this.intDevice,
-              this.startSize,
-              this.targetDimens[dimenIdx].width,
-              this.targetDimens[dimenIdx].height,
-              this.amplitude[amplIndex],
-              this.maxScreenPercentage,
-            ),
-          );
+          for (let i = 0; i < this.repetitionTrial; i++) {
+            this.trials.push(
+              new Trial(
+                this.trialId++,
+                this.trialDirection[directionIdx],
+                this.intDevice,
+                this.startSize,
+                this.targetDimens[dimenIdx].width,
+                this.targetDimens[dimenIdx].height,
+                this.amplitude[amplIndex],
+                this.maxScreenPercentage,
+              ),
+            );
+          }
         }
       }
     }

@@ -1,10 +1,11 @@
 class Experiment {
-  constructor(experimentType, shape, intDevice, numBlocks) {
+  constructor(experimentType, shape, intDevice, numBlocks, repPerTrial) {
     this.experimentType = experimentType;
     this.shape = shape;
     this.intDevice = intDevice;
     this.numBlocks = numBlocks;
     this.blocks = [];
+    this.repPerTrial = repPerTrial;
 
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
@@ -12,7 +13,13 @@ class Experiment {
 
     for (let i = 1; i <= this.numBlocks; i++) {
       this.blocks.push(
-        new Block(i, this.experimentType, this.shape, this.intDevice),
+        new Block(
+          i,
+          this.experimentType,
+          this.shape,
+          this.intDevice,
+          this.repPerTrial,
+        ),
       );
     }
   }
