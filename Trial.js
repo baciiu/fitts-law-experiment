@@ -46,6 +46,7 @@ class Trial {
   }
 
   drawShapes() {
+    console.log(this.trialId);
     this.trialCompleted = false;
     this.start.style.display = "block";
     this.start.style.width = mmToPixels(this.startSize) + "px";
@@ -272,6 +273,9 @@ class Trial {
     const clickStartX1 = this.startCoords.x;
     const clickStartY1 = this.startCoords.y;
 
+    if (this.clicksCoords.at(2).x === undefined) {
+      return true;
+    }
     const clickTargetX2 = this.clicksCoords.at(2).x;
     const clickTargetY2 = this.clicksCoords.at(2).y;
 
@@ -401,7 +405,7 @@ class Trial {
     const trialLog = {
       userNumber: null,
       blockNumber: null,
-      trialNumber: null,
+      trialNumber: this.trialId,
       experimentType: null,
 
       amplitudeMM: this.amplitude,

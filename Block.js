@@ -24,6 +24,7 @@ class Block {
 
     this.trialId = 1;
     this.trials = [];
+
     this.generateTrials();
 
     this.maxScreenPercentage = 30;
@@ -46,51 +47,28 @@ class Block {
     return Array.from(amp);
   }
 
-  generateTrials() {
-    // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
-    if (this.has2InputParams()) {
-      this.trialDirection = this.getAngles(this.radianStep);
-      for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
+  init2InputParameters() {
+    this.trialDirection = this.getAngles(this.radianStep);
+    for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
+      for (
+        let directionIdx = 0;
+        directionIdx < this.trialDirection.length;
+        directionIdx++
+      ) {
         for (
-          let directionIdx = 0;
-          directionIdx < this.trialDirection.length;
-          directionIdx++
+          let amplIndex = 0;
+          amplIndex < this.amplitude.length;
+          amplIndex++
         ) {
-          for (
-            let amplIndex = 0;
-            amplIndex < this.amplitude.length;
-            amplIndex++
-          ) {
-            for (let i = 0; i < this.repetitionTrial; i++) {
-              const trial = new Trial(
-                this.trialId++,
-                this.trialDirection[directionIdx],
-                this.intDevice,
-                this.startSize,
-                this.targetDimens[dimenIdx].width,
-                this.targetDimens[dimenIdx].height,
-                this.amplitude[amplIndex],
-                this.maxScreenPercentage,
-              );
-              this.trials.push(trial);
-            }
-          }
-        }
-      }
-    } else {
-      // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
-      this.amplitude = this.getAmplitudes();
-      for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
-        for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
           for (let i = 0; i < this.repetitionTrial; i++) {
             const trial = new Trial(
               this.trialId++,
-              this.targetDimens[dimenIdx].angle,
+              this.trialDirection[directionIdx],
               this.intDevice,
               this.startSize,
               this.targetDimens[dimenIdx].width,
               this.targetDimens[dimenIdx].height,
-              this.amplitude[amplIdx],
+              this.amplitude[amplIndex],
               this.maxScreenPercentage,
             );
             this.trials.push(trial);
@@ -98,8 +76,37 @@ class Block {
         }
       }
     }
-    console.log(this.trials);
-    //this.shuffleArray(this.trials);
+  }
+
+  init4InputTrials() {
+    this.amplitude = this.getAmplitudes();
+    for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
+      for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
+        for (let i = 0; i < this.repetitionTrial; i++) {
+          const trial = new Trial(
+            this.trialId++,
+            this.targetDimens[dimenIdx].angle,
+            this.intDevice,
+            this.startSize,
+            this.targetDimens[dimenIdx].width,
+            this.targetDimens[dimenIdx].height,
+            this.amplitude[amplIdx],
+            this.maxScreenPercentage,
+          );
+          this.trials.push(trial);
+        }
+      }
+    }
+  }
+
+  generateTrials() {
+    if (this.has2InputParams()) {
+      // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
+      this.init2InputParameters();
+    } else {
+      // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
+      this.init4InputTrials();
+    }
   }
 
   getAngles(stepSize) {
@@ -113,7 +120,12 @@ class Block {
   }
 
   getTrial(trialNumber) {
-    return this.trials[trialNumber - 1];
+    console.log(trialNumber);
+    return this.trials[trialNumber];
+  }
+
+  setTrials(trials) {
+    this.trials = trials;
   }
 
   hasNextTrial(trialNumber) {
@@ -121,29 +133,13 @@ class Block {
   }
 
   getTrialsNumber() {
-    return this.trials.length;
+    if (this.trials !== undefined) {
+      return this.trials.length;
+    }
+    return 0;
   }
 
   getTrials() {
     return this.trials;
-  }
-
-  // Shuffling function using Fisher-Yates algorithm
-  shuffleArray(array) {
-    let currentIndex = array.length;
-    let temporaryValue, randomIndex;
-
-    // While there remain elements to shuffle
-    while (currentIndex !== 0) {
-      // Pick a remaining element
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-
-      // Swap it with the current element
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-    return array;
   }
 }
