@@ -269,14 +269,18 @@ class Trial {
   }
 
   isFailed() {
-    // start coordfinates
-    const centerX1 = this.startCoords.x;
-    const centerY1 = this.startCoords.y;
-    // target click
-    const centerX2 = this.clicksCoords.at(2).x;
-    const centerY2 = this.clicksCoords.at(2).y;
+    const clickStartX1 = this.startCoords.x;
+    const clickStartY1 = this.startCoords.y;
 
-    let distance = this.getDistance(centerX1, centerY1, centerX2, centerY2);
+    const clickTargetX2 = this.clicksCoords.at(2).x;
+    const clickTargetY2 = this.clicksCoords.at(2).y;
+
+    let distance = this.getDistance(
+      clickStartX1,
+      clickStartY1,
+      clickTargetX2,
+      clickTargetY2,
+    );
     return distance < mmToPixels(this.amplitude) / this.isFailedNumber;
   }
 

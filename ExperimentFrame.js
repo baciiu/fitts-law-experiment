@@ -33,6 +33,12 @@ class ExperimentFrame {
   }
 
   showTrial() {
+    if (
+      this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber) ===
+      undefined
+    ) {
+      err("TRIAL UNDEFINED");
+    }
     this.experiment
       .getBlock(this.blockNumber)
       .getTrial(this.trialNumber)
@@ -166,7 +172,7 @@ class ExperimentFrame {
     let totalTrials = 0;
     for (let i = 1; i <= this.experiment.numBlocks; i++) {
       const block = this.experiment.getBlock(i);
-      totalTrials += block.trialsNum;
+      totalTrials += block.getTrialsNumber();
     }
     return totalTrials;
   }
@@ -181,7 +187,7 @@ class ExperimentFrame {
     for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
       const block = this.experiment.getBlock(i + 1);
 
-      for (let j = 0; j < block.trialsNum; j++) {
+      for (let j = 0; j < block.getTrialsNumber(); j++) {
         const trial = block.getTrial(j + 1);
         console.log(trial);
       }
