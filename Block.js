@@ -6,44 +6,63 @@ class Block {
     this.shape = shape;
     this.repetitionTrial = repTrial;
     this.targetDimens = [
-      //{ width: 4, height: 4 },
-      //{ width: 8, height: 8 },
-      //{ width: 10, height: 15 },
+      //{ width: 20, height: 10, angle: 0, amplitude: 100 },
+      //{ width: 25, height: 10, angle: 100, amplitude: 100 },
+      //{ width: 40, height: 20, angle: 10, amplitude: 100 },
+      //{ width: 20, height: 30, angle: 100, amplitude: 145 },
       { width: 20, height: 10 },
       { width: 25, height: 10 },
       { width: 40, height: 20 },
     ];
 
+    this.radianStep = 180; // => [0,180] /  Left and Right
     this.amplitude = [100];
-    this.trialDirection = this.getAngles(180);
+    this.trialDirection = [];
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
 
     this.trialId = 1;
     this.trials = [];
-
     this.generateTrials();
-    this.trialsNum = this.trials.length;
 
     this.maxScreenPercentage = 30;
   }
 
+  has2InputParams() {
+    return (
+      this.targetDimens[0].amplitude === undefined &&
+      this.targetDimens[0].angle === undefined
+    );
+  }
+
+  getAmplitudes() {
+    const amp = new Set();
+
+    for (const a of this.targetDimens) {
+      amp.add(a.amplitude);
+    }
+    console.log(amp);
+    return Array.from(amp);
+  }
+
   generateTrials() {
-    for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
-      for (
-        let directionIdx = 0;
-        directionIdx < this.trialDirection.length;
-        directionIdx++
-      ) {
+    // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
+    if (this.has2InputParams()) {
+      this.trialDirection = this.getAngles(this.radianStep);
+      for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
         for (
-          let amplIndex = 0;
-          amplIndex < this.amplitude.length;
-          amplIndex++
+          let directionIdx = 0;
+          directionIdx < this.trialDirection.length;
+          directionIdx++
         ) {
-          for (let i = 0; i < this.repetitionTrial; i++) {
-            this.trials.push(
-              new Trial(
+          for (
+            let amplIndex = 0;
+            amplIndex < this.amplitude.length;
+            amplIndex++
+          ) {
+            for (let i = 0; i < this.repetitionTrial; i++) {
+              const trial = new Trial(
                 this.trialId++,
                 this.trialDirection[directionIdx],
                 this.intDevice,
@@ -52,13 +71,34 @@ class Block {
                 this.targetDimens[dimenIdx].height,
                 this.amplitude[amplIndex],
                 this.maxScreenPercentage,
-              ),
+              );
+              this.trials.push(trial);
+            }
+          }
+        }
+      }
+    } else {
+      // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
+      this.amplitude = this.getAmplitudes();
+      for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
+        for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
+          for (let i = 0; i < this.repetitionTrial; i++) {
+            const trial = new Trial(
+              this.trialId++,
+              this.targetDimens[dimenIdx].angle,
+              this.intDevice,
+              this.startSize,
+              this.targetDimens[dimenIdx].width,
+              this.targetDimens[dimenIdx].height,
+              this.amplitude[amplIdx],
+              this.maxScreenPercentage,
             );
+            this.trials.push(trial);
           }
         }
       }
     }
-    // Shuffle the trials array randomly
+    console.log(this.trials);
     //this.shuffleArray(this.trials);
   }
 
@@ -77,7 +117,7 @@ class Block {
   }
 
   hasNextTrial(trialNumber) {
-    return this.trialsNum > trialNumber;
+    return this.getTrialsNumber() > trialNumber;
   }
 
   getTrialsNumber() {
