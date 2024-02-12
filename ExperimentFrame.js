@@ -7,13 +7,15 @@ class ExperimentFrame {
     this.experimentType = "STS"; //
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
-    this.repetitonPerTrial = 3;
+    this.repetitonPerTrial = 1;
+    this.scrambleBlocks = false;
     this.experiment = new Experiment(
       this.experimentType,
       this.shape,
       this.intDevice,
       this.totalBlocks,
       this.repetitonPerTrial,
+      this.scrambleBlocks,
     );
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
@@ -37,7 +39,7 @@ class ExperimentFrame {
       this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber) ===
       undefined
     ) {
-      err("TRIAL UNDEFINED");
+      console.log("TRIAL UNDEFINED");
     }
     this.experiment
       .getBlock(this.blockNumber)
@@ -66,13 +68,13 @@ class ExperimentFrame {
 
     let data = this.trial.getExportDataTrial();
     data.userNumber = this.userNumber;
-    data.trialNumber = this.trialNumber;
     data.blockNumber = this.blockNumber;
     data.experimentType = this.experimentType;
 
     this.trialsData.push(data);
+    console.log(data);
 
-    if (data.isFailed == true) {
+    if (data.isFailed === true) {
       // add it to the block
     }
 
@@ -115,8 +117,6 @@ class ExperimentFrame {
 
   experimentFinished() {
     //window.close();
-    console.log(this.trialsData);
-
     this.downloadCSV(this.trialsData);
     console.log("finished! :) ");
     showFinishWindow();
