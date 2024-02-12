@@ -1,18 +1,32 @@
 class Experiment {
-  constructor(experimentType, shape, intDevice, numBlocks, repPerTrial) {
+  constructor(
+    experimentType,
+    shape,
+    intDevice,
+    numBlocks,
+    repPerTrial,
+    scramble,
+  ) {
     this.experimentType = experimentType;
     this.shape = shape;
     this.intDevice = intDevice;
     this.numBlocks = numBlocks;
     this.blocks = [];
     this.repPerTrial = repPerTrial;
+    this.scrambleBlocks = scramble;
 
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
-    this.setupContinueButton();
 
+    this.init();
+  }
+
+  init() {
+    this.setupContinueButton();
     this.generateBlocks();
-    this.shuffleBlocks();
+    if (this.scrambleBlocks) {
+      this.shuffleBlocks();
+    }
   }
 
   generateBlocks() {

@@ -8,12 +8,14 @@ class ExperimentFrame {
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
     this.repetitonPerTrial = 1;
+    this.scrambleBlocks = false;
     this.experiment = new Experiment(
       this.experimentType,
       this.shape,
       this.intDevice,
       this.totalBlocks,
       this.repetitonPerTrial,
+      this.scrambleBlocks,
     );
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
@@ -38,7 +40,6 @@ class ExperimentFrame {
       undefined
     ) {
       console.log("TRIAL UNDEFINED");
-      return;
     }
     this.experiment
       .getBlock(this.blockNumber)
