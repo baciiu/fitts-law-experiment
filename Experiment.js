@@ -42,6 +42,7 @@ class Experiment {
         arr
           .slice()
           .sort((a, b) => orderMap.get(a.trialId) - orderMap.get(b.trialId));
+        return arr;
       };
 
       for (let i = 2; i <= this.numBlocks; i++) {
