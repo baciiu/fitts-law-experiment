@@ -20,7 +20,7 @@ class Trial {
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
     this.isDone = isDone;
-    this.isFailedNumber = 4;
+    this.isFailedNumber = 4; // Trial failed if distance < mmToPixels(this.amplitude) / this.isFailedNumber;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -207,7 +207,7 @@ class Trial {
   }
 
   endTrial() {
-    this.getExportDataTrial();
+    //this.getExportDataTrial();
     experimentFrame.data = this.getExportDataTrial();
     this.firstClickDone = false;
     this.targetClickData = null;
@@ -223,6 +223,10 @@ class Trial {
     this.trialCompleted = true;
 
     this.isDone = experimentFrame.trialCompleted();
+  }
+
+  getTrialID() {
+    return this.trialId;
   }
 
   getTimeFormat(date) {
@@ -402,7 +406,7 @@ class Trial {
   }
 
   getExportDataTrial() {
-    const trialLog = {
+    return {
       userNumber: null,
       blockNumber: null,
       trialNumber: this.trialId,
@@ -499,7 +503,6 @@ class Trial {
         this.clicksCoords.at(3).y,
       ),
     };
-    return trialLog;
   }
 }
 
