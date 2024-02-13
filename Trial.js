@@ -1,6 +1,7 @@
 class Trial {
   constructor(
     trialId,
+    trialRep,
     trialDirection,
     intDevice,
     startSize,
@@ -11,7 +12,7 @@ class Trial {
     isDone,
   ) {
     this.trialId = trialId;
-    this.trialDirection = trialDirection;
+    (this.trialRep = trialRep), (this.trialDirection = trialDirection);
     this.intDevice = intDevice;
     this.startSize = startSize;
     this.targetWidth = targetWidth;
@@ -20,7 +21,7 @@ class Trial {
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
     this.isDone = isDone;
-    this.isFailedNumber = 4;
+    this.isFailedNumber = 4; // Trial failed if distance < mmToPixels(this.amplitude) / this.isFailedNumber;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -46,7 +47,7 @@ class Trial {
   }
 
   drawShapes() {
-    console.log(this.trialId);
+    console.log("Trial id: " + this.trialId);
     this.trialCompleted = false;
     this.start.style.display = "block";
     this.start.style.width = mmToPixels(this.startSize) + "px";
@@ -207,7 +208,7 @@ class Trial {
   }
 
   endTrial() {
-    this.getExportDataTrial();
+    //this.getExportDataTrial();
     experimentFrame.data = this.getExportDataTrial();
     this.firstClickDone = false;
     this.targetClickData = null;
@@ -223,6 +224,10 @@ class Trial {
     this.trialCompleted = true;
 
     this.isDone = experimentFrame.trialCompleted();
+  }
+
+  getTrialID() {
+    return this.trialId;
   }
 
   getTimeFormat(date) {
@@ -402,10 +407,11 @@ class Trial {
   }
 
   getExportDataTrial() {
-    const trialLog = {
+    return {
       userNumber: null,
       blockNumber: null,
       trialNumber: this.trialId,
+      trialRep: this.trialRep,
       experimentType: null,
 
       amplitudeMM: this.amplitude,
@@ -499,7 +505,6 @@ class Trial {
         this.clicksCoords.at(3).y,
       ),
     };
-    return trialLog;
   }
 }
 

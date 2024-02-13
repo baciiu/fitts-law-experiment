@@ -1,14 +1,14 @@
 class ExperimentFrame {
   constructor(userNumber) {
     this.blockNumber = 1;
-    this.trialNumber = 1;
+    this.trialNumber = -1;
     this.totalBlocks = 2;
-    this.trialsPerBreak = 4;
+    this.trialsPerBreak = 100;
     this.experimentType = "STS"; //
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
-    this.repetitonPerTrial = 1;
-    this.scrambleBlocks = false;
+    this.repetitonPerTrial = 2;
+    this.scrambleBlocks = true;
     this.experiment = new Experiment(
       this.experimentType,
       this.shape,
@@ -25,6 +25,9 @@ class ExperimentFrame {
     this.trial = null;
     this.trialsData = [];
     this.userNumber = userNumber;
+    this.trialIndex = 0;
+    console.log(this.experiment.getBlock(1));
+    console.log(this.experiment.getBlock(2));
   }
 
   setupContinueButton() {
@@ -34,26 +37,28 @@ class ExperimentFrame {
     });
   }
 
-  showTrial() {
-    if (
-      this.experiment.getBlock(this.blockNumber).getTrial(this.trialNumber) ===
-      undefined
-    ) {
-      console.log("TRIAL UNDEFINED");
+  getFirstTrial() {
+    if (this.trialNumber === -1) {
+      let block = this.experiment.getBlock(this.blockNumber);
+      let first_trial = block.getTrials()[0];
+      this.trialNumber = first_trial.getTrialID();
     }
-    this.experiment
-      .getBlock(this.blockNumber)
-      .getTrial(this.trialNumber)
-      .setPreviousTrialPosition(this.endTrialPos);
+  }
 
-    this.trial = this.experiment
-      .getBlock(this.blockNumber)
-      .getTrial(this.trialNumber);
-
+  showTrial() {
     if (!this.printedFirstBlock) {
       this.printedFirstBlock = true;
-      //this.printAllTrials();
+      this.getFirstTrial();
     }
+    let block = this.experiment.getBlock(this.blockNumber);
+
+    block
+      .getTrials()
+      .at(this.trialIndex)
+      .setPreviousTrialPosition(this.endTrialPos);
+
+    this.trial = block.getTrials()[this.trialIndex];
+
     this.showIndexes();
     this.trial.drawShapes();
 
@@ -72,16 +77,16 @@ class ExperimentFrame {
     data.experimentType = this.experimentType;
 
     this.trialsData.push(data);
-    console.log(data);
 
     if (data.isFailed === true) {
       // add it to the block
+      //console.log("add trial in the block");
     }
 
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
     if (currentBlock) {
-      if (currentBlock.hasNextTrial(this.trialNumber)) {
+      if (currentBlock.hasNextTrial(this.trialIndex)) {
         this.getNextTrial();
       } else if (this.experiment.hasNextBlock(this.blockNumber)) {
         this.getNextBlock();
@@ -94,19 +99,32 @@ class ExperimentFrame {
   }
 
   getNextTrial() {
-    this.trialNumber++;
+    this.trialIndex++;
+    const currentBlock = this.experiment.getBlock(this.blockNumber);
+
+    this.trialNumber = currentBlock
+      .getTrials()
+      .at(this.trialIndex)
+      .getTrialID();
+
     this.showTrial();
   }
 
   getNextBlock() {
     this.blockNumber++;
-    this.trialNumber = 1;
+    // get trial number from first position
+    const currentBlock = this.experiment.getBlock(this.blockNumber);
+
+    this.trialNumber = currentBlock.getTrials()[0].getTrialID();
+    this.trialIndex = 0;
     this.showTrial();
   }
 
   showIndexes() {
+    let index = this.trialIndex;
+    index++;
     const currentTrialIndexEl = document.getElementById("currentTrialIndex");
-    currentTrialIndexEl.innerText = this.trialNumber;
+    currentTrialIndexEl.innerText = index;
 
     const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
     currentBlockIndexEl.innerText = this.getTotalTrials() + "";
@@ -178,7 +196,9 @@ class ExperimentFrame {
   }
 
   getRemainingTrials() {
-    const a = this.trialNumber % this.trialsPerBreak;
+    let index = this.trialIndex;
+    index++;
+    const a = index % this.trialsPerBreak;
     const b = this.trialsPerBreak;
     return b - a;
   }
@@ -189,7 +209,6 @@ class ExperimentFrame {
 
       for (let j = 0; j < block.getTrialsNumber(); j++) {
         const trial = block.getTrial(j + 1);
-        console.log(trial);
       }
     }
   }

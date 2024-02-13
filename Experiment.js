@@ -53,15 +53,14 @@ class Experiment {
       );
 
       const reorder = (arr, orderMap) => {
-        arr
+        return arr
           .slice()
           .sort((a, b) => orderMap.get(a.trialId) - orderMap.get(b.trialId));
-        return arr;
       };
 
       for (let i = 2; i <= this.numBlocks; i++) {
-        let trial = this.getBlock(i).getTrials();
-        let shuffled_trial = reorder(trial, orderMap);
+        let trials = this.getBlock(i).getTrials();
+        let shuffled_trial = reorder(trials, orderMap);
         this.getBlock(i).setTrials(shuffled_trial);
       }
     }

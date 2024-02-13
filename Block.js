@@ -24,7 +24,6 @@ class Block {
 
     this.trialId = 1;
     this.trials = [];
-
     this.generateTrials();
 
     this.maxScreenPercentage = 30;
@@ -43,7 +42,6 @@ class Block {
     for (const a of this.targetDimens) {
       amp.add(a.amplitude);
     }
-    console.log(amp);
     return Array.from(amp);
   }
 
@@ -60,9 +58,24 @@ class Block {
           amplIndex < this.amplitude.length;
           amplIndex++
         ) {
-          for (let i = 0; i < this.repetitionTrial; i++) {
+          let temp_id = this.trialId;
+          const trial = new Trial(
+            this.trialId++,
+            temp_id + "",
+            this.trialDirection[directionIdx],
+            this.intDevice,
+            this.startSize,
+            this.targetDimens[dimenIdx].width,
+            this.targetDimens[dimenIdx].height,
+            this.amplitude[amplIndex],
+            this.maxScreenPercentage,
+          );
+          this.trials.push(trial);
+
+          for (let i = 1; i < this.repetitionTrial; i++) {
             const trial = new Trial(
               this.trialId++,
+              temp_id + "." + i,
               this.trialDirection[directionIdx],
               this.intDevice,
               this.startSize,
@@ -82,9 +95,24 @@ class Block {
     this.amplitude = this.getAmplitudes();
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
       for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
-        for (let i = 0; i < this.repetitionTrial; i++) {
+        let temp_id = this.trialId;
+        const trial = new Trial(
+          this.trialId++,
+          temp_id + "",
+          this.targetDimens[dimenIdx].angle,
+          this.intDevice,
+          this.startSize,
+          this.targetDimens[dimenIdx].width,
+          this.targetDimens[dimenIdx].height,
+          this.amplitude[amplIdx],
+          this.maxScreenPercentage,
+        );
+        this.trials.push(trial);
+
+        for (let i = 1; i < this.repetitionTrial; i++) {
           const trial = new Trial(
             this.trialId++,
+            temp_id + "." + i,
             this.targetDimens[dimenIdx].angle,
             this.intDevice,
             this.startSize,
@@ -119,27 +147,28 @@ class Block {
     return angles;
   }
 
-  getTrial(trialNumber) {
-    console.log(trialNumber);
-    return this.trials[trialNumber];
+  getTrial(trialIndex) {
+    return this.getTrials()[trialIndex];
   }
 
   setTrials(trials) {
     this.trials = trials;
   }
 
-  hasNextTrial(trialNumber) {
-    return this.getTrialsNumber() > trialNumber;
+  hasNextTrial(trialIndex) {
+    let next = trialIndex++;
+    return next < this.getTrialsNumber() - 1;
   }
 
   getTrialsNumber() {
-    if (this.trials !== undefined) {
+    if (this.getTrials() !== null) {
       return this.trials.length;
     }
     return 0;
   }
 
   getTrials() {
-    return this.trials;
+    if (this.trials) return this.trials;
+    return null;
   }
 }
