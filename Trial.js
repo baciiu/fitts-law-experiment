@@ -1,6 +1,7 @@
 class Trial {
   constructor(
     trialId,
+    trialRep,
     trialDirection,
     intDevice,
     startSize,
@@ -11,7 +12,7 @@ class Trial {
     isDone,
   ) {
     this.trialId = trialId;
-    this.trialDirection = trialDirection;
+    (this.trialRep = trialRep), (this.trialDirection = trialDirection);
     this.intDevice = intDevice;
     this.startSize = startSize;
     this.targetWidth = targetWidth;
@@ -46,7 +47,7 @@ class Trial {
   }
 
   drawShapes() {
-    console.log(this.trialId);
+    console.log("Trial id: " + this.trialId);
     this.trialCompleted = false;
     this.start.style.display = "block";
     this.start.style.width = mmToPixels(this.startSize) + "px";
@@ -410,6 +411,7 @@ class Trial {
       userNumber: null,
       blockNumber: null,
       trialNumber: this.trialId,
+      trialRep: this.trialRep,
       experimentType: null,
 
       amplitudeMM: this.amplitude,

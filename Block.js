@@ -58,9 +58,24 @@ class Block {
           amplIndex < this.amplitude.length;
           amplIndex++
         ) {
-          for (let i = 0; i < this.repetitionTrial; i++) {
+          let temp_id = this.trialId;
+          const trial = new Trial(
+            this.trialId++,
+            temp_id + "",
+            this.trialDirection[directionIdx],
+            this.intDevice,
+            this.startSize,
+            this.targetDimens[dimenIdx].width,
+            this.targetDimens[dimenIdx].height,
+            this.amplitude[amplIndex],
+            this.maxScreenPercentage,
+          );
+          this.trials.push(trial);
+
+          for (let i = 1; i < this.repetitionTrial; i++) {
             const trial = new Trial(
               this.trialId++,
+              temp_id + "." + i,
               this.trialDirection[directionIdx],
               this.intDevice,
               this.startSize,
@@ -80,9 +95,24 @@ class Block {
     this.amplitude = this.getAmplitudes();
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
       for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
-        for (let i = 0; i < this.repetitionTrial; i++) {
+        let temp_id = this.trialId;
+        const trial = new Trial(
+          this.trialId++,
+          temp_id + "",
+          this.targetDimens[dimenIdx].angle,
+          this.intDevice,
+          this.startSize,
+          this.targetDimens[dimenIdx].width,
+          this.targetDimens[dimenIdx].height,
+          this.amplitude[amplIdx],
+          this.maxScreenPercentage,
+        );
+        this.trials.push(trial);
+
+        for (let i = 1; i < this.repetitionTrial; i++) {
           const trial = new Trial(
             this.trialId++,
+            temp_id + "." + i,
             this.targetDimens[dimenIdx].angle,
             this.intDevice,
             this.startSize,

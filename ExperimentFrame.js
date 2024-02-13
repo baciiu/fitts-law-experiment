@@ -7,7 +7,7 @@ class ExperimentFrame {
     this.experimentType = "STS"; //
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
-    this.repetitonPerTrial = 1;
+    this.repetitonPerTrial = 2;
     this.scrambleBlocks = true;
     this.experiment = new Experiment(
       this.experimentType,
@@ -42,17 +42,13 @@ class ExperimentFrame {
       let block = this.experiment.getBlock(this.blockNumber);
       let first_trial = block.getTrials()[0];
       this.trialNumber = first_trial.getTrialID();
-      console.log(first_trial);
-      console.log("first trial at index 0 : " + this.trialNumber);
     }
   }
 
   showTrial() {
     if (!this.printedFirstBlock) {
       this.printedFirstBlock = true;
-      console.log("FIRST BLOCK");
       this.getFirstTrial();
-      //this.printAllTrials();
     }
     let block = this.experiment.getBlock(this.blockNumber);
 
@@ -84,14 +80,13 @@ class ExperimentFrame {
 
     if (data.isFailed === true) {
       // add it to the block
-      console.log("add trial in the block");
+      //console.log("add trial in the block");
     }
 
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
     if (currentBlock) {
       if (currentBlock.hasNextTrial(this.trialIndex)) {
-        console.log("HAS NEXT TRIAL");
         this.getNextTrial();
       } else if (this.experiment.hasNextBlock(this.blockNumber)) {
         this.getNextBlock();
@@ -122,9 +117,6 @@ class ExperimentFrame {
 
     this.trialNumber = currentBlock.getTrials()[0].getTrialID();
     this.trialIndex = 0;
-    console.log(
-      "trial nr:  " + this.trialNumber + " from block: " + this.blockNumber,
-    );
     this.showTrial();
   }
 
@@ -217,7 +209,6 @@ class ExperimentFrame {
 
       for (let j = 0; j < block.getTrialsNumber(); j++) {
         const trial = block.getTrial(j + 1);
-        console.log(trial);
       }
     }
   }

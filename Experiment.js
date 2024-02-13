@@ -48,7 +48,6 @@ class Experiment {
     this.shuffleArray(trial_pattern);
 
     if (this.numBlocks > 1) {
-      console.log(this.numBlocks + " BLOCKS");
       const orderMap = new Map(
         trial_pattern.map((item, index) => [item.trialId, index]),
       );
