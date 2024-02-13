@@ -78,12 +78,19 @@ class ExperimentFrame {
 
     this.trialsData.push(data);
 
-    if (data.isFailed === true) {
-      // add it to the block
-      //console.log("add trial in the block");
-    }
-
     const currentBlock = this.experiment.getBlock(this.blockNumber);
+
+    if (data.isFailed === true) {
+      const failedTrial = { ...this.trial }; // create a copy
+
+      failedTrial.trialId = currentBlock.getTrialsNumber() + 1;
+
+      this.insertItemAfterGivenIndex(
+        currentBlock.getTrials(),
+        failedTrial,
+        this.trialIndex + 1,
+      );
+    }
 
     if (currentBlock) {
       if (currentBlock.hasNextTrial(this.trialIndex)) {
@@ -96,6 +103,22 @@ class ExperimentFrame {
     } else {
       console.error("Invalid block number:", this.blockNumber);
     }
+  }
+
+  // Fisher-Yates Algorithm
+  insertItemAfterGivenIndex(array, newItem, startIndex) {
+    // Ensure the startIndex is within the array bounds and not the last element
+    if (startIndex < 0 || startIndex >= array.length - 1) {
+      console.error("Invalid startIndex. Item not inserted.");
+      return;
+    }
+
+    // Generate a random index in the range from startIndex + 1 to the array length inclusive
+    const randomIndex =
+      Math.floor(Math.random() * (array.length - startIndex)) + startIndex + 1;
+
+    // Insert the new item at the random index
+    array.splice(randomIndex, 0, newItem);
   }
 
   getNextTrial() {
@@ -201,15 +224,5 @@ class ExperimentFrame {
     const a = index % this.trialsPerBreak;
     const b = this.trialsPerBreak;
     return b - a;
-  }
-
-  printAllTrials() {
-    for (let i = 0; i < this.experiment.getNumBlocks(); i++) {
-      const block = this.experiment.getBlock(i + 1);
-
-      for (let j = 0; j < block.getTrialsNumber(); j++) {
-        const trial = block.getTrial(j + 1);
-      }
-    }
   }
 }
