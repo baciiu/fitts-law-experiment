@@ -114,8 +114,9 @@ class ExperimentFrame {
     }
 
     // Generate a random index in the range from startIndex + 1 to the array length inclusive
+    const rand = Math.random();
     const randomIndex =
-      Math.floor(Math.random() * (array.length - startIndex)) + startIndex + 1;
+      Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
 
     // Insert the new item at the random index
     array.splice(randomIndex, 0, newItem);
