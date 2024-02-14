@@ -97,8 +97,9 @@ class Experiment {
     const availableIndices = this.rectIndices.filter(
       (index) => !this.usedIndices.includes(index),
     );
+    const rand = Math.random();
     const randomIndex =
-      availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      availableIndices[Math.floor(rand * availableIndices.length)];
     this.usedIndices.push(randomIndex);
     return randomIndex;
   }
@@ -109,7 +110,8 @@ class Experiment {
     let temporaryValue, randomIndex;
 
     while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
+      const rand = Math.random();
+      randomIndex = Math.floor(rand * currentIndex);
       currentIndex -= 1;
 
       temporaryValue = array[currentIndex];

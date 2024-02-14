@@ -12,7 +12,8 @@ class Trial {
     isDone,
   ) {
     this.trialId = trialId;
-    (this.trialRep = trialRep), (this.trialDirection = trialDirection);
+    this.trialRep = trialRep;
+    this.trialDirection = trialDirection;
     this.intDevice = intDevice;
     this.startSize = startSize;
     this.targetWidth = targetWidth;
@@ -95,7 +96,6 @@ class Trial {
   handleStartPress(event) {
     if (event.button === 0 && !this.firstClickDone) {
       this.trialStarted = true;
-      this.target.style.backgroundColor = "green";
       this.firstClickData = {
         name: "start",
         x: event.clientX,
@@ -116,7 +116,7 @@ class Trial {
     if (!this.trialStarted) {
       this.errorSound.play();
     }
-
+    this.target.style.backgroundColor = "green";
     this.logMouseEvent(event);
 
     this.start.style.display = "none";
