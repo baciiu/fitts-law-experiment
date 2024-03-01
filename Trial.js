@@ -3,6 +3,7 @@ class Trial {
     trialId,
     trialRep,
     trialDirection,
+    experimentType,
     intDevice,
     startSize,
     targetWidth,
@@ -14,6 +15,7 @@ class Trial {
     this.trialId = trialId;
     this.trialRep = trialRep;
     this.trialDirection = trialDirection;
+    this.experimentType = experimentType;
     this.intDevice = intDevice;
     this.startSize = startSize;
     this.targetWidth = targetWidth;
@@ -62,7 +64,8 @@ class Trial {
     this.target.style.position = "absolute";
     this.target.style.backgroundColor = "yellow";
 
-    const pos = this.generateDiagonalPositions();
+    const pos = this.generatePositions();
+    console.log(pos);
 
     this.start.style.left = pos.start.x + "px";
     this.start.style.top = pos.start.y + "px";
@@ -77,7 +80,7 @@ class Trial {
     this.body.style.height = window.innerHeight + "px";
 
     this.testDiagonalPositions(this);
-    //this.testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    this.testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -298,7 +301,27 @@ class Trial {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   }
 
-  generateDiagonalPositions() {
+  calculateMaxDistance() {
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+    let maxDistanceWidth = (this.maxScreenPercentage * canvasWidth) / 100;
+    let maxDistanceHeight = (this.maxScreenPercentage * canvasHeight) / 100;
+
+    // Ensure a minimum max distance (e.g., 200 pixels)
+    const minMaxDistance = 200;
+    maxDistanceWidth = Math.max(maxDistanceWidth, minMaxDistance);
+    maxDistanceHeight = Math.max(maxDistanceHeight, minMaxDistance);
+
+    return { maxDistanceWidth, maxDistanceHeight };
+  }
+
+  getTargetCoordinates(angle, amplitude, x1, y1) {
+    let x2 = x1 + amplitude * Math.cos((angle * Math.PI) / 180);
+    let y2 = y1 + amplitude * Math.sin((angle * Math.PI) / 180);
+    return { x: x2, y: y2 };
+  }
+
+  generatePositions() {
     let canvasWidth = window.innerWidth;
     let canvasHeight = window.innerHeight;
     let maxDistanceWidth = (this.maxScreenPercentage * canvasWidth) / 100;
@@ -372,10 +395,11 @@ class Trial {
   testStartDistanceFromPreviousEnd(startX, startY) {
     if (!this.previousTrialEnd) {
       console.log("No previous trial to compare with.");
-      return;
+      return true;
     }
 
-    let screenWidth = (this.maxScreenPercentage * window.innerWidth) / 100;
+    let screenWidth = window.innerWidth;
+    console.log("screen width: " + screenWidth);
 
     // Calculate the distance between the previous trial's end (target) and current trial's start
     let actualDistance = this.getDistance(
