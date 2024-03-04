@@ -5,7 +5,8 @@ class Trial {
     trialDirection,
     experimentType,
     intDevice,
-    startSize,
+    startWidth,
+    startHeight,
     targetWidth,
     targetHeight,
     amplitude,
@@ -17,7 +18,8 @@ class Trial {
     this.trialDirection = trialDirection;
     this.experimentType = experimentType;
     this.intDevice = intDevice;
-    this.startSize = startSize;
+    this.startWidth = startWidth;
+    this.startHeight = startHeight;
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
@@ -42,6 +44,7 @@ class Trial {
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
+    this.margin = mmToPixels(5);
 
     this.clicksTime = [];
     this.clicksCoords = [];
@@ -49,35 +52,43 @@ class Trial {
     this.mouseEvents = [];
   }
 
-  drawShapes() {
-    console.log("Trial id: " + this.trialId);
-    this.trialCompleted = false;
+  drawStart(start) {
     this.start.style.display = "block";
-    this.start.style.width = mmToPixels(this.startSize) + "px";
-    this.start.style.height = mmToPixels(this.startSize) + "px";
+    this.start.style.width = mmToPixels(this.startWidth) + "px";
+    this.start.style.height = mmToPixels(this.startHeight) + "px";
     this.start.style.position = "absolute";
+    this.start.style.left = start.x + "px";
+    this.start.style.top = start.y + "px";
+    this.startCoords = start;
     this.start.style.backgroundColor = "gray";
+  }
 
+  drawTarget(target) {
     this.target.style.display = "block";
     this.target.style.width = mmToPixels(this.targetWidth) + "px";
     this.target.style.height = mmToPixels(this.targetHeight) + "px";
     this.target.style.position = "absolute";
+    this.target.style.left = target.x + "px";
+    this.target.style.top = target.y + "px";
+    this.targetCoords = target;
     this.target.style.backgroundColor = "yellow";
+  }
+
+  drawBody() {
+    this.body.style.display = "block";
+    this.body.style.width = window.innerWidth + "px";
+    this.body.style.height = window.innerHeight + "px";
+  }
+
+  drawShapes() {
+    this.trialCompleted = false;
 
     const pos = this.generatePositions();
     console.log(pos);
 
-    this.start.style.left = pos.start.x + "px";
-    this.start.style.top = pos.start.y + "px";
-    this.target.style.left = pos.target.x + "px";
-    this.target.style.top = pos.target.y + "px";
-
-    this.startCoords = pos.start;
-    this.targetCoords = pos.target;
-
-    this.body.style.display = "block";
-    this.body.style.width = window.innerWidth + "px";
-    this.body.style.height = window.innerHeight + "px";
+    this.drawStart(pos.start);
+    this.drawTarget(pos.target);
+    this.drawBody();
 
     this.testDiagonalPositions(this);
     this.testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
@@ -330,14 +341,16 @@ class Trial {
       Math.pow(maxDistanceWidth, 2) + Math.pow(maxDistanceHeight, 2),
     );
     let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startSize);
-    let height1 = mmToPixels(this.startSize);
+    let width1 = mmToPixels(this.startWidth);
+    let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
 
     let topMargin = mmToPixels(5);
     let otherMargins = mmToPixels(3);
     let start, target, x1, y1, x2, y2;
+    let maxcount = 100;
+    let count = 0;
 
     do {
       // Generate potential start coordinates within bounds and margins
@@ -373,7 +386,7 @@ class Trial {
   }
 
   testDiagonalPositions() {
-    const positions = this.generateDiagonalPositions();
+    const positions = this.generatePositions();
     const centerX1 = positions.start.x + mmToPixels(this.startSize) / 2;
     const centerY1 = positions.start.y + mmToPixels(this.startSize) / 2;
     const centerX2 = positions.target.x + mmToPixels(this.targetWidth) / 2;
@@ -445,8 +458,8 @@ class Trial {
 
       startX: this.startCoords.x,
       startY: this.startCoords.y,
-      startWidthPx: mmToPixels(this.startSize),
-      startHeightPx: mmToPixels(this.startSize),
+      startWidthPx: mmToPixels(this.startWidth),
+      startHeightPx: mmToPixels(this.startHeight),
 
       targetX: this.targetCoords.x,
       targetY: this.targetCoords.y,
@@ -530,24 +543,4 @@ class Trial {
       ),
     };
   }
-}
-
-function mmToPixels(mm) {
-  // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-  const screenWidth = 1512; // Screen width in pixels
-  const screenHeight = 982; // Screen height in pixels
-  const screenDiagonal = 14.42; // Screen diagonal in pixel
-
-  const inches = mm / 25.4;
-  let result = inches * 151;
-  //result = result.toFixed(2);
-  //let res = Number(result);
-  return result;
-
-  // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1 // update 151 is more accurate
-  // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
-}
-
-function pxToMM(px) {
-  return (px / 151) * 25.4;
 }

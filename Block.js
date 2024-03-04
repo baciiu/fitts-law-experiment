@@ -5,15 +5,7 @@ class Block {
     this.startSize = 10;
     this.shape = shape;
     this.repetitionTrial = repTrial;
-    this.targetDimens = [
-      //{ width: 20, height: 10, angle: 0, amplitude: 100 },
-      //{ width: 25, height: 10, angle: 100, amplitude: 100 },
-      //{ width: 40, height: 20, angle: 10, amplitude: 100 },
-      //{ width: 20, height: 30, angle: 100, amplitude: 145 },
-      { width: 20, height: 10 },
-      { width: 25, height: 10 },
-      { width: 40, height: 20 },
-    ];
+    this.targetDimens = getInput();
 
     this.radianStep = 180; // => [0,180] /  Left and Right
     this.amplitude = [100];
@@ -21,6 +13,8 @@ class Block {
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
+
+    this.startSize = 10;
 
     this.trialId = 1;
     this.trials = [];
@@ -58,6 +52,19 @@ class Block {
           amplIndex < this.amplitude.length;
           amplIndex++
         ) {
+          let startWidth, startHeight;
+
+          if (this.experimentType == "discrete") {
+            startWidth = this.startSize;
+            startHeight = this.startSize;
+          } else if (this.experimentType == "reciprocal") {
+            startWidth = this.targetDimens[dimenIdx].width;
+            startHeight = this.targetDimens[dimenIdx].height;
+          } else {
+            console.log("Experiment Undefined");
+            return;
+          }
+
           let temp_id = this.trialId;
           const trial = new Trial(
             this.trialId++,
@@ -65,7 +72,8 @@ class Block {
             this.trialDirection[directionIdx],
             this.experimentType,
             this.intDevice,
-            this.startSize,
+            startWidth,
+            startHeight,
             this.targetDimens[dimenIdx].width,
             this.targetDimens[dimenIdx].height,
             this.amplitude[amplIndex],
@@ -80,7 +88,8 @@ class Block {
               this.trialDirection[directionIdx],
               this.experimentType,
               this.intDevice,
-              this.startSize,
+              startWidth,
+              startHeight,
               this.targetDimens[dimenIdx].width,
               this.targetDimens[dimenIdx].height,
               this.amplitude[amplIndex],
@@ -97,6 +106,18 @@ class Block {
     this.amplitude = this.getAmplitudes();
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
       for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
+        let startWidth, startHeight;
+        if (this.experimentType == "discrete") {
+          startWidth = this.startSize;
+          startHeight = this.startSize;
+        } else if (this.experimentType == "reciprocal") {
+          startWidth = this.targetDimens[dimenIdx].width;
+          startHeight = this.targetDimens[dimenIdx].height;
+        } else {
+          console.log("Experiment Undefined");
+          return;
+        }
+
         let temp_id = this.trialId;
         const trial = new Trial(
           this.trialId++,
@@ -104,7 +125,8 @@ class Block {
           this.targetDimens[dimenIdx].angle,
           this.experimentType,
           this.intDevice,
-          this.startSize,
+          startWidth,
+          startHeight,
           this.targetDimens[dimenIdx].width,
           this.targetDimens[dimenIdx].height,
           this.amplitude[amplIdx],
@@ -119,7 +141,8 @@ class Block {
             this.targetDimens[dimenIdx].angle,
             this.experimentType,
             this.intDevice,
-            this.startSize,
+            startWidth,
+            startHeight,
             this.targetDimens[dimenIdx].width,
             this.targetDimens[dimenIdx].height,
             this.amplitude[amplIdx],
