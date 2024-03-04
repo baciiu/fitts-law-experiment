@@ -44,12 +44,9 @@ class Trial {
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
-    this.margin = mmToPixels(5);
 
     this.clicksTime = [];
     this.clicksCoords = [];
-
-    this.mouseEvents = [];
   }
 
   drawStart(start) {
@@ -90,8 +87,7 @@ class Trial {
     this.drawTarget(pos.target);
     this.drawBody();
 
-    this.testDiagonalPositions(this);
-    this.testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -244,42 +240,6 @@ class Trial {
     return this.trialId;
   }
 
-  getTimeFormat(date) {
-    const now = new Date(date);
-    const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0 in JavaScript
-    const day = String(now.getDate()).padStart(2, "0");
-    const hour = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
-
-    return `${day}.${month} T ${hour}:${minutes}:${seconds}.${milliseconds}`;
-  }
-
-  getOnlyTimeFormat(date) {
-    const now = new Date(date);
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
-
-    return `${seconds}.${milliseconds}`;
-  }
-
-  getDirection() {
-    switch (this.trialDirection) {
-      case 0:
-        return "right";
-      case 90:
-        return "down";
-      case 180:
-        return "left";
-      case 270:
-        return "up";
-      default:
-        return "diagonal";
-    }
-    return "wrong direction!";
-  }
-
   setPreviousTrialPosition(trialEnd) {
     this.previousTrialEnd = trialEnd;
   }
@@ -298,7 +258,7 @@ class Trial {
     const clickTargetX2 = this.clicksCoords.at(2).x;
     const clickTargetY2 = this.clicksCoords.at(2).y;
 
-    let distance = this.getDistance(
+    let distance = getDistance(
       clickStartX1,
       clickStartY1,
       clickTargetX2,
@@ -307,39 +267,9 @@ class Trial {
     return distance < mmToPixels(this.amplitude) / this.isFailedNumber;
   }
 
-  // Euclidean distance takes 2 points (x1,y1) and (x2,y2) and returns the straight-line distance between them
-  getDistance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-  }
-
-  calculateMaxDistance() {
-    let canvasWidth = window.innerWidth;
-    let canvasHeight = window.innerHeight;
-    let maxDistanceWidth = (this.maxScreenPercentage * canvasWidth) / 100;
-    let maxDistanceHeight = (this.maxScreenPercentage * canvasHeight) / 100;
-
-    // Ensure a minimum max distance (e.g., 200 pixels)
-    const minMaxDistance = 200;
-    maxDistanceWidth = Math.max(maxDistanceWidth, minMaxDistance);
-    maxDistanceHeight = Math.max(maxDistanceHeight, minMaxDistance);
-
-    return { maxDistanceWidth, maxDistanceHeight };
-  }
-
-  getTargetCoordinates(angle, amplitude, x1, y1) {
-    let x2 = x1 + amplitude * Math.cos((angle * Math.PI) / 180);
-    let y2 = y1 + amplitude * Math.sin((angle * Math.PI) / 180);
-    return { x: x2, y: y2 };
-  }
-
   generatePositions() {
     let canvasWidth = window.innerWidth;
     let canvasHeight = window.innerHeight;
-    let maxDistanceWidth = (this.maxScreenPercentage * canvasWidth) / 100;
-    let maxDistanceHeight = (this.maxScreenPercentage * canvasHeight) / 100;
-    let maxDiagonalDistance = Math.sqrt(
-      Math.pow(maxDistanceWidth, 2) + Math.pow(maxDistanceHeight, 2),
-    );
     let amplitude = mmToPixels(this.amplitude);
     let width1 = mmToPixels(this.startWidth);
     let height1 = mmToPixels(this.startHeight);
@@ -349,11 +279,8 @@ class Trial {
     let topMargin = mmToPixels(5);
     let otherMargins = mmToPixels(3);
     let start, target, x1, y1, x2, y2;
-    let maxcount = 100;
-    let count = 0;
 
     do {
-      // Generate potential start coordinates within bounds and margins
       x1 =
         Math.random() * (canvasWidth - width1 - 2 * otherMargins) +
         width1 / 2 +
@@ -363,14 +290,20 @@ class Trial {
         height1 / 2 +
         topMargin;
 
-      // Calculate target position based on amplitude and angle
       let angle = this.trialDirection;
-      x2 = x1 + amplitude * Math.cos((angle * Math.PI) / 180);
-      y2 = y1 + amplitude * Math.sin((angle * Math.PI) / 180);
+
+      const targetCoords = generateCenterPointWithAmplitude(
+        x1,
+        y1,
+        amplitude,
+        angle,
+      );
+      x2 = targetCoords.x;
+      y2 = targetCoords.y;
 
       // Check if the target is within bounds and the distance is correct
       if (
-        this.getDistance(x1, y1, x2, y2) === amplitude &&
+        getDistance(x1, y1, x2, y2) === amplitude &&
         x2 - width2 / 2 > otherMargins &&
         x2 + width2 / 2 < canvasWidth - otherMargins &&
         y2 - height2 / 2 > topMargin &&
@@ -383,56 +316,6 @@ class Trial {
     } while (!start || !target); // Repeat if a valid position was not found
 
     return { start, target };
-  }
-
-  testDiagonalPositions() {
-    const positions = this.generatePositions();
-    const centerX1 = positions.start.x + mmToPixels(this.startSize) / 2;
-    const centerY1 = positions.start.y + mmToPixels(this.startSize) / 2;
-    const centerX2 = positions.target.x + mmToPixels(this.targetWidth) / 2;
-    const centerY2 = positions.target.y + mmToPixels(this.targetHeight) / 2;
-
-    const distance = this.getDistance(centerX1, centerY1, centerX2, centerY2);
-    const amplitudeInPixels = mmToPixels(this.amplitude);
-
-    if (Math.abs(distance - amplitudeInPixels) < 1e-5) {
-      // Using a small threshold to account for floating point inaccuracies
-    } else {
-      console.error(
-        "Test failed: The distance between the centers is not equal to the amplitude.",
-      );
-      throw Error("DISTANCE NOT OK");
-    }
-  }
-
-  testStartDistanceFromPreviousEnd(startX, startY) {
-    if (!this.previousTrialEnd) {
-      console.log("No previous trial to compare with.");
-      return true;
-    }
-
-    let screenWidth = window.innerWidth;
-    console.log("screen width: " + screenWidth);
-
-    // Calculate the distance between the previous trial's end (target) and current trial's start
-    let actualDistance = this.getDistance(
-      startX,
-      startY,
-      this.previousTrialEnd.x,
-      this.previousTrialEnd.y,
-    );
-
-    // Check if the actual distance is within the screen width
-    if (actualDistance <= screenWidth) {
-      console.log(
-        "Test passed: The start is within screen width from the previous end.",
-      );
-    } else {
-      console.error(
-        "Test failed: The start exceeds screen width from the previous end.",
-      );
-    }
-    return actualDistance <= screenWidth;
   }
 
   logMouseEvent(event) {
@@ -454,7 +337,7 @@ class Trial {
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),
       directionDegree: this.trialDirection,
-      direction: this.getDirection(this.trialDirection),
+      direction: getDirection(this.trialDirection),
 
       startX: this.startCoords.x,
       startY: this.startCoords.y,
@@ -469,29 +352,17 @@ class Trial {
       HIT: this.HIT ? 1 : 0,
       isFailed: this.isFailed(),
 
-      T0: this.getTimeFormat(this.clicksTime.at(0)), //this.clicksTime.at(0),
-      T1: this.getTimeFormat(this.clicksTime.at(1)),
-      T2: this.getTimeFormat(this.clicksTime.at(2)),
-      T3: this.getTimeFormat(this.clicksTime.at(3)),
+      T0: getTimeFormat(this.clicksTime.at(0)), //this.clicksTime.at(0),
+      T1: getTimeFormat(this.clicksTime.at(1)),
+      T2: getTimeFormat(this.clicksTime.at(2)),
+      T3: getTimeFormat(this.clicksTime.at(3)),
 
-      "T1-T0": this.getOnlyTimeFormat(
-        this.clicksTime.at(1) - this.clicksTime.at(0),
-      ),
-      "T2-T0": this.getOnlyTimeFormat(
-        this.clicksTime.at(2) - this.clicksTime.at(0),
-      ),
-      "T3-T0": this.getOnlyTimeFormat(
-        this.clicksTime.at(3) - this.clicksTime.at(0),
-      ),
-      "T2-T1": this.getOnlyTimeFormat(
-        this.clicksTime.at(2) - this.clicksTime.at(1),
-      ),
-      "T3-T1": this.getOnlyTimeFormat(
-        this.clicksTime.at(3) - this.clicksTime.at(1),
-      ),
-      "T3-T2": this.getOnlyTimeFormat(
-        this.clicksTime.at(3) - this.clicksTime.at(2),
-      ),
+      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
+      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
+      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
+      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
+      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
+      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
 
       "Click T0 X": this.clicksCoords.at(0).x,
       "Click T0 Y": this.clicksCoords.at(0).y,
@@ -505,37 +376,37 @@ class Trial {
       "Click T3 X": this.clicksCoords.at(3).x,
       "Click T3 Y": this.clicksCoords.at(3).y,
 
-      "Distance T1 to T0 ": this.getDistance(
+      "Distance T1 to T0 ": getDistance(
         this.clicksCoords.at(0).x,
         this.clicksCoords.at(0).y,
         this.clicksCoords.at(1).x,
         this.clicksCoords.at(1).y,
       ),
-      "Distance T2 toT0 ": this.getDistance(
+      "Distance T2 toT0 ": getDistance(
         this.clicksCoords.at(0).x,
         this.clicksCoords.at(0).y,
         this.clicksCoords.at(2).x,
         this.clicksCoords.at(2).y,
       ),
-      "Distance T3 to T0 ": this.getDistance(
+      "Distance T3 to T0 ": getDistance(
         this.clicksCoords.at(0).x,
         this.clicksCoords.at(0).y,
         this.clicksCoords.at(3).x,
         this.clicksCoords.at(3).y,
       ),
-      "Distance T2 to T1 ": this.getDistance(
+      "Distance T2 to T1 ": getDistance(
         this.clicksCoords.at(1).x,
         this.clicksCoords.at(1).y,
         this.clicksCoords.at(2).x,
         this.clicksCoords.at(2).y,
       ),
-      "Distance T3 to T1 ": this.getDistance(
+      "Distance T3 to T1 ": getDistance(
         this.clicksCoords.at(1).x,
         this.clicksCoords.at(1).y,
         this.clicksCoords.at(3).x,
         this.clicksCoords.at(3).y,
       ),
-      "Distance T3 to T2 ": this.getDistance(
+      "Distance T3 to T2 ": getDistance(
         this.clicksCoords.at(2).x,
         this.clicksCoords.at(2).y,
         this.clicksCoords.at(3).x,

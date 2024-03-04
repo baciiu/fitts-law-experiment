@@ -54,10 +54,10 @@ class Block {
         ) {
           let startWidth, startHeight;
 
-          if (this.experimentType == "discrete") {
+          if (this.experimentType === "discrete") {
             startWidth = this.startSize;
             startHeight = this.startSize;
-          } else if (this.experimentType == "reciprocal") {
+          } else if (this.experimentType === "reciprocal") {
             startWidth = this.targetDimens[dimenIdx].width;
             startHeight = this.targetDimens[dimenIdx].height;
           } else {
@@ -107,10 +107,10 @@ class Block {
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
       for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
         let startWidth, startHeight;
-        if (this.experimentType == "discrete") {
+        if (this.experimentType === "discrete") {
           startWidth = this.startSize;
           startHeight = this.startSize;
-        } else if (this.experimentType == "reciprocal") {
+        } else if (this.experimentType === "reciprocal") {
           startWidth = this.targetDimens[dimenIdx].width;
           startHeight = this.targetDimens[dimenIdx].height;
         } else {
