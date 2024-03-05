@@ -1,10 +1,10 @@
 class ExperimentFrame {
-  constructor(userNumber) {
+  constructor(userNumber, experimentType) {
     this.blockNumber = 1;
     this.trialNumber = -1;
     this.totalBlocks = 2;
     this.trialsPerBreak = 100;
-    this.experimentType = "STS"; //
+    this.experimentType = experimentType; //
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
     this.repetitonPerTrial = 2;

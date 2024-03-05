@@ -17,20 +17,22 @@ function startExperiment() {
   document.body.style.pointerEvents = "auto";
 
   /*
-                  // Request full-screen mode for the document body
-                  const docBody = document.documentElement;
-                  if (docBody.requestFullscreen) {
-                      docBody.requestFullscreen();
-                  } else if (docBody.mozRequestFullScreen) {
-                      docBody.mozRequestFullScreen();
-                  } else if (docBody.webkitRequestFullscreen) {
-                      docBody.webkitRequestFullscreen();
-                  } else if (docBody.msRequestFullscreen) {
-                      docBody.msRequestFullscreen();
-                  }*/
+                          // Request full-screen mode for the document body
+                          const docBody = document.documentElement;
+                          if (docBody.requestFullscreen) {
+                              docBody.requestFullscreen();
+                          } else if (docBody.mozRequestFullScreen) {
+                              docBody.mozRequestFullScreen();
+                          } else if (docBody.webkitRequestFullscreen) {
+                              docBody.webkitRequestFullscreen();
+                          } else if (docBody.msRequestFullscreen) {
+                              docBody.msRequestFullscreen();
+                          }*/
 
   /** START */
-  experimentFrame = new ExperimentFrame(3);
+  const experimentType = "discrete";
+  //const experimentType = 'reciprocal';
+  experimentFrame = new ExperimentFrame(4, experimentType);
   experimentFrame.showTrial();
 }
 
