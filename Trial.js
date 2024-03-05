@@ -320,7 +320,7 @@ class Trial {
   }
 
   isLeftEdgeWithinBounds(x, width) {
-    return x - width / 2 > this.TOP_MARGIN_PX;
+    return x - width / 2 > this.OTHER_MARGINS_PX;
   }
 
   isRightEdgeWithinBounds(x, width) {
@@ -336,7 +336,11 @@ class Trial {
   }
 
   isAmplitude(x1, y1, x2, y2, amplitude) {
-    return getDistance(x1, y1, x2, y2) === amplitude;
+    const distance = getDistance(x1, y1, x2, y2);
+    const tolerance = 1;
+    console.log("Distance: " + distance);
+    console.log("Amplitude: " + amplitude);
+    return Math.abs(distance - amplitude) <= tolerance;
   }
 
   generateDiscretePositions() {
@@ -345,7 +349,14 @@ class Trial {
     let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
-    let start, target, x1, y1, x2, y2;
+    let start,
+      target,
+      x1,
+      y1,
+      x2,
+      y2,
+      maxcount = 100,
+      count = 0;
 
     do {
       const startCoords = this.getRandomPoint(width1, height1);
@@ -371,12 +382,68 @@ class Trial {
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
         return { start, target };
       }
+      count++;
+
+      if (maxcount < count) {
+        console.log("Max count reached");
+        break;
+        return;
+      }
     } while (!start || !target); // Repeat if a valid position was not found
 
     return { start, target };
   }
 
-  generateReciprocalPositions() {}
+  generateReciprocalPositions() {
+    let amplitude = mmToPixels(this.amplitude);
+    let width1 = mmToPixels(this.startWidth);
+    let height1 = mmToPixels(this.startHeight);
+    let width2 = mmToPixels(this.targetWidth);
+    let height2 = mmToPixels(this.targetHeight);
+    let start,
+      target,
+      x1,
+      y1,
+      x2,
+      y2,
+      count = 0,
+      maxcount = 100;
+
+    do {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      const angle = this.trialDirection;
+
+      const radians = (angle * Math.PI) / 180; // Convert angle to radians
+
+      x1 = centerX + (amplitude / 2) * Math.cos(radians);
+      y1 = centerY + (amplitude / 2) * Math.sin(radians);
+
+      x2 = centerX - (amplitude / 2) * Math.cos(radians);
+      y2 = centerY - (amplitude / 2) * Math.sin(radians);
+
+      console.log("Coordinates: ", x1, y1, x2, y2);
+
+      if (
+        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+        this.isShapeWithinBounds(x2, y2, width2, height2)
+      ) {
+        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        return { start, target };
+      }
+      count++;
+      if (maxcount < count) {
+        const dis = this.generateDiscretePositions();
+        start = dis.start;
+        target = dis.target;
+        return { start, target };
+      }
+    } while (!start || !target); // Repeat if a valid position was not found
+
+    return { start, target };
+  }
 
   logMouseEvent(event) {
     this.clicksTime.push(new Date());
