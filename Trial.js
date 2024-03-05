@@ -1,4 +1,8 @@
 class Trial {
+  TOP_MARGIN_PX = mmToPixels(5);
+  OTHER_MARGINS_PX = mmToPixels(3);
+  FAILED_TRIAL_THRESHOLD = 4;
+
   constructor(
     trialId,
     trialRep,
@@ -26,7 +30,6 @@ class Trial {
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
     this.isDone = isDone;
-    this.isFailedNumber = 4; // Trial failed if distance < mmToPixels(this.amplitude) / this.isFailedNumber;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -78,9 +81,33 @@ class Trial {
   }
 
   drawShapes() {
+    if (this.experimentType === "discrete") {
+      this.drawDiscreteShapes();
+    } else if (this.experimentType === "reciprocal") {
+      this.drawReciprocalShapes();
+    } else {
+      throw Error("experiment type undefined.");
+    }
+  }
+
+  drawDiscreteShapes() {
     this.trialCompleted = false;
 
-    const pos = this.generatePositions();
+    const pos = this.generateDiscretePositions();
+    console.log(pos);
+
+    this.drawStart(pos.start);
+    this.drawTarget(pos.target);
+    this.drawBody();
+
+    testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    this.setupEventHandlers();
+  }
+
+  drawReciprocalShapes() {
+    this.trialCompleted = false;
+
+    const pos = this.generateReciprocalPositions();
     console.log(pos);
 
     this.drawStart(pos.start);
@@ -264,31 +291,66 @@ class Trial {
       clickTargetX2,
       clickTargetY2,
     );
-    return distance < mmToPixels(this.amplitude) / this.isFailedNumber;
+    return distance < mmToPixels(this.amplitude) / this.FAILED_TRIAL_THRESHOLD;
   }
 
-  generatePositions() {
-    let canvasWidth = window.innerWidth;
-    let canvasHeight = window.innerHeight;
+  getRandomPoint(width1, height1) {
+    const x1 =
+      Math.random() * (window.innerWidth - width1 - 2 * this.OTHER_MARGINS_PX) +
+      width1 / 2 +
+      this.OTHER_MARGINS_PX;
+    const y1 =
+      Math.random() *
+        (window.innerHeight -
+          height1 -
+          this.TOP_MARGIN_PX -
+          this.OTHER_MARGINS_PX) +
+      height1 / 2 +
+      this.TOP_MARGIN_PX;
+    return { x: x1, y: y1 };
+  }
+
+  isShapeWithinBounds(x, y, width, height) {
+    return (
+      this.isLeftEdgeWithinBounds(x, width) &&
+      this.isRightEdgeWithinBounds(x, width) &&
+      this.isTopEdgeWithinBounds(y, height) &&
+      this.isBottomEdgeWithinBounds(y, height)
+    );
+  }
+
+  isLeftEdgeWithinBounds(x, width) {
+    return x - width / 2 > this.TOP_MARGIN_PX;
+  }
+
+  isRightEdgeWithinBounds(x, width) {
+    return x + width / 2 < window.innerWidth - this.OTHER_MARGINS_PX;
+  }
+
+  isTopEdgeWithinBounds(y, height) {
+    return y - height / 2 > this.TOP_MARGIN_PX;
+  }
+
+  isBottomEdgeWithinBounds(y, height) {
+    return y + height / 2 < window.innerHeight - this.TOP_MARGIN_PX;
+  }
+
+  isAmplitude(x1, y1, x2, y2, amplitude) {
+    return getDistance(x1, y1, x2, y2) === amplitude;
+  }
+
+  generateDiscretePositions() {
     let amplitude = mmToPixels(this.amplitude);
     let width1 = mmToPixels(this.startWidth);
     let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
-
-    let topMargin = mmToPixels(5);
-    let otherMargins = mmToPixels(3);
     let start, target, x1, y1, x2, y2;
 
     do {
-      x1 =
-        Math.random() * (canvasWidth - width1 - 2 * otherMargins) +
-        width1 / 2 +
-        otherMargins;
-      y1 =
-        Math.random() * (canvasHeight - height1 - topMargin - otherMargins) +
-        height1 / 2 +
-        topMargin;
+      const startCoords = this.getRandomPoint(width1, height1);
+      x1 = startCoords.x;
+      y1 = startCoords.y;
 
       let angle = this.trialDirection;
 
@@ -301,13 +363,9 @@ class Trial {
       x2 = targetCoords.x;
       y2 = targetCoords.y;
 
-      // Check if the target is within bounds and the distance is correct
       if (
-        getDistance(x1, y1, x2, y2) === amplitude &&
-        x2 - width2 / 2 > otherMargins &&
-        x2 + width2 / 2 < canvasWidth - otherMargins &&
-        y2 - height2 / 2 > topMargin &&
-        y2 + height2 / 2 < canvasHeight - otherMargins
+        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+        this.isShapeWithinBounds(x2, y2, width2, height2)
       ) {
         start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
@@ -317,6 +375,8 @@ class Trial {
 
     return { start, target };
   }
+
+  generateReciprocalPositions() {}
 
   logMouseEvent(event) {
     this.clicksTime.push(new Date());

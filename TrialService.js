@@ -84,14 +84,6 @@ function testStartDistanceFromPreviousEnd(startX, startY) {
   return actualDistance <= screenWidth;
 }
 
-function generateCoordForExperimentType(exp) {
-  if (this.experimentType == "discrete") {
-  } else if (this.experimentType == "reciprocal") {
-  } else {
-    console.log("Experiment Undefined");
-  }
-}
-
 function generateCenterPointWithAmplitude(x, y, amplitude, angle) {
   const angleRadians = angle * (Math.PI / 180);
   return {
@@ -111,5 +103,3 @@ function getInput() {
     //{ width: 40, height: 20 },
   ];
 }
-
-MARGIN_MM = mmToPixels(5);
