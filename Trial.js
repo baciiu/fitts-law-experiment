@@ -2,6 +2,7 @@ class Trial {
   TOP_MARGIN_PX = mmToPixels(5);
   OTHER_MARGINS_PX = mmToPixels(3);
   FAILED_TRIAL_THRESHOLD = 4;
+  AMBIGUITY_MARGIN_PX = mmToPixels(10);
 
   constructor(
     trialId,
@@ -30,6 +31,7 @@ class Trial {
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
     this.isDone = isDone;
+    this.isAmbiguityMarginHit = false;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -43,6 +45,7 @@ class Trial {
     this.targetClickData = null;
     this.bodyClickData = null;
     this.trialCompleted = false;
+    this.isFailedTrial = false;
 
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
@@ -220,7 +223,15 @@ class Trial {
         this.errorSound.play();
       }
       this.target.style.display = "none";
+    } else if (
+      event.button === 0 &&
+      this.firstClickDone &&
+      this.firstClickData != null &&
+      this.targetClickData
+    ) {
+      this.isAmbiguityMarginHit = this.isCursorInsideShape(event, this.target);
     }
+    this.isFailedTrial = this.isFailed();
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mousedown", this.boundHandleTargetRelease);
@@ -236,16 +247,38 @@ class Trial {
 
   isCursorInsideShape(event, shape) {
     const rect = shape.getBoundingClientRect();
-    return (
+
+    let isCursorInsideShape =
       event.clientX >= rect.left &&
       event.clientX <= rect.right &&
       event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    );
+      event.clientY <= rect.bottom;
+    console.log("isCursorInsideShape: " + isCursorInsideShape);
+
+    if (this.intDevice === "Touch") {
+      const extendedRect = {
+        left: rect.left - this.AMBIGUITY_MARGIN_PX,
+        top: rect.top - this.AMBIGUITY_MARGIN_PX,
+        right: rect.right + this.AMBIGUITY_MARGIN_PX,
+        bottom: rect.bottom + this.AMBIGUITY_MARGIN_PX,
+      };
+
+      let isTouchInsideMargin =
+        event.clientX >= extendedRect.left &&
+        event.clientX <= extendedRect.right &&
+        event.clientY >= extendedRect.top &&
+        event.clientY <= extendedRect.bottom;
+
+      if (!isCursorInsideShape && isTouchInsideMargin) {
+        this.isAmbiguityMarginHit = true;
+      }
+      console.log("isTouchInsideMargin: " + isTouchInsideMargin);
+      return isTouchInsideMargin;
+    }
+    return isCursorInsideShape;
   }
 
   endTrial() {
-    //this.getExportDataTrial();
     experimentFrame.data = this.getExportDataTrial();
     this.firstClickDone = false;
     this.targetClickData = null;
@@ -386,7 +419,6 @@ class Trial {
 
       if (maxcount < count) {
         console.log("Max count reached");
-        break;
         return;
       }
     } while (!start || !target); // Repeat if a valid position was not found
@@ -459,7 +491,8 @@ class Trial {
       blockNumber: null,
       trialNumber: this.trialId,
       trialRep: this.trialRep,
-      experimentType: null,
+      experimentType: this.experimentType,
+      device: this.intDevice,
 
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),
@@ -477,7 +510,8 @@ class Trial {
       targetHeightPx: mmToPixels(this.targetHeight),
 
       HIT: this.HIT ? 1 : 0,
-      isFailed: this.isFailed(),
+      AmbiguityMarginHIT: this.isAmbiguityMarginHit,
+      isFailedTrial: this.isFailedTrial,
 
       T0: getTimeFormat(this.clicksTime.at(0)), //this.clicksTime.at(0),
       T1: getTimeFormat(this.clicksTime.at(1)),

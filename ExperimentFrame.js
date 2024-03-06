@@ -4,9 +4,9 @@ class ExperimentFrame {
     this.trialNumber = -1;
     this.totalBlocks = 2;
     this.trialsPerBreak = 100;
-    this.experimentType = experimentType; //
-    this.shape = "rectangle"; // rectangle or circle
-    this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
+    this.experimentType = experimentType;
+    this.shape = "rectangle";
+    this.intDevice = "Touch"; //"Mouse" , "Touch"  , "Laser Pointer"
     this.repetitonPerTrial = 2;
     this.scrambleBlocks = false;
     this.experiment = new Experiment(
@@ -161,7 +161,6 @@ class ExperimentFrame {
   }
 
   experimentFinished() {
-    //window.close();
     this.downloadCSV(this.trialsData);
     console.log("finished! :) ");
     showFinishWindow();
