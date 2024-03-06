@@ -183,8 +183,7 @@ class Block {
   }
 
   hasNextTrial(trialIndex) {
-    let next = trialIndex++;
-    return next < this.getTrialsNumber() - 1;
+    return this.trials.find(() => this.trials[trialIndex]);
   }
 
   getTrialsNumber() {

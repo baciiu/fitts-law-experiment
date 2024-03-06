@@ -8,7 +8,7 @@ class ExperimentFrame {
     this.shape = "rectangle"; // rectangle or circle
     this.intDevice = "Mouse"; //"Mouse" , "Touch"  , "Laser Pointer"
     this.repetitonPerTrial = 2;
-    this.scrambleBlocks = true;
+    this.scrambleBlocks = false;
     this.experiment = new Experiment(
       this.experimentType,
       this.shape,
@@ -93,6 +93,7 @@ class ExperimentFrame {
     }
 
     if (currentBlock) {
+      this.trialIndex++;
       if (currentBlock.hasNextTrial(this.trialIndex)) {
         this.getNextTrial();
       } else if (this.experiment.hasNextBlock(this.blockNumber)) {
@@ -123,15 +124,17 @@ class ExperimentFrame {
   }
 
   getNextTrial() {
-    this.trialIndex++;
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
-    this.trialNumber = currentBlock
-      .getTrials()
-      .at(this.trialIndex)
-      .getTrialID();
-
-    this.showTrial();
+    if (currentBlock.getTrials().at(this.trialIndex)) {
+      this.trialNumber = currentBlock
+        .getTrials()
+        .at(this.trialIndex)
+        .getTrialID();
+      this.showTrial();
+    } else {
+      this.getNextBlock();
+    }
   }
 
   getNextBlock() {
