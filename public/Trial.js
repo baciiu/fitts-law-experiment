@@ -409,50 +409,47 @@ class Trial {
       maxcount = 100,
       count = 0;
 
-    do {
-      const startCoords = this.getRandomPoint(width1, height1);
-      x1 = startCoords.x;
-      y1 = startCoords.y;
+    const startCoords = this.getRandomPoint(width1, height1);
+    x1 = startCoords.x;
+    y1 = startCoords.y;
 
-      let angle = this.trialDirection;
+    let angle = this.trialDirection;
 
-      const targetCoords = generateCenterPointWithAmplitude(
-        x1,
-        y1,
-        amplitude,
-        angle,
-      );
-      x2 = targetCoords.x;
-      y2 = targetCoords.y;
+    const targetCoords = generateCenterPointWithAmplitude(
+      x1,
+      y1,
+      amplitude,
+      angle,
+    );
+    x2 = targetCoords.x;
+    y2 = targetCoords.y;
 
+    if (
+      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+      this.isShapeWithinBounds(x2, y2, width2, height2)
+    ) {
+      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+      return { start, target };
+    }
+    count++;
+
+    if (!start || !target) {
+      const dis = this.generateReciprocalPositions();
       if (
-        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-        this.isShapeWithinBounds(x2, y2, width2, height2)
+        !dis.start ||
+        !dis.target ||
+        !dis.start.x ||
+        !dis.start.y ||
+        !dis.target.x ||
+        !dis.target.y
       ) {
-        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-        return { start, target };
+        throw Error("[MY ERROR]:  Could not generate a valid position");
       }
-      count++;
-
-      if (maxcount < count) {
-        const dis = this.generateReciprocalPositions();
-        if (
-          !dis.start ||
-          !dis.target ||
-          !dis.start.x ||
-          !dis.start.y ||
-          !dis.target.x ||
-          !dis.target.y
-        ) {
-          throw Error("[MY ERROR]:  Could not generate a valid position");
-        }
-        start = dis.start;
-        target = dis.target;
-        return { start, target };
-      }
-    } while (!start || !target); // Repeat if a valid position was not found
-
+      start = dis.start;
+      target = dis.target;
+      return { start, target };
+    }
     return { start, target };
   }
 
