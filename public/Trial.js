@@ -97,7 +97,6 @@ class Trial {
     this.trialCompleted = false;
 
     const pos = this.generateDiscretePositions();
-    console.log(pos);
 
     this.drawStart(pos.start);
     this.drawTarget(pos.target);
@@ -111,7 +110,6 @@ class Trial {
     this.trialCompleted = false;
 
     const pos = this.generateReciprocalPositions();
-    console.log(pos);
 
     this.drawStart(pos.start);
     this.drawTarget(pos.target);
@@ -253,7 +251,8 @@ class Trial {
       event.clientX <= rect.right &&
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
-    console.log("isCursorInsideShape: " + isCursorInsideShape);
+    console.log(shape);
+    console.info("isCursorInside: " + isCursorInsideShape);
 
     if (this.intDevice === "Touch") {
       const extendedRect = {
@@ -272,7 +271,12 @@ class Trial {
       if (!isCursorInsideShape && isTouchInsideMargin) {
         this.isAmbiguityMarginHit = true;
       }
-      console.log("isTouchInsideMargin: " + isTouchInsideMargin);
+      console.log(
+        "isTouchInsideMargin: " +
+          isTouchInsideMargin +
+          " Ambiguity Hit: " +
+          this.isAmbiguityMarginHit,
+      );
       return isTouchInsideMargin;
     }
     return isCursorInsideShape;
@@ -312,7 +316,7 @@ class Trial {
     const clickStartX1 = this.startCoords.x;
     const clickStartY1 = this.startCoords.y;
 
-    if (this.clicksCoords.at(2).x === undefined) {
+    if (this.clicksCoords.at(2) === undefined) {
       return true;
     }
     const clickTargetX2 = this.clicksCoords.at(2).x;
@@ -371,8 +375,6 @@ class Trial {
   isAmplitude(x1, y1, x2, y2, amplitude) {
     const distance = getDistance(x1, y1, x2, y2);
     const tolerance = 1;
-    console.log("Distance: " + distance);
-    console.log("Amplitude: " + amplitude);
     return Math.abs(distance - amplitude) <= tolerance;
   }
 
@@ -418,8 +420,13 @@ class Trial {
       count++;
 
       if (maxcount < count) {
-        console.log("Max count reached");
-        return;
+        const dis = this.generateDiscretePositions();
+        if (!dis.start || !dis.target) {
+          return Error("Could not generate a valid position");
+        }
+        start = dis.start;
+        target = dis.target;
+        return { start, target };
       }
     } while (!start || !target); // Repeat if a valid position was not found
 
@@ -432,48 +439,32 @@ class Trial {
     let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
-    let start,
-      target,
-      x1,
-      y1,
-      x2,
-      y2,
-      count = 0,
-      maxcount = 100;
+    let start, target, x1, y1, x2, y2;
 
-    do {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
 
-      const angle = this.trialDirection;
+    const angle = this.trialDirection;
 
-      const radians = (angle * Math.PI) / 180; // Convert angle to radians
+    const radians = (angle * Math.PI) / 180; // Convert angle to radians
 
-      x1 = centerX + (amplitude / 2) * Math.cos(radians);
-      y1 = centerY + (amplitude / 2) * Math.sin(radians);
+    x1 = centerX + (amplitude / 2) * Math.cos(radians);
+    y1 = centerY + (amplitude / 2) * Math.sin(radians);
 
-      x2 = centerX - (amplitude / 2) * Math.cos(radians);
-      y2 = centerY - (amplitude / 2) * Math.sin(radians);
+    x2 = centerX - (amplitude / 2) * Math.cos(radians);
+    y2 = centerY - (amplitude / 2) * Math.sin(radians);
 
-      console.log("Coordinates: ", x1, y1, x2, y2);
-
-      if (
-        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-        this.isShapeWithinBounds(x2, y2, width2, height2)
-      ) {
-        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-        return { start, target };
-      }
-      count++;
-      if (maxcount < count) {
-        const dis = this.generateDiscretePositions();
-        start = dis.start;
-        target = dis.target;
-        return { start, target };
-      }
-    } while (!start || !target); // Repeat if a valid position was not found
-
+    if (
+      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+      this.isShapeWithinBounds(x2, y2, width2, height2)
+    ) {
+      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+      return { start, target };
+    }
+    if (!start || !target) {
+      return Error("Could not generate a valid position");
+    }
     return { start, target };
   }
 

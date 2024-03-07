@@ -2,7 +2,7 @@ class ExperimentFrame {
   constructor(userNumber, experimentType) {
     this.blockNumber = 1;
     this.trialNumber = -1;
-    this.totalBlocks = 2;
+    this.totalBlocks = 1;
     this.trialsPerBreak = 100;
     this.experimentType = experimentType;
     this.shape = "rectangle";
@@ -26,8 +26,14 @@ class ExperimentFrame {
     this.trialsData = [];
     this.userNumber = userNumber;
     this.trialIndex = 0;
-    console.log(this.experiment.getBlock(1));
-    console.log(this.experiment.getBlock(2));
+  }
+
+  setDevice() {
+    if (isMobile()) {
+      this.intDevice = "Touch";
+    } else {
+      this.intDevice = "Pointer";
+    }
   }
 
   setupContinueButton() {

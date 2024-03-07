@@ -1,5 +1,20 @@
 {
   "devDependencies": {
     "prettier": "3.1.0"
-  }
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "http-server": "^14.1.1"
+  },
+  "name": "fitts-law-experiment",
+  "description": "",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
