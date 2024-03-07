@@ -2,11 +2,11 @@ class ExperimentFrame {
   constructor(userNumber, experimentType) {
     this.blockNumber = 1;
     this.trialNumber = -1;
-    this.totalBlocks = 2;
+    this.totalBlocks = 1;
     this.trialsPerBreak = 100;
     this.experimentType = experimentType;
     this.shape = "rectangle";
-    this.intDevice = "Touch";
+    this.intDevice = this.setDevice();//"Mouse" , "Touch"
     this.repetitionPerTrial = 2;
     this.scrambleBlocks = false;
     this.experiment = new Experiment(
@@ -36,6 +36,13 @@ class ExperimentFrame {
   init() {
     this.showTrial();
   }
+    setDevice() {
+        if (isMobile()) {
+            return "Touch";
+        } else {
+            return "Mouse";
+        }
+    }
 
   setupContinueButton() {
     this.continueButton.addEventListener("click", () => {

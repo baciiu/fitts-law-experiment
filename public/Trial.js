@@ -455,7 +455,7 @@ class Trial {
       return { start, target };
     }
     if (!start || !target) {
-      return Error("Could not generate a valid position");
+      throw Error("[MY ERROR]: Could not generate a valid position");
     }
     return { start, target };
   }

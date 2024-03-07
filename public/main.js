@@ -44,7 +44,6 @@ function startExperiment() {
   experiment.init();
 }
 
-// Event listener for the start button
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", click);
 
