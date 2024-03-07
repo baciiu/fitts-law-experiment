@@ -87,7 +87,7 @@ class Trial {
     } else if (this.experimentType === "reciprocal") {
       this.drawReciprocalShapes();
     } else {
-      throw Error("experiment type undefined.");
+      throw Error("[MY ERROR]: Experiment type undefined.");
     }
   }
 
@@ -95,12 +95,13 @@ class Trial {
     this.trialCompleted = false;
 
     const pos = this.generateDiscretePositions();
+    this.checkIfCoordinatesFitTheScreen(pos);
 
     this.drawStart(pos.start);
     this.drawTarget(pos.target);
     this.drawBody();
 
-    testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    // testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -108,13 +109,30 @@ class Trial {
     this.trialCompleted = false;
 
     const pos = this.generateReciprocalPositions();
-
+    this.checkIfCoordinatesFitTheScreen(pos);
     this.drawStart(pos.start);
     this.drawTarget(pos.target);
     this.drawBody();
 
-    testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    // testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
+  }
+
+  checkIfCoordinatesFitTheScreen(pos) {
+    if (
+      !(
+        pos.start &&
+        pos.target &&
+        pos.start.x &&
+        pos.start.y &&
+        pos.target.x &&
+        pos.target.y
+      )
+    ) {
+      throw Error(
+        "[MY ERROR]: Could not generate a valid position for the screen size! ",
+      );
+    }
   }
 
   setupEventHandlers() {
@@ -418,7 +436,20 @@ class Trial {
       count++;
 
       if (maxcount < count) {
-        throw Error("[MY ERROR]: Max count reached");
+        const dis = this.generateReciprocalPositions();
+        if (
+          !dis.start ||
+          !dis.target ||
+          !dis.start.x ||
+          !dis.start.y ||
+          !dis.target.x ||
+          !dis.target.y
+        ) {
+          throw Error("[MY ERROR]:  Could not generate a valid position");
+        }
+        start = dis.start;
+        target = dis.target;
+        return { start, target };
       }
     } while (!start || !target); // Repeat if a valid position was not found
 

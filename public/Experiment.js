@@ -1,14 +1,6 @@
 class Experiment {
-  constructor(
-    experimentType,
-    shape,
-    intDevice,
-    numBlocks,
-    repPerTrial,
-    scramble,
-  ) {
+  constructor(experimentType, intDevice, numBlocks, repPerTrial, scramble) {
     this.experimentType = experimentType;
-    this.shape = shape;
     this.intDevice = intDevice;
     this.numBlocks = numBlocks;
     this.blocks = [];
@@ -32,13 +24,7 @@ class Experiment {
   generateBlocks() {
     for (let i = 1; i <= this.numBlocks; i++) {
       this.blocks.push(
-        new Block(
-          i,
-          this.experimentType,
-          this.shape,
-          this.intDevice,
-          this.repPerTrial,
-        ),
+        new Block(i, this.experimentType, this.intDevice, this.repPerTrial),
       );
     }
   }

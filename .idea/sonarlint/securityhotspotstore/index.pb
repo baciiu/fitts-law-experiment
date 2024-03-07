@@ -43,3 +43,7 @@ w
 G.idea/sonarlint/issuestore/a/e/aeba6bbf7db581f0a74ff41f00562b59ef1673bc,1/3/1319d564a9cc93ab7d2491b214c1f1f1eea819eb
 Å
 Q.idea/sonarlint/securityhotspotstore/a/e/aeba6bbf7db581f0a74ff41f00562b59ef1673bc,9/8/9837e4d4f557d50b85ce33886fbaa91fff944f87
+7
+key.pem,7/9/795c2fa3db91c47a8a4f84050bbd3fcfdfe72628
+8
+cert.pem,6/c/6c97fb9ae4b9c51b0c87a18716debddcb9acbaac
