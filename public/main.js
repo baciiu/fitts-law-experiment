@@ -10,24 +10,32 @@ function showFinishWindow() {
   document.body.style.pointerEvents = "none";
 }
 
+function click() {
+  if (enableFullScreen) {
+    openFullScreen();
+  } else {
+    startExperiment();
+  }
+}
+
+function openFullScreen() {
+  document
+    .getElementById("root")
+    .requestFullscreen()
+    .then(
+      () => {
+        startExperiment();
+      },
+      () => {
+        startExperiment();
+      },
+    );
+}
+
 function startExperiment() {
   const startWindow = document.getElementById("startWindow");
   startWindow.style.display = "none";
-
   document.body.style.pointerEvents = "auto";
-
-  /*
-              Request full-screen mode for the document body
-              const docBody = document.documentElement;
-              if (docBody.requestFullscreen) {
-              docBody.requestFullscreen();
-              } else if (docBody.mozRequestFullScreen) {
-              docBody.mozRequestFullScreen();
-              } else if (docBody.webkitRequestFullscreen) {
-              docBody.webkitRequestFullscreen();
-              } else if (docBody.msRequestFullscreen) {
-              docBody.msRequestFullscreen();
-              }*/
 
   /** START */
   //const experimentType = "discrete";
@@ -38,7 +46,9 @@ function startExperiment() {
 
 // Event listener for the start button
 const startButton = document.getElementById("startButton");
-startButton.addEventListener("click", startExperiment);
+startButton.addEventListener("click", click);
 
+const enableFullScreen = false;
 showStartWindow();
-startExperiment();
+
+// https://192.168.0.100:8080/start.html
