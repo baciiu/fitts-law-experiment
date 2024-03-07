@@ -267,7 +267,7 @@ class Trial {
       event.clientX <= rect.right &&
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
-    console.log("isCursorInsideShape: " + isCursorInsideShape);
+    //console.log("isCursorInsideShape: " + isCursorInsideShape);
 
     if (this.intDevice === "Touch") {
       const extendedRect = {
@@ -286,7 +286,7 @@ class Trial {
       if (!isCursorInsideShape && isTouchInsideMargin) {
         this.isAmbiguityMarginHit = true;
       }
-      console.log("isTouchInsideMargin: " + isTouchInsideMargin);
+      //console.log("isTouchInsideMargin: " + isTouchInsideMargin);
       return isTouchInsideMargin;
     }
     return isCursorInsideShape;

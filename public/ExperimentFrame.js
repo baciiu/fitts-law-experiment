@@ -60,6 +60,10 @@ class ExperimentFrame {
 
   trialCompleted(trialData) {
     console.log(trialData);
+
+    trialData.blockNumber = this.blockNumber;
+    trialData.userNumber = this.userNumber;
+
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
