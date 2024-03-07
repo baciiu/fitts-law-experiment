@@ -1,9 +1,8 @@
 class Block {
-  constructor(blockNumber, experimentType, shape, intDevice, repTrial) {
+  constructor(blockNumber, experimentType, intDevice, repTrial) {
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
     this.startSize = 10;
-    this.shape = shape;
     this.repetitionTrial = repTrial;
     this.targetDimens = getInput();
 
@@ -61,8 +60,7 @@ class Block {
             startWidth = this.targetDimens[dimenIdx].width;
             startHeight = this.targetDimens[dimenIdx].height;
           } else {
-            console.log("Experiment Undefined");
-            return;
+            throw Error("[MY ERROR]: Experiment Undefined.");
           }
 
           let temp_id = this.trialId;
@@ -114,8 +112,7 @@ class Block {
           startWidth = this.targetDimens[dimenIdx].width;
           startHeight = this.targetDimens[dimenIdx].height;
         } else {
-          console.log("Experiment Undefined");
-          return;
+          throw Error("[MY ERROR]: Experiment Undefined.");
         }
 
         let temp_id = this.trialId;
@@ -183,7 +180,11 @@ class Block {
   }
 
   hasNextTrial(trialIndex) {
-    return this.trials.find(() => this.trials[trialIndex]);
+    if (this.trials.find(() => this.trials[trialIndex])) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   getTrialsNumber() {

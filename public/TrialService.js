@@ -34,6 +34,12 @@ function getOnlyTimeFormat(date) {
   return `${seconds}.${milliseconds}`;
 }
 
+function isMobile() {
+  const regex =
+    /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  return regex.test(navigator.userAgent);
+}
+
 function getDirection(direction) {
   switch (direction) {
     case 0:
@@ -61,7 +67,6 @@ function testStartDistanceFromPreviousEnd(startX, startY) {
   }
 
   let screenWidth = window.innerWidth;
-  console.log("screen width: " + screenWidth);
 
   // Calculate the distance between the previous trial's end (target) and current trial's start
   let actualDistance = this.getDistance(
@@ -77,7 +82,7 @@ function testStartDistanceFromPreviousEnd(startX, startY) {
       "Test passed: The start is within screen width from the previous end.",
     );
   } else {
-    console.error(
+    console.(
       "Test failed: The start exceeds screen width from the previous end.",
     );
   }

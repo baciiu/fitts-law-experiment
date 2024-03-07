@@ -87,7 +87,7 @@ class Trial {
     } else if (this.experimentType === "reciprocal") {
       this.drawReciprocalShapes();
     } else {
-      throw Error("experiment type undefined.");
+      throw Error("[MY ERROR]: Experiment type undefined.");
     }
   }
 
@@ -95,13 +95,13 @@ class Trial {
     this.trialCompleted = false;
 
     const pos = this.generateDiscretePositions();
-    console.log(pos);
+    this.checkIfCoordinatesFitTheScreen(pos);
 
     this.drawStart(pos.start);
     this.drawTarget(pos.target);
     this.drawBody();
 
-    testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    // testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -109,14 +109,30 @@ class Trial {
     this.trialCompleted = false;
 
     const pos = this.generateReciprocalPositions();
-    console.log(pos);
-
+    this.checkIfCoordinatesFitTheScreen(pos);
     this.drawStart(pos.start);
     this.drawTarget(pos.target);
     this.drawBody();
 
-    testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
+    // testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
+  }
+
+  checkIfCoordinatesFitTheScreen(pos) {
+    if (
+      !(
+        pos.start &&
+        pos.target &&
+        pos.start.x &&
+        pos.start.y &&
+        pos.target.x &&
+        pos.target.y
+      )
+    ) {
+      throw Error(
+        "[MY ERROR]: Could not generate a valid position for the screen size! ",
+      );
+    }
   }
 
   setupEventHandlers() {
@@ -316,7 +332,7 @@ class Trial {
     const clickStartX1 = this.startCoords.x;
     const clickStartY1 = this.startCoords.y;
 
-    if (this.clicksCoords.at(2).x === undefined) {
+    if (this.clicksCoords.at(2) === undefined) {
       return true;
     }
     const clickTargetX2 = this.clicksCoords.at(2).x;
@@ -375,8 +391,6 @@ class Trial {
   isAmplitude(x1, y1, x2, y2, amplitude) {
     const distance = getDistance(x1, y1, x2, y2);
     const tolerance = 1;
-    console.log("Distance: " + distance);
-    console.log("Amplitude: " + amplitude);
     return Math.abs(distance - amplitude) <= tolerance;
   }
 
@@ -422,7 +436,20 @@ class Trial {
       count++;
 
       if (maxcount < count) {
-        throw Error("[MY ERROR]: Max count reached");
+        const dis = this.generateReciprocalPositions();
+        if (
+          !dis.start ||
+          !dis.target ||
+          !dis.start.x ||
+          !dis.start.y ||
+          !dis.target.x ||
+          !dis.target.y
+        ) {
+          throw Error("[MY ERROR]:  Could not generate a valid position");
+        }
+        start = dis.start;
+        target = dis.target;
+        return { start, target };
       }
     } while (!start || !target); // Repeat if a valid position was not found
 
@@ -435,48 +462,32 @@ class Trial {
     let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
-    let start,
-      target,
-      x1,
-      y1,
-      x2,
-      y2,
-      count = 0,
-      maxcount = 100;
+    let start, target, x1, y1, x2, y2;
 
-    do {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
 
-      const angle = this.trialDirection;
+    const angle = this.trialDirection;
 
-      const radians = (angle * Math.PI) / 180; // Convert angle to radians
+    const radians = (angle * Math.PI) / 180; // Convert angle to radians
 
-      x1 = centerX + (amplitude / 2) * Math.cos(radians);
-      y1 = centerY + (amplitude / 2) * Math.sin(radians);
+    x1 = centerX + (amplitude / 2) * Math.cos(radians);
+    y1 = centerY + (amplitude / 2) * Math.sin(radians);
 
-      x2 = centerX - (amplitude / 2) * Math.cos(radians);
-      y2 = centerY - (amplitude / 2) * Math.sin(radians);
+    x2 = centerX - (amplitude / 2) * Math.cos(radians);
+    y2 = centerY - (amplitude / 2) * Math.sin(radians);
 
-      console.log("Coordinates: ", x1, y1, x2, y2);
-
-      if (
-        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-        this.isShapeWithinBounds(x2, y2, width2, height2)
-      ) {
-        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-        return { start, target };
-      }
-      count++;
-      if (maxcount < count) {
-        const dis = this.generateDiscretePositions();
-        start = dis.start;
-        target = dis.target;
-        return { start, target };
-      }
-    } while (!start || !target); // Repeat if a valid position was not found
-
+    if (
+      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+      this.isShapeWithinBounds(x2, y2, width2, height2)
+    ) {
+      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+      return { start, target };
+    }
+    if (!start || !target) {
+      throw Error("[MY ERROR]: Could not generate a valid position");
+    }
     return { start, target };
   }
 

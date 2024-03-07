@@ -2,16 +2,14 @@ class ExperimentFrame {
   constructor(userNumber, experimentType) {
     this.blockNumber = 1;
     this.trialNumber = -1;
-    this.totalBlocks = 2;
+    this.totalBlocks = 1;
     this.trialsPerBreak = 100;
     this.experimentType = experimentType;
-    this.shape = "rectangle";
-    this.intDevice = "Touch";
+    this.intDevice = this.setDevice();
     this.repetitionPerTrial = 2;
     this.scrambleBlocks = false;
     this.experiment = new Experiment(
       this.experimentType,
-      this.shape,
       this.intDevice,
       this.totalBlocks,
       this.repetitionPerTrial,
@@ -35,6 +33,14 @@ class ExperimentFrame {
 
   init() {
     this.showTrial();
+  }
+
+  setDevice() {
+    if (isMobile()) {
+      return "Touch";
+    } else {
+      return "Mouse";
+    }
   }
 
   setupContinueButton() {
@@ -97,8 +103,9 @@ class ExperimentFrame {
     if (typeof this.trial.drawShapes === "function") {
       this.trial.drawShapes();
     } else {
-      console.log(this.trial);
-      console.error("drawShapes method not found on the current trial object.");
+      throw Error(
+        "[MY ERROR]: drawShapes method not found on the current trial object.",
+      );
     }
 
     this.showIndexes();
@@ -112,8 +119,7 @@ class ExperimentFrame {
   insertItemAfterGivenIndex(array, newItem, startIndex) {
     // Ensure the startIndex is within the array bounds and not the last element
     if (startIndex < 0 || startIndex >= array.length - 1) {
-      console.error("Invalid startIndex. Item not inserted.");
-      return;
+      throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
     }
 
     // Generate a random index in the range from startIndex + 1 to the array length inclusive
@@ -140,7 +146,6 @@ class ExperimentFrame {
 
   experimentFinished() {
     this.downloadCSV(this.trialsData);
-    console.log("finished! :) ");
     showFinishWindow();
   }
 
@@ -218,7 +223,7 @@ class ExperimentFrame {
 
         this.trial = firstTrial;
       } else {
-        console.error("No trials found in the first block.");
+        throw Error("[MY ERROR]: No trials found in the first block.");
       }
     }
   }
