@@ -6,15 +6,15 @@ class ExperimentFrame {
     this.trialsPerBreak = 100;
     this.experimentType = experimentType;
     this.shape = "rectangle";
-    this.intDevice = "Touch"; //"Mouse" , "Touch"  , "Laser Pointer"
-    this.repetitonPerTrial = 2;
+    this.intDevice = "Touch";
+    this.repetitionPerTrial = 2;
     this.scrambleBlocks = false;
     this.experiment = new Experiment(
       this.experimentType,
       this.shape,
       this.intDevice,
       this.totalBlocks,
-      this.repetitonPerTrial,
+      this.repetitionPerTrial,
       this.scrambleBlocks,
     );
     this.breakWindow = document.getElementById("breakWindow");
@@ -26,8 +26,15 @@ class ExperimentFrame {
     this.trialsData = [];
     this.userNumber = userNumber;
     this.trialIndex = 0;
-    console.log(this.experiment.getBlock(1));
-    console.log(this.experiment.getBlock(2));
+
+    document.addEventListener(
+      "trialCompleted",
+      this.handleTrialCompleted.bind(this),
+    );
+  }
+
+  init() {
+    this.showTrial();
   }
 
   setupContinueButton() {
@@ -37,11 +44,44 @@ class ExperimentFrame {
     });
   }
 
-  getFirstTrial() {
-    if (this.trialNumber === -1) {
-      let block = this.experiment.getBlock(this.blockNumber);
-      let first_trial = block.getTrials()[0];
-      this.trialNumber = first_trial.getTrialID();
+  // Handle the completed trial using event.detail
+  handleTrialCompleted(event) {
+    const trialData = event.detail;
+    this.trialCompleted(trialData);
+  }
+
+  // Other methods remain unchanged
+
+  trialCompleted(trialData) {
+    console.log(trialData);
+    this.endTrialPos = trialData.endTrialPos;
+    this.trialsData.push(trialData);
+
+    const currentBlock = this.experiment.getBlock(this.blockNumber);
+    if (trialData.isFailedTrial) {
+      const failedTrial = {
+        ...trialData,
+        trialId: currentBlock.getTrialsNumber() + 1,
+      };
+      this.insertItemAfterGivenIndex(
+        currentBlock.getTrials(),
+        failedTrial,
+        this.trialIndex + 1,
+      );
+    }
+
+    this.prepareForNextTrialOrFinish(currentBlock);
+  }
+
+  prepareForNextTrialOrFinish(currentBlock) {
+    this.trialIndex++;
+    if (currentBlock.getTrials()[this.trialIndex]) {
+      this.showTrial();
+    } else if (++this.blockNumber <= this.totalBlocks) {
+      this.trialIndex = 0;
+      this.showTrial();
+    } else {
+      this.experimentFinished();
     }
   }
 
@@ -50,59 +90,21 @@ class ExperimentFrame {
       this.printedFirstBlock = true;
       this.getFirstTrial();
     }
+
     let block = this.experiment.getBlock(this.blockNumber);
-
-    block
-      .getTrials()
-      .at(this.trialIndex)
-      .setPreviousTrialPosition(this.endTrialPos);
-
     this.trial = block.getTrials()[this.trialIndex];
 
-    this.showIndexes();
-    this.trial.drawShapes();
+    if (typeof this.trial.drawShapes === "function") {
+      this.trial.drawShapes();
+    } else {
+      console.log(this.trial);
+      console.error("drawShapes method not found on the current trial object.");
+    }
 
-    // Time for a break
+    this.showIndexes();
+
     if (this.trialNumber % this.trialsPerBreak === 0) {
       this.displayBreakWindow();
-    }
-  }
-
-  trialCompleted() {
-    this.endTrialPos = this.trial.getEndTrialPosition();
-
-    let data = this.trial.getExportDataTrial();
-    data.userNumber = this.userNumber;
-    data.blockNumber = this.blockNumber;
-    data.experimentType = this.experimentType;
-
-    this.trialsData.push(data);
-
-    const currentBlock = this.experiment.getBlock(this.blockNumber);
-
-    if (data.isFailed === true) {
-      const failedTrial = { ...this.trial }; // create a copy
-
-      failedTrial.trialId = currentBlock.getTrialsNumber() + 1;
-
-      this.insertItemAfterGivenIndex(
-        currentBlock.getTrials(),
-        failedTrial,
-        this.trialIndex + 1,
-      );
-    }
-
-    if (currentBlock) {
-      this.trialIndex++;
-      if (currentBlock.hasNextTrial(this.trialIndex)) {
-        this.getNextTrial();
-      } else if (this.experiment.hasNextBlock(this.blockNumber)) {
-        this.getNextBlock();
-      } else {
-        this.experimentFinished();
-      }
-    } else {
-      console.error("Invalid block number:", this.blockNumber);
     }
   }
 
@@ -121,30 +123,6 @@ class ExperimentFrame {
 
     // Insert the new item at the random index
     array.splice(randomIndex, 0, newItem);
-  }
-
-  getNextTrial() {
-    const currentBlock = this.experiment.getBlock(this.blockNumber);
-
-    if (currentBlock.getTrials().at(this.trialIndex)) {
-      this.trialNumber = currentBlock
-        .getTrials()
-        .at(this.trialIndex)
-        .getTrialID();
-      this.showTrial();
-    } else {
-      this.getNextBlock();
-    }
-  }
-
-  getNextBlock() {
-    this.blockNumber++;
-    // get trial number from first position
-    const currentBlock = this.experiment.getBlock(this.blockNumber);
-
-    this.trialNumber = currentBlock.getTrials()[0].getTrialID();
-    this.trialIndex = 0;
-    this.showTrial();
   }
 
   showIndexes() {
@@ -227,5 +205,21 @@ class ExperimentFrame {
     const a = index % this.trialsPerBreak;
     const b = this.trialsPerBreak;
     return b - a;
+  }
+
+  getFirstTrial() {
+    if (this.trialNumber === -1) {
+      let block = this.experiment.getBlock(this.blockNumber);
+
+      if (block && block.getTrials().length > 0) {
+        let firstTrial = block.getTrials()[0];
+
+        this.trialNumber = firstTrial.getTrialID();
+
+        this.trial = firstTrial;
+      } else {
+        console.error("No trials found in the first block.");
+      }
+    }
   }
 }

@@ -16,7 +16,6 @@ class Trial {
     targetHeight,
     amplitude,
     maxScreenPercentage,
-    isDone,
   ) {
     this.trialId = trialId;
     this.trialRep = trialRep;
@@ -30,7 +29,6 @@ class Trial {
     this.amplitude = amplitude;
     this.maxScreenPercentage = maxScreenPercentage;
     this.previousTrialEnd = {};
-    this.isDone = isDone;
     this.isAmbiguityMarginHit = false;
 
     this.successSound = new Audio("./sounds/success.wav");
@@ -279,7 +277,16 @@ class Trial {
   }
 
   endTrial() {
-    experimentFrame.data = this.getExportDataTrial();
+    const trialData = this.getExportDataTrial();
+    this.cleanupTrial();
+
+    // Dispatch the custom event with the trial data
+    const event = new CustomEvent("trialCompleted", { detail: trialData });
+    document.dispatchEvent(event);
+  }
+
+  cleanupTrial() {
+    // Your cleanup code here...
     this.firstClickDone = false;
     this.targetClickData = null;
     this.firstClickData = null;
@@ -291,9 +298,6 @@ class Trial {
     this.start.removeEventListener("mousedown", this.boundHandleStartPress);
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-    this.trialCompleted = true;
-
-    this.isDone = experimentFrame.trialCompleted();
   }
 
   getTrialID() {
@@ -418,8 +422,7 @@ class Trial {
       count++;
 
       if (maxcount < count) {
-        console.log("Max count reached");
-        return;
+        throw Error("[MY ERROR]: Max count reached");
       }
     } while (!start || !target); // Repeat if a valid position was not found
 
