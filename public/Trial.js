@@ -3,6 +3,13 @@ class Trial {
   OTHER_MARGINS_PX = mmToPixels(3);
   FAILED_TRIAL_THRESHOLD = 4;
   AMBIGUITY_MARGIN_PX = mmToPixels(10);
+  PressAndReleaseMustBeInsideTarget = false;
+  EndTrialByTargetPress = true;
+
+  // T & F => press inside, release inside, end trial
+  // T & T => no sense cannot be both true at the same time
+  // F & T => press inside, end trial
+  // F & F => no sense cannot be both false at the same time
 
   constructor(
     trialId,
@@ -180,17 +187,30 @@ class Trial {
     if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
-      this.HIT = this.isCursorInsideShape(event, this.target) ? 1 : 0;
+      const insideTarget = this.isCursorInsideShape(event, this.target);
+      this.HIT = insideTarget ? 1 : 0;
       this.bodyIsPressed = true;
       console.log(this.HIT);
 
-      if (this.HIT === 1) {
-        this.target.style.display = "none";
-        this.successSound.play();
+      if (insideTarget) {
+        if (this.EndTrialByTargetPress) {
+          this.successSound.play();
+          this.target.style.display = "none";
+          this.endTrial();
+        } else if (!this.PressAndReleaseMustBeInsideTarget) {
+          // Scenario (F & F): Press does not have to be inside target; ignore this scenario or treat as invalid
+          console.log("Scenario (F & F) is not handled or invalid.");
+        }
       } else {
-        this.isFailedTrial = this.isFailed();
-        this.target.style.display = "none";
         this.errorSound.play();
+        if (
+          this.PressAndReleaseMustBeInsideTarget ||
+          this.EndTrialByTargetPress
+        ) {
+          this.target.style.display = "none";
+          this.isFailedTrial = true;
+          this.endTrial();
+        }
       }
       this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
       this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
@@ -200,10 +220,31 @@ class Trial {
   handleBodyRelease(event) {
     const isTouchEvent =
       event.changedTouches && event.changedTouches.length > 0;
+    const insideTarget = this.isCursorInsideShape(event, this.target);
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       console.log("handleBodyRelease OK");
       this.logMouseEvent(event, 3);
-      this.endTrial();
+
+      if (
+        this.PressAndReleaseMustBeInsideTarget &&
+        !this.EndTrialByTargetPress
+      ) {
+        // Scenario (T & F): Both press and release must be inside target
+        if (insideTarget && this.HIT === 1) {
+          this.successSound.play();
+          this.target.style.display = "none";
+          this.endTrial();
+        } else {
+          this.errorSound.play();
+          this.isFailedTrial = true;
+          this.endTrial();
+        }
+      } else {
+        // If (F & T) was handled in press, this block might not be needed
+        console.log(
+          "Release action under (F & T) or (F & F) is not applicable.",
+        );
+      }
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
     }
@@ -269,14 +310,6 @@ class Trial {
 
   getTrialID() {
     return this.trialId;
-  }
-
-  setPreviousTrialPosition(trialEnd) {
-    this.previousTrialEnd = trialEnd;
-  }
-
-  getEndTrialPosition() {
-    return this.targetCoords;
   }
 
   isFailed() {
@@ -472,6 +505,9 @@ class Trial {
       AmbiguityMarginHIT: this.isAmbiguityMarginHit ? 1 : 0,
       isFailedTrial: this.isFailedTrial,
 
+      PressAndReleaseMustBeInsideTarget: this.PressAndReleaseMustBeInsideTarget,
+      EndTrialByTargetPress: this.EndTrialByTargetPress,
+
       T0: getTimeFormat(this.clicksTime.at(0)),
       T1: getTimeFormat(this.clicksTime.at(1)),
       T2: getTimeFormat(this.clicksTime.at(2)),
@@ -484,53 +520,53 @@ class Trial {
       "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
       "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
 
-      "Click T0 X": this.clicksCoords.at(0).x,
-      "Click T0 Y": this.clicksCoords.at(0).y,
+      "Click T0 X": this.clicksCoords.at(0)?.x,
+      "Click T0 Y": this.clicksCoords.at(0)?.y,
 
-      "Click T1 X": this.clicksCoords.at(1).x,
-      "Click T1 Y": this.clicksCoords.at(1).y,
+      "Click T1 X": this.clicksCoords.at(1)?.x,
+      "Click T1 Y": this.clicksCoords.at(1)?.y,
 
-      "Click T2 X": this.clicksCoords.at(2).x,
-      "Click T2 Y": this.clicksCoords.at(2).y,
+      "Click T2 X": this.clicksCoords.at(2)?.x,
+      "Click T2 Y": this.clicksCoords.at(2)?.y,
 
-      "Click T3 X": this.clicksCoords.at(3).x,
-      "Click T3 Y": this.clicksCoords.at(3).y,
+      "Click T3 X": this.clicksCoords.at(3)?.x,
+      "Click T3 Y": this.clicksCoords.at(3)?.y,
 
       "Distance T1 to T0 ": getDistance(
-        this.clicksCoords.at(0).x,
-        this.clicksCoords.at(0).y,
-        this.clicksCoords.at(1).x,
-        this.clicksCoords.at(1).y,
+        this.clicksCoords.at(0)?.x,
+        this.clicksCoords.at(0)?.y,
+        this.clicksCoords.at(1)?.x,
+        this.clicksCoords.at(1)?.y,
       ),
       "Distance T2 toT0 ": getDistance(
-        this.clicksCoords.at(0).x,
-        this.clicksCoords.at(0).y,
-        this.clicksCoords.at(2).x,
-        this.clicksCoords.at(2).y,
+        this.clicksCoords.at(0)?.x,
+        this.clicksCoords.at(0)?.y,
+        this.clicksCoords.at(2)?.x,
+        this.clicksCoords.at(2)?.y,
       ),
       "Distance T3 to T0 ": getDistance(
-        this.clicksCoords.at(0).x,
-        this.clicksCoords.at(0).y,
-        this.clicksCoords.at(3).x,
-        this.clicksCoords.at(3).y,
+        this.clicksCoords.at(0)?.x,
+        this.clicksCoords.at(0)?.y,
+        this.clicksCoords.at(3)?.x,
+        this.clicksCoords.at(3)?.y,
       ),
       "Distance T2 to T1 ": getDistance(
-        this.clicksCoords.at(1).x,
-        this.clicksCoords.at(1).y,
-        this.clicksCoords.at(2).x,
-        this.clicksCoords.at(2).y,
+        this.clicksCoords.at(1)?.x,
+        this.clicksCoords.at(1)?.y,
+        this.clicksCoords.at(2)?.x,
+        this.clicksCoords.at(2)?.y,
       ),
       "Distance T3 to T1 ": getDistance(
-        this.clicksCoords.at(1).x,
-        this.clicksCoords.at(1).y,
-        this.clicksCoords.at(3).x,
-        this.clicksCoords.at(3).y,
+        this.clicksCoords.at(1)?.x,
+        this.clicksCoords.at(1)?.y,
+        this.clicksCoords.at(3)?.x,
+        this.clicksCoords.at(3)?.y,
       ),
       "Distance T3 to T2 ": getDistance(
-        this.clicksCoords.at(2).x,
-        this.clicksCoords.at(2).y,
-        this.clicksCoords.at(3).x,
-        this.clicksCoords.at(3).y,
+        this.clicksCoords.at(2)?.x,
+        this.clicksCoords.at(2)?.y,
+        this.clicksCoords.at(3)?.x,
+        this.clicksCoords.at(3)?.y,
       ),
     };
   }
