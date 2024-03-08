@@ -136,8 +136,6 @@ class Trial {
   setupEventHandlers() {
     this.boundHandleStartPress = this.handleStartPress.bind(this);
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
-    this.boundHandleTargetPress = this.handleTargetPress.bind(this);
-    this.boundHandleTargetRelease = this.handleTargetRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
 
