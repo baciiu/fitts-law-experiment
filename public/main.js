@@ -38,8 +38,8 @@ function startExperiment() {
   document.body.style.pointerEvents = "auto";
 
   /** START */
-  const experimentType = "discrete";
-  //const experimentType = "reciprocal";
+  //const experimentType = "discrete";
+  const experimentType = "reciprocal";
   const experiment = new ExperimentFrame(4, experimentType);
   experiment.init();
 }
