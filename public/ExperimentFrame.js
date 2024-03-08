@@ -37,12 +37,12 @@ class ExperimentFrame {
 
   setDevice() {
     /*if (isMobile()) {
-          // does not work; set manually
-          return "Touch";
-        } else {
-          return "Mouse";
-        }*/
-    return "Touch";
+                  // does not work; set manually
+                  return "Touch";
+                } else {
+                  return "Mouse";
+                }*/
+    return "Mouse"; // "Touch";
   }
 
   setupContinueButton() {
@@ -94,7 +94,7 @@ class ExperimentFrame {
       this.insertItemAfterGivenIndex(
         currentBlock.getTrials(),
         failedTrial,
-        this.trialIndex + 1,
+        this.trialIndex,
       );
     }
     this.prepareForNextTrialOrFinish(currentBlock);

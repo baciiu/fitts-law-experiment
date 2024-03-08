@@ -6,8 +6,8 @@ class Block {
     this.repetitionTrial = repTrial;
     this.targetDimens = getInput();
 
-    this.radianStep = 180; // => [0,180] /  Left and Right
-    this.amplitude = [100];
+    this.radianStep = 90; // => [0,90,180,270]; 180 => [0,180] /  Left and Right
+    this.amplitude = [100, 54];
     this.trialDirection = [];
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;

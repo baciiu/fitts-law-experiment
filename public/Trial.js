@@ -219,7 +219,7 @@ class Trial {
           this.EndTrialByTargetPress
         ) {
           this.target.style.display = "none";
-          this.isFailedTrial = true;
+          this.isFailedTrial = this.isFailed();
           this.endTrial();
         }
       }
@@ -249,7 +249,7 @@ class Trial {
           this.endTrial();
         } else {
           this.errorSound.play();
-          this.isFailedTrial = true;
+          this.isFailedTrial = this.isFailed();
           this.endTrial();
         }
       } else {

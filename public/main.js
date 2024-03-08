@@ -40,7 +40,7 @@ function startExperiment() {
   /** START */
   //const experimentType = "discrete";
   const experimentType = "reciprocal";
-  const experiment = new ExperimentFrame(4, experimentType);
+  const experiment = new ExperimentFrame(5, experimentType);
   experiment.init();
 }
 
