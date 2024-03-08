@@ -145,17 +145,20 @@ class Trial {
 
   handleStartPress(event) {
     console.log("handleStartPress");
-    if (event.button === 0 && !this.firstClickDone) {
+    const isTouchEvent = event.touches && event.touches.length > 0;
+    if ((event.button === 0 || isTouchEvent) && !this.firstClickDone) {
       this.successSound.play();
       this.trialStarted = true;
       this.firstClickDone = true;
       this.logMouseEvent(event, 0);
       this.start.removeEventListener("mousedown", this.boundHandleStartPress);
+      this.start.removeEventListener("touchstart", this.boundHandleStartPress);
     }
   }
 
   handleStartRelease(event) {
     console.log("handleStartRelease");
+    const isTouchEvent = event.touches && event.touches.length > 0;
     if (!this.trialStarted) {
       this.errorSound.play();
     } else if (this.trialStarted) {
@@ -163,13 +166,17 @@ class Trial {
       this.start.style.display = "none";
       this.logMouseEvent(event, 1);
       this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
+      this.start.removeEventListener("touchend", this.boundHandleStartRelease); // Remove touchend listener if added
       this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.addEventListener("touchstart", this.boundHandleBodyPress); // Add touchstart listener for the body
       this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
+      this.body.addEventListener("touchend", this.boundHandleBodyRelease); // Add touchend listener for the body
     }
   }
 
   handleBodyPress(event) {
     console.log("handleBodyPress");
+    const isTouchEvent = event.touches && event.touches.length > 0;
     if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
@@ -178,24 +185,27 @@ class Trial {
       console.log(this.HIT);
 
       if (this.HIT === 1) {
+        this.target.style.display = "none";
         this.successSound.play();
       } else {
         this.isFailedTrial = this.isFailed();
+        this.target.style.display = "none";
         this.errorSound.play();
       }
-
-      this.target.style.display = "none";
       this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
     }
-    this.errorSound.play();
   }
 
   handleBodyRelease(event) {
+    const isTouchEvent =
+      event.changedTouches && event.changedTouches.length > 0;
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       console.log("handleBodyRelease OK");
       this.logMouseEvent(event, 3);
-      this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.endTrial();
+      this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
+      this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
     }
   }
 
@@ -341,33 +351,41 @@ class Trial {
     let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
-    let start, target, x1, y1, x2, y2;
-
-    const startCoords = this.getRandomPoint(width1, height1);
-    x1 = startCoords.x;
-    y1 = startCoords.y;
-
-    let angle = this.trialDirection;
-
-    const targetCoords = generateCenterPointWithAmplitude(
+    let start,
+      target,
       x1,
       y1,
-      amplitude,
-      angle,
-    );
-    x2 = targetCoords.x;
-    y2 = targetCoords.y;
+      x2,
+      y2,
+      count = 0,
+      maxcount = 100;
 
-    if (
-      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-      this.isShapeWithinBounds(x2, y2, width2, height2)
-    ) {
-      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-      return { start, target };
-    }
+    do {
+      const startCoords = this.getRandomPoint(width1, height1);
+      x1 = startCoords.x;
+      y1 = startCoords.y;
 
-    if (!start || !target) {
+      let angle = this.trialDirection;
+
+      const targetCoords = generateCenterPointWithAmplitude(
+        x1,
+        y1,
+        amplitude,
+        angle,
+      );
+      x2 = targetCoords.x;
+      y2 = targetCoords.y;
+
+      if (
+        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+        this.isShapeWithinBounds(x2, y2, width2, height2)
+      ) {
+        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        return { start, target };
+      }
+    } while (!start || !target);
+    if (count > maxcount) {
       const dis = this.generateReciprocalPositions();
       if (
         !dis.start ||
