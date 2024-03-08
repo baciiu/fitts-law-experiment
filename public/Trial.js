@@ -39,11 +39,9 @@ class Trial {
     this.body = document.getElementById("body");
 
     this.firstClickDone = false;
-    this.firstClickData = false;
-    this.targetClickData = null;
-    this.bodyClickData = null;
     this.trialCompleted = false;
     this.isFailedTrial = false;
+    this.bodyIsPressed = false;
 
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
@@ -142,119 +140,63 @@ class Trial {
     this.boundHandleTargetRelease = this.handleTargetRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
-    // Use bind to ensure 'this' inside the handlers refers to the Block instance
+
     this.start.addEventListener("mousedown", this.boundHandleStartPress);
     this.start.addEventListener("mouseup", this.boundHandleStartRelease);
   }
 
   handleStartPress(event) {
+    console.log("handleStartPress");
     if (event.button === 0 && !this.firstClickDone) {
+      this.successSound.play();
       this.trialStarted = true;
-      this.firstClickData = {
-        name: "start",
-        x: event.clientX,
-        y: event.clientY,
-        time: new Date(),
-        startHit: this.isCursorInsideShape(event, this.start),
-      };
       this.firstClickDone = true;
-      if (this.firstClickData.startHit) {
-        this.successSound.play();
-
-        this.logMouseEvent(event);
-      }
+      this.logMouseEvent(event, 0);
+      this.start.removeEventListener("mousedown", this.boundHandleStartPress);
     }
   }
 
   handleStartRelease(event) {
+    console.log("handleStartRelease");
     if (!this.trialStarted) {
       this.errorSound.play();
-    }
-    this.target.style.backgroundColor = "green";
-    this.logMouseEvent(event);
-
-    this.start.style.display = "none";
-    this.target.addEventListener("mousedown", this.boundHandleTargetPress);
-    this.target.addEventListener("mouseup", this.boundHandleTargetRelease);
-    this.body.addEventListener("mousedown", this.boundHandleBodyPress);
-    this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
-  }
-
-  handleTargetRelease(event) {
-    if (!this.trialStarted) {
-      this.errorSound.play();
-    }
-
-    this.logMouseEvent(event);
-
-    this.endTrial();
-  }
-
-  handleTargetPress(event) {
-    if (
-      event.button === 0 &&
-      this.firstClickDone &&
-      this.bodyClickData == null
-    ) {
-      this.targetClickData = {
-        name: "target",
-        x: event.clientX,
-        y: event.clientY,
-        time: new Date(),
-        targetHit: this.isCursorInsideShape(event, this.target),
-      };
-      this.logMouseEvent(event);
-
-      if (this.targetClickData.targetHit) {
-        this.HIT = this.targetClickData.targetHit;
-        this.successSound.play();
-      } else {
-        this.HIT = 0;
-        this.errorSound.play();
-      }
+    } else if (this.trialStarted) {
+      this.target.style.backgroundColor = "green";
+      this.start.style.display = "none";
+      this.logMouseEvent(event, 1);
+      this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
+      this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
     }
   }
 
   handleBodyPress(event) {
-    if (
-      event.button === 0 &&
-      this.firstClickDone &&
-      this.firstClickData != null &&
-      this.targetClickData == null
-    ) {
-      this.bodyClickData = {
-        name: "body",
-        x: event.clientX,
-        y: event.clientY,
-        time: new Date(),
-        bodyHit: this.isCursorInsideShape(event, this.body),
-      };
+    console.log("handleBodyPress");
+    if (this.trialStarted && this.firstClickDone) {
+      this.logMouseEvent(event, 2);
 
-      this.logMouseEvent(event);
+      this.HIT = this.isCursorInsideShape(event, this.target) ? 1 : 0;
+      this.bodyIsPressed = true;
+      console.log(this.HIT);
 
-      if (this.bodyClickData.bodyHit) {
-        this.HIT = 0;
+      if (this.HIT === 1) {
+        this.successSound.play();
+      } else {
+        this.isFailedTrial = this.isFailed();
         this.errorSound.play();
       }
-      this.target.style.display = "none";
-    } else if (
-      event.button === 0 &&
-      this.firstClickDone &&
-      this.firstClickData != null &&
-      this.targetClickData
-    ) {
-      this.isAmbiguityMarginHit = this.isCursorInsideShape(event, this.target);
-    }
-    this.isFailedTrial = this.isFailed();
 
-    this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
-    this.target.removeEventListener("mousedown", this.boundHandleTargetRelease);
+      this.target.style.display = "none";
+      this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+    }
+    this.errorSound.play();
   }
 
   handleBodyRelease(event) {
-    if (!this.targetClickData && this.bodyClickData) {
-      this.logMouseEvent(event);
-
+    if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
+      console.log("handleBodyRelease OK");
+      this.logMouseEvent(event, 3);
+      this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.endTrial();
     }
   }
@@ -294,20 +236,21 @@ class Trial {
 
   endTrial() {
     const trialData = this.getExportDataTrial();
-    this.cleanupTrial();
+    const trialCopy = JSON.parse(JSON.stringify(this));
 
+    this.cleanupTrial();
     // Dispatch the custom event with the trial data
-    const event = new CustomEvent("trialCompleted", { detail: trialData });
+    const event = new CustomEvent("trialCompleted", {
+      detail: { trialData, trialCopy },
+    });
     document.dispatchEvent(event);
   }
 
   cleanupTrial() {
     // Your cleanup code here...
     this.firstClickDone = false;
-    this.targetClickData = null;
-    this.firstClickData = null;
-    this.bodyClickData = null;
     this.trialStarted = false;
+    this.bodyIsPressed = false;
 
     this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
     this.target.removeEventListener("mouseup", this.boundHandleTargetRelease);
@@ -400,14 +343,7 @@ class Trial {
     let height1 = mmToPixels(this.startHeight);
     let width2 = mmToPixels(this.targetWidth);
     let height2 = mmToPixels(this.targetHeight);
-    let start,
-      target,
-      x1,
-      y1,
-      x2,
-      y2,
-      maxcount = 100,
-      count = 0;
+    let start, target, x1, y1, x2, y2;
 
     const startCoords = this.getRandomPoint(width1, height1);
     x1 = startCoords.x;
@@ -432,7 +368,6 @@ class Trial {
       target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
       return { start, target };
     }
-    count++;
 
     if (!start || !target) {
       const dis = this.generateReciprocalPositions();
@@ -488,18 +423,15 @@ class Trial {
     return { start, target };
   }
 
-  logMouseEvent(event) {
-    this.clicksTime.push(new Date());
-    this.clicksCoords.push({
-      x: event.clientX,
-      y: event.clientY,
-    });
+  logMouseEvent(event, index) {
+    this.clicksTime[index] = new Date();
+    this.clicksCoords[index] = { x: event.clientX, y: event.clientY };
   }
 
   getExportDataTrial() {
     return {
-      userNumber: null,
-      blockNumber: null,
+      userNumber: "",
+      blockNumber: "",
       trialNumber: this.trialId,
       trialRep: this.trialRep,
       experimentType: this.experimentType,
@@ -521,10 +453,10 @@ class Trial {
       targetHeightPx: mmToPixels(this.targetHeight),
 
       HIT: this.HIT ? 1 : 0,
-      AmbiguityMarginHIT: this.isAmbiguityMarginHit,
+      AmbiguityMarginHIT: this.isAmbiguityMarginHit ? 1 : 0,
       isFailedTrial: this.isFailedTrial,
 
-      T0: getTimeFormat(this.clicksTime.at(0)), //this.clicksTime.at(0),
+      T0: getTimeFormat(this.clicksTime.at(0)),
       T1: getTimeFormat(this.clicksTime.at(1)),
       T2: getTimeFormat(this.clicksTime.at(2)),
       T3: getTimeFormat(this.clicksTime.at(3)),
