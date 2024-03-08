@@ -36,12 +36,13 @@ class ExperimentFrame {
   }
 
   setDevice() {
-    if (isMobile()) {
-      // does not work; set manually
-      return "Touch";
-    } else {
-      return "Mouse";
-    }
+    /*if (isMobile()) {
+          // does not work; set manually
+          return "Touch";
+        } else {
+          return "Mouse";
+        }*/
+    return "Touch";
   }
 
   setupContinueButton() {

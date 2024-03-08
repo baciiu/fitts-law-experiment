@@ -2,9 +2,9 @@ class Trial {
   TOP_MARGIN_PX = mmToPixels(5);
   OTHER_MARGINS_PX = mmToPixels(3);
   FAILED_TRIAL_THRESHOLD = 4;
-  AMBIGUITY_MARGIN_PX = mmToPixels(10);
-  PressAndReleaseMustBeInsideTarget = false;
-  EndTrialByTargetPress = true;
+  AMBIGUITY_MARGIN_PX = mmToPixels(20);
+  PressAndReleaseMustBeInsideTarget = true;
+  EndTrialByTargetPress = false;
 
   // T & F => press inside, release inside, end trial
   // T & T => no sense cannot be both true at the same time
@@ -153,11 +153,14 @@ class Trial {
   handleStartPress(event) {
     console.log("handleStartPress");
     const isTouchEvent = event.touches && event.touches.length > 0;
-    if ((event.button === 0 || isTouchEvent) && !this.firstClickDone) {
-      this.successSound.play();
-      this.trialStarted = true;
-      this.firstClickDone = true;
+
+    if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
+      this.successSound.play();
+      this.firstClickDone = true;
+      this.trialStarted = true;
+    } else {
+      this.errorSound.play();
       this.start.removeEventListener("mousedown", this.boundHandleStartPress);
       this.start.removeEventListener("touchstart", this.boundHandleStartPress);
     }
@@ -166,18 +169,26 @@ class Trial {
   handleStartRelease(event) {
     console.log("handleStartRelease");
     const isTouchEvent = event.touches && event.touches.length > 0;
+    const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
       this.errorSound.play();
     } else if (this.trialStarted) {
-      this.target.style.backgroundColor = "green";
-      this.start.style.display = "none";
-      this.logMouseEvent(event, 1);
-      this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
-      this.start.removeEventListener("touchend", this.boundHandleStartRelease); // Remove touchend listener if added
-      this.body.addEventListener("mousedown", this.boundHandleBodyPress);
-      this.body.addEventListener("touchstart", this.boundHandleBodyPress); // Add touchstart listener for the body
-      this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
-      this.body.addEventListener("touchend", this.boundHandleBodyRelease); // Add touchend listener for the body
+      if (isInsideStart) {
+        this.logMouseEvent(event, 1);
+        this.target.style.backgroundColor = "green";
+        this.start.style.display = "none";
+        this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
+        this.start.removeEventListener(
+          "touchend",
+          this.boundHandleStartRelease,
+        ); // Remove touchend listener if added
+        this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+        this.body.addEventListener("touchstart", this.boundHandleBodyPress); // Add touchstart listener for the body
+        this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
+        this.body.addEventListener("touchend", this.boundHandleBodyRelease); // Add touchend listener for the body
+      } else {
+        this.errorSound.play();
+      }
     }
   }
 
@@ -218,9 +229,11 @@ class Trial {
   }
 
   handleBodyRelease(event) {
+    console.log("handleBodyRelease");
     const isTouchEvent =
       event.changedTouches && event.changedTouches.length > 0;
     const insideTarget = this.isCursorInsideShape(event, this.target);
+    const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       console.log("handleBodyRelease OK");
       this.logMouseEvent(event, 3);
