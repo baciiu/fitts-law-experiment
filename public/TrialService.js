@@ -82,7 +82,7 @@ function testStartDistanceFromPreviousEnd(startX, startY) {
       "Test passed: The start is within screen width from the previous end.",
     );
   } else {
-    console.(
+    console.log(
       "Test failed: The start exceeds screen width from the previous end.",
     );
   }

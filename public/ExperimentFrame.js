@@ -37,6 +37,7 @@ class ExperimentFrame {
 
   setDevice() {
     if (isMobile()) {
+      // does not work; set manually
       return "Touch";
     } else {
       return "Mouse";
@@ -50,32 +51,51 @@ class ExperimentFrame {
     });
   }
 
-  // Handle the completed trial using event.detail
   handleTrialCompleted(event) {
-    const trialData = event.detail;
-    this.trialCompleted(trialData);
+    const detail = event.detail;
+    this.trialCompleted(detail);
   }
 
   // Other methods remain unchanged
 
-  trialCompleted(trialData) {
-    console.log(trialData);
+  trialCompleted(detail) {
+    let trialData = detail.trialData;
+    let trialCopy = detail.trialCopy;
+    const currentBlock = this.experiment.getBlock(this.blockNumber);
+
+    if (trialData === undefined || trialData === null) {
+      throw Error("[MY ERROR]: Could not parse trial data");
+    }
+    trialData.blockNumber = this.blockNumber;
+    trialData.userNumber = this.userNumber;
+
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
-    const currentBlock = this.experiment.getBlock(this.blockNumber);
     if (trialData.isFailedTrial) {
-      const failedTrial = {
-        ...trialData,
-        trialId: currentBlock.getTrialsNumber() + 1,
-      };
+      const failedTrial = new Trial(
+        currentBlock.getTrialsNumber() + 1,
+        trialCopy.trialRep,
+        trialCopy.trialDirection,
+        trialCopy.experimentType,
+        trialCopy.intDevice,
+        trialCopy.startWidth,
+        trialCopy.startHeight,
+        trialCopy.targetWidth,
+        trialCopy.targetHeight,
+        trialCopy.amplitude,
+        trialCopy.maxScreenPercentage,
+      );
+
+      if (!(failedTrial instanceof Trial)) {
+        throw Error("[MY ERROR]: newItem must be an instance of Trial.");
+      }
       this.insertItemAfterGivenIndex(
         currentBlock.getTrials(),
         failedTrial,
         this.trialIndex + 1,
       );
     }
-
     this.prepareForNextTrialOrFinish(currentBlock);
   }
 
@@ -117,6 +137,9 @@ class ExperimentFrame {
 
   // Fisher-Yates Algorithm
   insertItemAfterGivenIndex(array, newItem, startIndex) {
+    if (!(newItem instanceof Trial)) {
+      throw Error("[MY ERROR]: newItem must be an instance of Trial.");
+    }
     // Ensure the startIndex is within the array bounds and not the last element
     if (startIndex < 0 || startIndex >= array.length - 1) {
       throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
