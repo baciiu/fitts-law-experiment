@@ -1,8 +1,6 @@
 
 ?
 Notes/_todo.txt,2/f/2fee8c759b8a7b9c86032066b741f3a00f7e0b8b
-F
-Notes/presentation.txt,0/5/0560508c33bc9ae9c9ec269272021dfc9ca843bc
 ?
 Notes/README.md,a/e/aeba6bbf7db581f0a74ff41f00562b59ef1673bc
 9
@@ -47,3 +45,5 @@ Q.idea/sonarlint/securityhotspotstore/a/e/aeba6bbf7db581f0a74ff41f00562b59ef1673
 key.pem,7/9/795c2fa3db91c47a8a4f84050bbd3fcfdfe72628
 8
 cert.pem,6/c/6c97fb9ae4b9c51b0c87a18716debddcb9acbaac
+?
+Notes/notex.txt,0/d/0d6f9855bec25f794ed1adf0ba6f693a75857673
