@@ -38,16 +38,14 @@ function startExperiment() {
   document.body.style.pointerEvents = "auto";
 
   /** START */
-  //const experimentType = "discrete";
-  const experimentType = "reciprocal";
-  const experiment = new ExperimentFrame(5, experimentType);
+  const experiment = new ExperimentFrame(USER, EXPERIMENT_TYPE);
   experiment.init();
 }
 
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", click);
 
-const enableFullScreen = false;
+const enableFullScreen = ENABLE_FULL_SCREEN;
 showStartWindow();
 
 // http://169.254.141.169:3000 for ipad
