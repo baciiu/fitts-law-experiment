@@ -2,12 +2,12 @@ class ExperimentFrame {
   constructor(userNumber, experimentType) {
     this.blockNumber = 1;
     this.trialNumber = -1;
-    this.totalBlocks = 1;
-    this.trialsPerBreak = 100;
+    this.totalBlocks = BLOCKS_NUMBER;
+    this.trialsPerBreak = TRIALS_PER_BREAK;
     this.experimentType = experimentType;
-    this.intDevice = this.setDevice();
-    this.repetitionPerTrial = 2;
-    this.scrambleBlocks = false;
+    this.intDevice = DEVICE_TYPE;
+    this.repetitionPerTrial = REPETITION_PER_TRIAL;
+    this.scrambleBlocks = true;
     this.experiment = new Experiment(
       this.experimentType,
       this.intDevice,
@@ -33,16 +33,6 @@ class ExperimentFrame {
 
   init() {
     this.showTrial();
-  }
-
-  setDevice() {
-    /*if (isMobile()) {
-                  // does not work; set manually
-                  return "Touch";
-                } else {
-                  return "Mouse";
-                }*/
-    return "Mouse"; // "Touch";
   }
 
   setupContinueButton() {

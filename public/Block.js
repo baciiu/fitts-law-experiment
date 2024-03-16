@@ -2,24 +2,21 @@ class Block {
   constructor(blockNumber, experimentType, intDevice, repTrial) {
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
-    this.startSize = 10;
+    this.startSize = START_SIZE;
     this.repetitionTrial = repTrial;
-    this.targetDimens = getInput();
-
-    this.radianStep = 90; // => [0,90,180,270]; 180 => [0,180] /  Left and Right
-    this.amplitude = [100, 54];
+    this.targetDimens = INPUT;
+    this.trialDirection = this.getAngles(RADIAN_START, RADIAN_STEP);
+    this.amplitude = AMPLITUDE_LIST;
     this.trialDirection = [];
     this.intDevice = intDevice;
     this.blockNumber = blockNumber;
     this.experimentType = experimentType;
 
-    this.startSize = 10;
-
     this.trialId = 1;
     this.trials = [];
     this.generateTrials();
 
-    this.maxScreenPercentage = 30;
+    this.maxScreenPercentage = MAX_DISTANCE_START_TARGET_PERCENTAGE;
   }
 
   has2InputParams() {
@@ -39,7 +36,6 @@ class Block {
   }
 
   init2InputParameters() {
-    this.trialDirection = this.getAngles(this.radianStep);
     for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
       for (
         let directionIdx = 0;
@@ -161,30 +157,18 @@ class Block {
     }
   }
 
-  getAngles(stepSize) {
-    const startAngle = 0;
-    const endAngle = 360;
+  getAngles(startAngle, stepSize) {
+    const endAngle = startAngle % 360;
     let angles = [];
     for (let angle = startAngle; angle < endAngle; angle += stepSize) {
       angles.push(angle);
     }
+    console.log(angles);
     return angles;
-  }
-
-  getTrial(trialIndex) {
-    return this.getTrials()[trialIndex];
   }
 
   setTrials(trials) {
     this.trials = trials;
-  }
-
-  hasNextTrial(trialIndex) {
-    if (this.trials.find(() => this.trials[trialIndex])) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   getTrialsNumber() {
