@@ -6,35 +6,27 @@ class Trial {
   PressAndReleaseMustBeInsideTarget = true;
   EndTrialByTargetPress = false;
 
-  // T & F => press inside, release inside, end trial
-  // T & T => no sense cannot be both true at the same time
-  // F & T => press inside, end trial
-  // F & F => no sense cannot be both false at the same time
-
   constructor(
     trialId,
     trialRep,
     trialDirection,
-    experimentType,
-    intDevice,
     startWidth,
     startHeight,
     targetWidth,
     targetHeight,
     amplitude,
-    maxScreenPercentage,
   ) {
     this.trialId = trialId;
     this.trialRep = trialRep;
     this.trialDirection = trialDirection;
-    this.experimentType = experimentType;
-    this.intDevice = intDevice;
+    this.experimentType = EXPERIMENT_TYPE;
+    this.intDevice = DEVICE_TYPE;
     this.startWidth = startWidth;
     this.startHeight = startHeight;
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
-    this.maxScreenPercentage = maxScreenPercentage;
+    this.maxScreenPercentage = MAX_DISTANCE_START_TARGET_PERCENTAGE;
     this.previousTrialEnd = {};
     this.isAmbiguityMarginHit = false;
 
@@ -106,7 +98,6 @@ class Trial {
     this.drawTarget(pos.target);
     this.drawBody();
 
-    // testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -119,7 +110,6 @@ class Trial {
     this.drawTarget(pos.target);
     this.drawBody();
 
-    // testStartDistanceFromPreviousEnd(pos.start.x, pos.start.y);
     this.setupEventHandlers();
   }
 
@@ -168,7 +158,6 @@ class Trial {
 
   handleStartRelease(event) {
     console.log("handleStartRelease");
-    const isTouchEvent = event.touches && event.touches.length > 0;
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
       this.errorSound.play();
@@ -194,7 +183,6 @@ class Trial {
 
   handleBodyPress(event) {
     console.log("handleBodyPress");
-    const isTouchEvent = event.touches && event.touches.length > 0;
     if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
@@ -230,8 +218,6 @@ class Trial {
 
   handleBodyRelease(event) {
     console.log("handleBodyRelease");
-    const isTouchEvent =
-      event.changedTouches && event.changedTouches.length > 0;
     const insideTarget = this.isCursorInsideShape(event, this.target);
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
@@ -271,7 +257,6 @@ class Trial {
       event.clientX <= rect.right &&
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
-    //console.log("isCursorInsideShape: " + isCursorInsideShape);
 
     if (this.intDevice === "Touch") {
       const extendedRect = {
@@ -290,7 +275,6 @@ class Trial {
       if (!isCursorInsideShape && isTouchInsideMargin) {
         this.isAmbiguityMarginHit = true;
       }
-      //console.log("isTouchInsideMargin: " + isTouchInsideMargin);
       return isTouchInsideMargin;
     }
     return isCursorInsideShape;
