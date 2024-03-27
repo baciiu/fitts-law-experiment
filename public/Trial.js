@@ -162,14 +162,8 @@ class Trial {
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
-
-    if (this.experimentType === "discrete") {
-      this.start.addEventListener("mousedown", this.boundHandleStartPress);
-      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
-    } else {
-      this.start.addEventListener("mousedown", this.boundHandleStartPress);
-      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
-    }
+    this.start.addEventListener("mousedown", this.boundHandleStartPress);
+    this.start.addEventListener("mouseup", this.boundHandleStartRelease);
   }
 
   handleStartPress(event) {
@@ -200,13 +194,8 @@ class Trial {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          if (this.getParity(this.trialRep) === 0) {
-            this.target.style.backgroundColor = "yellow";
-            this.start.style.backgroundColor = "green";
-          } else {
-            this.target.style.backgroundColor = "yellow";
-            this.start.style.backgroundColor = "green";
-          }
+          this.target.style.backgroundColor = "yellow";
+          this.start.style.backgroundColor = "green";
         }
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
@@ -236,12 +225,8 @@ class Trial {
       if (insideTarget) {
         if (this.EndTrialByTargetPress) {
           this.successSound.play();
+          this.target.style.display = "none";
 
-          if (this.experimentType === "reciprocal") {
-            // this.start.style.display = "none";
-          } else {
-            this.target.style.display = "none";
-          }
           this.endTrial();
         } else if (!this.PressAndReleaseMustBeInsideTarget) {
           // Scenario (F & F): Press does not have to be inside target; ignore this scenario or treat as invalid
@@ -289,6 +274,8 @@ class Trial {
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
       this.endTrial();
+    } else if (this.trialStarted && this.firstClickDone) {
+      this.logMouseEvent(event, 3);
     }
   }
 
@@ -324,11 +311,11 @@ class Trial {
   }
 
   endTrial() {
+    console.log(this.clicksCoords);
     const trialData = this.getExportDataTrial();
     const trialCopy = JSON.parse(JSON.stringify(this));
 
     this.cleanupTrial();
-    // Dispatch the custom event with the trial data
     const event = new CustomEvent("trialCompleted", {
       detail: { trialData, trialCopy },
     });
@@ -336,13 +323,10 @@ class Trial {
   }
 
   cleanupTrial() {
-    // Your cleanup code here...
     this.firstClickDone = false;
     this.trialStarted = false;
     this.bodyIsPressed = false;
 
-    this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
-    this.target.removeEventListener("mouseup", this.boundHandleTargetRelease);
     this.start.removeEventListener("mousedown", this.boundHandleStartPress);
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
