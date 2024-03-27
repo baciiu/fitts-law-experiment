@@ -60,17 +60,10 @@ class Trial {
       shape.style.width = mmToPixels(this.targetWidth) + "px";
       shape.style.height = mmToPixels(this.targetHeight) + "px";
       this.targetCoords = coords;
-      shape.style.backgroundColor = "yellow";
     } else {
       shape.style.width = mmToPixels(this.startWidth) + "px";
       shape.style.height = mmToPixels(this.startHeight) + "px";
       this.startCoords = coords;
-
-      if (this.isFirstTrial()) {
-        shape.style.backgroundColor = "gray";
-      } else {
-        shape.style.backgroundColor = "green";
-      }
     }
   }
 
@@ -102,8 +95,9 @@ class Trial {
     this.checkIfCoordinatesFitTheScreen(pos);
 
     this.drawShape(pos.target, this.target, true);
+    this.target.style.backgroundColor = "yellow";
     this.drawShape(pos.start, this.start, false);
-
+    this.start.style.backgroundColor = "grey";
     this.drawBody();
 
     this.setupEventHandlers();
@@ -119,10 +113,17 @@ class Trial {
 
     if (this.getParity(this.trialRep) === 0) {
       this.drawShape(pos.target, this.target, true);
+      this.target.style.backgroundColor = "green";
       this.drawShape(pos.start, this.start, false);
+      this.start.style.backgroundColor = "yellow";
     } else {
-      this.drawShape(pos.target, this.start, false);
       this.drawShape(pos.start, this.target, true);
+      this.target.style.backgroundColor = "green";
+      this.drawShape(pos.target, this.start, false);
+      this.start.style.backgroundColor = "yellow";
+    }
+    if (this.isFirstTrial()) {
+      this.start.style.backgroundColor = "gray";
     }
 
     this.drawBody();
@@ -162,8 +163,13 @@ class Trial {
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
 
-    this.start.addEventListener("mousedown", this.boundHandleStartPress);
-    this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+    if (this.experimentType === "discrete") {
+      this.start.addEventListener("mousedown", this.boundHandleStartPress);
+      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+    } else {
+      this.start.addEventListener("mousedown", this.boundHandleStartPress);
+      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+    }
   }
 
   handleStartPress(event) {
@@ -189,11 +195,20 @@ class Trial {
     } else if (this.trialStarted) {
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
-        this.target.style.backgroundColor = "green";
 
         if (this.experimentType === "discrete") {
           this.start.style.display = "none";
+          this.target.style.backgroundColor = "green";
+        } else {
+          if (this.getParity(this.trialRep) === 0) {
+            this.target.style.backgroundColor = "yellow";
+            this.start.style.backgroundColor = "green";
+          } else {
+            this.target.style.backgroundColor = "yellow";
+            this.start.style.backgroundColor = "green";
+          }
         }
+
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
           "touchend",
@@ -221,9 +236,11 @@ class Trial {
       if (insideTarget) {
         if (this.EndTrialByTargetPress) {
           this.successSound.play();
-          this.target.style.display = "none";
+
           if (this.experimentType === "reciprocal") {
-            this.start.style.display = "none";
+            // this.start.style.display = "none";
+          } else {
+            this.target.style.display = "none";
           }
           this.endTrial();
         } else if (!this.PressAndReleaseMustBeInsideTarget) {
@@ -262,20 +279,16 @@ class Trial {
         if (insideTarget && this.HIT === 1) {
           this.successSound.play();
           this.target.style.display = "none";
-          this.endTrial();
         } else {
           this.errorSound.play();
           this.isFailedTrial = this.isFailed();
-          this.endTrial();
         }
       } else {
-        // If (F & T) was handled in press, this block might not be needed
-        console.log(
-          "Release action under (F & T) or (F & F) is not applicable.",
-        );
+        console.log("ERRR handleBodyRelease ");
       }
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+      this.endTrial();
     }
   }
 
