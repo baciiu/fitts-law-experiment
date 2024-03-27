@@ -50,26 +50,33 @@ class Trial {
     this.clicksCoords = [];
   }
 
-  drawStart(start) {
-    this.start.style.display = "block";
-    this.start.style.width = mmToPixels(this.startWidth) + "px";
-    this.start.style.height = mmToPixels(this.startHeight) + "px";
-    this.start.style.position = "absolute";
-    this.start.style.left = start.x + "px";
-    this.start.style.top = start.y + "px";
-    this.startCoords = start;
-    this.start.style.backgroundColor = "gray";
+  drawShape(coords, shape, isTarget) {
+    shape.style.display = "block";
+    shape.style.position = "absolute";
+    shape.style.left = coords.x + "px";
+    shape.style.top = coords.y + "px";
+
+    if (isTarget) {
+      shape.style.width = mmToPixels(this.targetWidth) + "px";
+      shape.style.height = mmToPixels(this.targetHeight) + "px";
+      this.targetCoords = coords;
+      shape.style.backgroundColor = "yellow";
+    } else {
+      shape.style.width = mmToPixels(this.startWidth) + "px";
+      shape.style.height = mmToPixels(this.startHeight) + "px";
+      this.startCoords = coords;
+
+      if (this.isFirstTrial()) {
+        shape.style.backgroundColor = "gray";
+      } else {
+        shape.style.backgroundColor = "green";
+      }
+    }
   }
 
-  drawTarget(target) {
-    this.target.style.display = "block";
-    this.target.style.width = mmToPixels(this.targetWidth) + "px";
-    this.target.style.height = mmToPixels(this.targetHeight) + "px";
-    this.target.style.position = "absolute";
-    this.target.style.left = target.x + "px";
-    this.target.style.top = target.y + "px";
-    this.targetCoords = target;
-    this.target.style.backgroundColor = "yellow";
+  isFirstTrial() {
+    console.log(this.trialId);
+    return this.trialId === 1;
   }
 
   drawBody() {
@@ -94,8 +101,9 @@ class Trial {
     const pos = this.generateDiscretePositions();
     this.checkIfCoordinatesFitTheScreen(pos);
 
-    this.drawStart(pos.start);
-    this.drawTarget(pos.target);
+    this.drawShape(pos.target, this.target, true);
+    this.drawShape(pos.start, this.start, false);
+
     this.drawBody();
 
     this.setupEventHandlers();
@@ -106,11 +114,29 @@ class Trial {
 
     const pos = this.generateReciprocalPositions();
     this.checkIfCoordinatesFitTheScreen(pos);
-    this.drawStart(pos.start);
-    this.drawTarget(pos.target);
+
+    console.log(this.trialRep.toString());
+
+    if (this.getParity(this.trialRep) === 0) {
+      this.drawShape(pos.target, this.target, true);
+      this.drawShape(pos.start, this.start, false);
+    } else {
+      this.drawShape(pos.target, this.start, false);
+      this.drawShape(pos.start, this.target, true);
+    }
+
     this.drawBody();
 
     this.setupEventHandlers();
+  }
+
+  getParity(number) {
+    const parts = number.toString().split(".");
+    if (parts[1] && Number(parts[1]) % 2 !== 0) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   checkIfCoordinatesFitTheScreen(pos) {
@@ -142,7 +168,6 @@ class Trial {
 
   handleStartPress(event) {
     console.log("handleStartPress");
-    const isTouchEvent = event.touches && event.touches.length > 0;
 
     if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
@@ -165,7 +190,10 @@ class Trial {
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
         this.target.style.backgroundColor = "green";
-        this.start.style.display = "none";
+
+        if (this.experimentType === "discrete") {
+          this.start.style.display = "none";
+        }
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
           "touchend",
@@ -189,12 +217,14 @@ class Trial {
       const insideTarget = this.isCursorInsideShape(event, this.target);
       this.HIT = insideTarget ? 1 : 0;
       this.bodyIsPressed = true;
-      console.log(this.HIT);
 
       if (insideTarget) {
         if (this.EndTrialByTargetPress) {
           this.successSound.play();
           this.target.style.display = "none";
+          if (this.experimentType === "reciprocal") {
+            this.start.style.display = "none";
+          }
           this.endTrial();
         } else if (!this.PressAndReleaseMustBeInsideTarget) {
           // Scenario (F & F): Press does not have to be inside target; ignore this scenario or treat as invalid
