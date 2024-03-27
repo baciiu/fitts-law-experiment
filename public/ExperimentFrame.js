@@ -1,16 +1,14 @@
 class ExperimentFrame {
-  constructor(userNumber, experimentType) {
+  constructor(userNumber) {
     this.blockNumber = 1;
     this.trialNumber = -1;
     this.totalBlocks = BLOCKS_NUMBER;
     this.trialsPerBreak = TRIALS_PER_BREAK;
-    this.experimentType = experimentType;
-    this.intDevice = DEVICE_TYPE;
+    this.experimentType = EXPERIMENT_TYPE;
     this.repetitionPerTrial = REPETITION_PER_TRIAL;
-    this.scrambleBlocks = true;
+    this.scrambleBlocks = SCRAMBLE_BLOCKS;
     this.experiment = new Experiment(
       this.experimentType,
-      this.intDevice,
       this.totalBlocks,
       this.repetitionPerTrial,
       this.scrambleBlocks,
@@ -18,7 +16,6 @@ class ExperimentFrame {
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
     this.setupContinueButton();
-    this.allClicks = [];
     this.endTrialPos = null;
     this.trial = null;
     this.trialsData = [];
@@ -68,14 +65,11 @@ class ExperimentFrame {
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
         trialCopy.trialDirection,
-        trialCopy.experimentType,
-        trialCopy.intDevice,
         trialCopy.startWidth,
         trialCopy.startHeight,
         trialCopy.targetWidth,
         trialCopy.targetHeight,
         trialCopy.amplitude,
-        trialCopy.maxScreenPercentage,
       );
 
       if (!(failedTrial instanceof Trial)) {

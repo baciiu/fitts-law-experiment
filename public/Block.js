@@ -1,16 +1,13 @@
 class Block {
-  constructor(blockNumber, experimentType, intDevice, repTrial) {
+  constructor(blockNumber, repTrial) {
     this.blockNumber = blockNumber;
-    this.experimentType = experimentType;
+    this.experimentType = EXPERIMENT_TYPE;
     this.startSize = START_SIZE;
     this.repetitionTrial = repTrial;
     this.targetDimens = INPUT;
     this.trialDirection = this.getAngles(RADIAN_START, RADIAN_STEP);
     this.amplitude = AMPLITUDE_LIST;
-    this.trialDirection = [];
-    this.intDevice = intDevice;
     this.blockNumber = blockNumber;
-    this.experimentType = experimentType;
 
     this.trialId = 1;
     this.trials = [];
@@ -26,70 +23,53 @@ class Block {
     );
   }
 
-  getAmplitudes() {
-    const amp = new Set();
+  addNewTrialForTarget(trialRep, trialAngle, target, amplitude) {
+    let startWidth;
+    let startHeight;
 
-    for (const a of this.targetDimens) {
-      amp.add(a.amplitude);
+    if (this.experimentType === "discrete") {
+      startWidth = this.startSize;
+      startHeight = this.startSize;
+    } else if (this.experimentType === "reciprocal") {
+      startWidth = target.width;
+      startHeight = target.height;
+    } else {
+      throw Error("[MY ERROR]: Experiment Undefined.");
     }
-    return Array.from(amp);
+
+    const trial = new Trial(
+      this.trialId++,
+      trialRep,
+      trialAngle,
+      startWidth,
+      startHeight,
+      target.width,
+      target.height,
+      amplitude,
+      this.maxScreenPercentage,
+    );
+    this.trials.push(trial);
   }
 
   init2InputParameters() {
-    for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
-      for (
-        let directionIdx = 0;
-        directionIdx < this.trialDirection.length;
-        directionIdx++
-      ) {
-        for (
-          let amplIndex = 0;
-          amplIndex < this.amplitude.length;
-          amplIndex++
-        ) {
-          let startWidth, startHeight;
+    console.log(this.targetDimens);
+    console.log(this.trialDirection);
+    console.log(this.amplitude);
 
-          if (this.experimentType === "discrete") {
-            startWidth = this.startSize;
-            startHeight = this.startSize;
-          } else if (this.experimentType === "reciprocal") {
-            startWidth = this.targetDimens[dimenIdx].width;
-            startHeight = this.targetDimens[dimenIdx].height;
-          } else {
-            throw Error("[MY ERROR]: Experiment Undefined.");
-          }
-
+    for (let target of this.targetDimens) {
+      for (let angle of this.trialDirection) {
+        for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
-          const trial = new Trial(
-            this.trialId++,
-            temp_id + "",
-            this.trialDirection[directionIdx],
-            this.experimentType,
-            this.intDevice,
-            startWidth,
-            startHeight,
-            this.targetDimens[dimenIdx].width,
-            this.targetDimens[dimenIdx].height,
-            this.amplitude[amplIndex],
-            this.maxScreenPercentage,
-          );
-          this.trials.push(trial);
+          this.addNewTrialForTarget(temp_id + "", angle, target, amplitude);
 
           for (let i = 1; i < this.repetitionTrial; i++) {
-            const trial = new Trial(
-              this.trialId++,
+            let temp_id = this.trialId;
+            this.addNewTrialForTarget(
               temp_id + "." + i,
-              this.trialDirection[directionIdx],
-              this.experimentType,
-              this.intDevice,
-              startWidth,
-              startHeight,
-              this.targetDimens[dimenIdx].width,
-              this.targetDimens[dimenIdx].height,
-              this.amplitude[amplIndex],
-              this.maxScreenPercentage,
+              angle,
+              target,
+              amplitude,
             );
-            this.trials.push(trial);
           }
         }
       }
@@ -97,52 +77,23 @@ class Block {
   }
 
   init4InputTrials() {
-    this.amplitude = this.getAmplitudes();
-    for (let dimenIdx = 0; dimenIdx < this.targetDimens.length; dimenIdx++) {
-      for (let amplIdx = 0; amplIdx < this.amplitude.length; amplIdx++) {
-        let startWidth, startHeight;
-        if (this.experimentType === "discrete") {
-          startWidth = this.startSize;
-          startHeight = this.startSize;
-        } else if (this.experimentType === "reciprocal") {
-          startWidth = this.targetDimens[dimenIdx].width;
-          startHeight = this.targetDimens[dimenIdx].height;
-        } else {
-          throw Error("[MY ERROR]: Experiment Undefined.");
-        }
+    for (const element of this.targetDimens) {
+      let temp_id = this.trialId;
+      this.addNewTrialForTarget(
+        temp_id + "",
+        element.angle,
+        element,
+        element.amplitude,
+      );
 
+      for (let i = 1; i < this.repetitionTrial; i++) {
         let temp_id = this.trialId;
-        const trial = new Trial(
-          this.trialId++,
-          temp_id + "",
-          this.targetDimens[dimenIdx].angle,
-          this.experimentType,
-          this.intDevice,
-          startWidth,
-          startHeight,
-          this.targetDimens[dimenIdx].width,
-          this.targetDimens[dimenIdx].height,
-          this.amplitude[amplIdx],
-          this.maxScreenPercentage,
+        this.addNewTrialForTarget(
+          temp_id + "." + i,
+          element.angle,
+          element,
+          element.amplitude,
         );
-        this.trials.push(trial);
-
-        for (let i = 1; i < this.repetitionTrial; i++) {
-          const trial = new Trial(
-            this.trialId++,
-            temp_id + "." + i,
-            this.targetDimens[dimenIdx].angle,
-            this.experimentType,
-            this.intDevice,
-            startWidth,
-            startHeight,
-            this.targetDimens[dimenIdx].width,
-            this.targetDimens[dimenIdx].height,
-            this.amplitude[amplIdx],
-            this.maxScreenPercentage,
-          );
-          this.trials.push(trial);
-        }
       }
     }
   }
@@ -158,7 +109,7 @@ class Block {
   }
 
   getAngles(startAngle, stepSize) {
-    const endAngle = startAngle % 360;
+    const endAngle = 360;
     let angles = [];
     for (let angle = startAngle; angle < endAngle; angle += stepSize) {
       angles.push(angle);
