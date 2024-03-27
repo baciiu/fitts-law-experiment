@@ -8,7 +8,6 @@ class ExperimentFrame {
     this.repetitionPerTrial = REPETITION_PER_TRIAL;
     this.scrambleBlocks = SCRAMBLE_BLOCKS;
     this.experiment = new Experiment(
-      this.experimentType,
       this.totalBlocks,
       this.repetitionPerTrial,
       this.scrambleBlocks,
@@ -126,7 +125,7 @@ class ExperimentFrame {
       throw Error("[MY ERROR]: newItem must be an instance of Trial.");
     }
     // Ensure the startIndex is within the array bounds and not the last element
-    if (startIndex < 0 || startIndex >= array.length - 1) {
+    if (startIndex < 0 || startIndex >= array.length) {
       throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
     }
 
