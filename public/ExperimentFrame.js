@@ -8,7 +8,6 @@ class ExperimentFrame {
     this.repetitionPerTrial = REPETITION_PER_TRIAL;
     this.scrambleBlocks = SCRAMBLE_BLOCKS;
     this.experiment = new Experiment(
-      this.experimentType,
       this.totalBlocks,
       this.repetitionPerTrial,
       this.scrambleBlocks,
@@ -21,6 +20,15 @@ class ExperimentFrame {
     this.trialsData = [];
     this.userNumber = userNumber;
     this.trialIndex = 0;
+
+    this.prevTrial = {
+      trialId: null,
+      trialRep: null,
+      startX: null,
+      startY: null,
+      targetX: null,
+      targetY: null,
+    };
 
     document.addEventListener(
       "trialCompleted",
@@ -105,6 +113,8 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     this.trial = block.getTrials()[this.trialIndex];
 
+    this.trial.setPreviousTrial(this.prevTrial);
+
     if (typeof this.trial.drawShapes === "function") {
       this.trial.drawShapes();
     } else {
@@ -115,9 +125,22 @@ class ExperimentFrame {
 
     this.showIndexes();
 
+    this.setThisPrevTrial();
+
     if (this.trialNumber % this.trialsPerBreak === 0) {
       this.displayBreakWindow();
     }
+  }
+
+  setThisPrevTrial() {
+    this.prevTrial = {
+      trialId: this.trial.trialId,
+      trialRep: this.trial.trialRep,
+      startX: this.trial.startCoords.x,
+      startY: this.trial.startCoords.y,
+      targetX: this.trial.targetCoords.x,
+      targetY: this.trial.targetCoords.y,
+    };
   }
 
   // Fisher-Yates Algorithm
@@ -126,7 +149,7 @@ class ExperimentFrame {
       throw Error("[MY ERROR]: newItem must be an instance of Trial.");
     }
     // Ensure the startIndex is within the array bounds and not the last element
-    if (startIndex < 0 || startIndex >= array.length - 1) {
+    if (startIndex < 0 || startIndex >= array.length) {
       throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
     }
 

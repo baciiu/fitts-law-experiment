@@ -23,7 +23,7 @@ class Block {
     );
   }
 
-  addNewTrialForTarget(trialRep, trialAngle, target, amplitude) {
+  addNewTrialForTarget(id, trialRep, trialAngle, target, amplitude) {
     let startWidth;
     let startHeight;
 
@@ -38,7 +38,7 @@ class Block {
     }
 
     const trial = new Trial(
-      this.trialId++,
+      id,
       trialRep,
       trialAngle,
       startWidth,
@@ -46,7 +46,6 @@ class Block {
       target.width,
       target.height,
       amplitude,
-      this.maxScreenPercentage,
     );
     this.trials.push(trial);
   }
@@ -59,12 +58,13 @@ class Block {
     for (let target of this.targetDimens) {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
+          let id = this.trialId;
           let temp_id = this.trialId;
-          this.addNewTrialForTarget(temp_id + "", angle, target, amplitude);
+          this.addNewTrialForTarget(id, temp_id + "", angle, target, amplitude);
 
           for (let i = 1; i < this.repetitionTrial; i++) {
-            let temp_id = this.trialId;
             this.addNewTrialForTarget(
+              this.trialId++,
               temp_id + "." + i,
               angle,
               target,
@@ -74,12 +74,14 @@ class Block {
         }
       }
     }
+    console.log(this.trials);
   }
 
   init4InputTrials() {
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
       this.addNewTrialForTarget(
+        this.trialId++,
         temp_id + "",
         element.angle,
         element,
@@ -87,8 +89,8 @@ class Block {
       );
 
       for (let i = 1; i < this.repetitionTrial; i++) {
-        let temp_id = this.trialId;
         this.addNewTrialForTarget(
+          this.trialId++,
           temp_id + "." + i,
           element.angle,
           element,

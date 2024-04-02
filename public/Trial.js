@@ -46,36 +46,17 @@ class Trial {
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
 
+    this.previousTrial = {
+      trialId: null,
+      trialRep: null,
+      startX: null,
+      startY: null,
+      targetX: null,
+      targetY: null,
+    };
+
     this.clicksTime = [];
     this.clicksCoords = [];
-  }
-
-  drawStart(start) {
-    this.start.style.display = "block";
-    this.start.style.width = mmToPixels(this.startWidth) + "px";
-    this.start.style.height = mmToPixels(this.startHeight) + "px";
-    this.start.style.position = "absolute";
-    this.start.style.left = start.x + "px";
-    this.start.style.top = start.y + "px";
-    this.startCoords = start;
-    this.start.style.backgroundColor = "gray";
-  }
-
-  drawTarget(target) {
-    this.target.style.display = "block";
-    this.target.style.width = mmToPixels(this.targetWidth) + "px";
-    this.target.style.height = mmToPixels(this.targetHeight) + "px";
-    this.target.style.position = "absolute";
-    this.target.style.left = target.x + "px";
-    this.target.style.top = target.y + "px";
-    this.targetCoords = target;
-    this.target.style.backgroundColor = "yellow";
-  }
-
-  drawBody() {
-    this.body.style.display = "block";
-    this.body.style.width = window.innerWidth + "px";
-    this.body.style.height = window.innerHeight + "px";
   }
 
   drawShapes() {
@@ -88,17 +69,56 @@ class Trial {
     }
   }
 
+  drawShape(coords, shape, isTarget) {
+    shape.style.display = "block";
+    shape.style.position = "absolute";
+    shape.style.left = coords.x + "px";
+    shape.style.top = coords.y + "px";
+
+    if (isTarget) {
+      shape.style.width = mmToPixels(this.targetWidth) + "px";
+      shape.style.height = mmToPixels(this.targetHeight) + "px";
+      this.targetCoords = coords;
+    } else {
+      shape.style.width = mmToPixels(this.startWidth) + "px";
+      shape.style.height = mmToPixels(this.startHeight) + "px";
+      this.startCoords = coords;
+    }
+  }
+
+  isFirstTrial() {
+    return this.trialId === 1;
+  }
+
+  drawBody() {
+    this.body.style.display = "block";
+    this.body.style.width = window.innerWidth + "px";
+    this.body.style.height = window.innerHeight + "px";
+  }
+
   drawDiscreteShapes() {
     this.trialCompleted = false;
 
     const pos = this.generateDiscretePositions();
     this.checkIfCoordinatesFitTheScreen(pos);
 
-    this.drawStart(pos.start);
-    this.drawTarget(pos.target);
+    this.drawShape(pos.target, this.target, true);
+    this.target.style.backgroundColor = "yellow";
+    this.drawShape(pos.start, this.start, false);
+    this.start.style.backgroundColor = "grey";
     this.drawBody();
 
     this.setupEventHandlers();
+  }
+
+  isPreviousTrial() {
+    return !!(
+      this.previousTrial.startX &&
+      this.previousTrial.startY &&
+      this.previousTrial.targetX &&
+      this.previousTrial.targetY &&
+      this.previousTrial.trialRep
+    );
   }
 
   drawReciprocalShapes() {
@@ -106,11 +126,34 @@ class Trial {
 
     const pos = this.generateReciprocalPositions();
     this.checkIfCoordinatesFitTheScreen(pos);
-    this.drawStart(pos.start);
-    this.drawTarget(pos.target);
+
+    if (this.getParity(this.trialRep) === 0) {
+      this.drawShape(pos.target, this.target, true);
+      this.target.style.backgroundColor = "green";
+      this.drawShape(pos.start, this.start, false);
+      this.start.style.backgroundColor = "yellow";
+    } else {
+      this.drawShape(pos.start, this.target, true);
+      this.target.style.backgroundColor = "green";
+      this.drawShape(pos.target, this.start, false);
+      this.start.style.backgroundColor = "yellow";
+    }
+    if (this.isFirstTrial()) {
+      this.start.style.backgroundColor = "gray";
+    }
+
     this.drawBody();
 
     this.setupEventHandlers();
+  }
+
+  getParity(number) {
+    const parts = number.toString().split(".");
+    if (parts[1] && Number(parts[1]) % 2 !== 0) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   checkIfCoordinatesFitTheScreen(pos) {
@@ -135,15 +178,11 @@ class Trial {
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
-
     this.start.addEventListener("mousedown", this.boundHandleStartPress);
     this.start.addEventListener("mouseup", this.boundHandleStartRelease);
   }
 
   handleStartPress(event) {
-    console.log("handleStartPress");
-    const isTouchEvent = event.touches && event.touches.length > 0;
-
     if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
       this.successSound.play();
@@ -157,15 +196,21 @@ class Trial {
   }
 
   handleStartRelease(event) {
-    console.log("handleStartRelease");
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
       this.errorSound.play();
     } else if (this.trialStarted) {
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
-        this.target.style.backgroundColor = "green";
-        this.start.style.display = "none";
+
+        if (this.experimentType === "discrete") {
+          this.start.style.display = "none";
+          this.target.style.backgroundColor = "green";
+        } else {
+          this.target.style.backgroundColor = "yellow";
+          this.start.style.backgroundColor = "green";
+        }
+
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
           "touchend",
@@ -182,23 +227,22 @@ class Trial {
   }
 
   handleBodyPress(event) {
-    console.log("handleBodyPress");
     if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
       const insideTarget = this.isCursorInsideShape(event, this.target);
       this.HIT = insideTarget ? 1 : 0;
       this.bodyIsPressed = true;
-      console.log(this.HIT);
 
       if (insideTarget) {
         if (this.EndTrialByTargetPress) {
           this.successSound.play();
           this.target.style.display = "none";
+
           this.endTrial();
         } else if (!this.PressAndReleaseMustBeInsideTarget) {
           // Scenario (F & F): Press does not have to be inside target; ignore this scenario or treat as invalid
-          console.log("Scenario (F & F) is not handled or invalid.");
+          //console.log("Scenario (F & F) is not handled or invalid.");
         }
       } else {
         this.errorSound.play();
@@ -217,11 +261,8 @@ class Trial {
   }
 
   handleBodyRelease(event) {
-    console.log("handleBodyRelease");
     const insideTarget = this.isCursorInsideShape(event, this.target);
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
-      console.log("handleBodyRelease OK");
       this.logMouseEvent(event, 3);
 
       if (
@@ -232,20 +273,17 @@ class Trial {
         if (insideTarget && this.HIT === 1) {
           this.successSound.play();
           this.target.style.display = "none";
-          this.endTrial();
         } else {
           this.errorSound.play();
           this.isFailedTrial = this.isFailed();
-          this.endTrial();
         }
       } else {
-        // If (F & T) was handled in press, this block might not be needed
-        console.log(
-          "Release action under (F & T) or (F & F) is not applicable.",
-        );
       }
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+      this.endTrial();
+    } else if (this.trialStarted && this.firstClickDone) {
+      this.logMouseEvent(event, 3);
     }
   }
 
@@ -285,7 +323,6 @@ class Trial {
     const trialCopy = JSON.parse(JSON.stringify(this));
 
     this.cleanupTrial();
-    // Dispatch the custom event with the trial data
     const event = new CustomEvent("trialCompleted", {
       detail: { trialData, trialCopy },
     });
@@ -293,13 +330,10 @@ class Trial {
   }
 
   cleanupTrial() {
-    // Your cleanup code here...
     this.firstClickDone = false;
     this.trialStarted = false;
     this.bodyIsPressed = false;
 
-    this.target.removeEventListener("mousedown", this.boundHandleTargetPress);
-    this.target.removeEventListener("mouseup", this.boundHandleTargetRelease);
     this.start.removeEventListener("mousedown", this.boundHandleStartPress);
     this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
@@ -434,37 +468,28 @@ class Trial {
     return { start, target };
   }
 
-  generateReciprocalPositions() {
-    let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startWidth);
-    let height1 = mmToPixels(this.startHeight);
-    let width2 = mmToPixels(this.targetWidth);
-    let height2 = mmToPixels(this.targetHeight);
-    let start, target, x1, y1, x2, y2;
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
-    const angle = this.trialDirection;
-
-    const radians = (angle * Math.PI) / 180; // Convert angle to radians
-
-    x1 = centerX + (amplitude / 2) * Math.cos(radians);
-    y1 = centerY + (amplitude / 2) * Math.sin(radians);
-
-    x2 = centerX - (amplitude / 2) * Math.cos(radians);
-    y2 = centerY - (amplitude / 2) * Math.sin(radians);
-
-    if (
-      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-      this.isShapeWithinBounds(x2, y2, width2, height2)
-    ) {
-      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-      return { start, target };
+  takeCoordsFromPrevTrial() {
+    if (!this.isPreviousTrial()) {
+      return false;
     }
-    if (!start || !target) {
-      throw Error("[MY ERROR]: Could not generate a valid position");
+    const isSameRepGroup =
+      Math.floor(this.previousTrial.trialRep) === Math.floor(this.trialRep);
+
+    const isNextRep = this.trialId === this.previousTrial.trialId + 1;
+
+    return isNextRep && isSameRepGroup;
+  }
+
+  generateReciprocalPositions() {
+    let start, target;
+
+    if (this.takeCoordsFromPrevTrial()) {
+      start = { x: this.previousTrial.startX, y: this.previousTrial.startY };
+      target = { x: this.previousTrial.targetX, y: this.previousTrial.targetY };
+    } else {
+      const point = this.generateDiscretePositions();
+      start = point.start;
+      target = point.target;
     }
     return { start, target };
   }
@@ -472,6 +497,10 @@ class Trial {
   logMouseEvent(event, index) {
     this.clicksTime[index] = new Date();
     this.clicksCoords[index] = { x: event.clientX, y: event.clientY };
+  }
+
+  setPreviousTrial(prevTrial) {
+    this.previousTrial = prevTrial;
   }
 
   getExportDataTrial() {
