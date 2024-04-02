@@ -14,7 +14,7 @@ class Experiment {
   init() {
     this.setupContinueButton();
     this.generateBlocks();
-    if (this.scrambleBlocks) {
+    if (this.scrambleBlocks && EXPERIMENT_TYPE === "discrete") {
       this.shuffleBlocks();
     }
   }

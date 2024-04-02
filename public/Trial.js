@@ -46,8 +46,27 @@ class Trial {
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
 
+    this.previousTrial = {
+      trialId: null,
+      trialRep: null,
+      startX: null,
+      startY: null,
+      targetX: null,
+      targetY: null,
+    };
+
     this.clicksTime = [];
     this.clicksCoords = [];
+  }
+
+  drawShapes() {
+    if (this.experimentType === "discrete") {
+      this.drawDiscreteShapes();
+    } else if (this.experimentType === "reciprocal") {
+      this.drawReciprocalShapes();
+    } else {
+      throw Error("[MY ERROR]: Experiment type undefined.");
+    }
   }
 
   drawShape(coords, shape, isTarget) {
@@ -68,7 +87,6 @@ class Trial {
   }
 
   isFirstTrial() {
-    console.log(this.trialId);
     return this.trialId === 1;
   }
 
@@ -76,16 +94,6 @@ class Trial {
     this.body.style.display = "block";
     this.body.style.width = window.innerWidth + "px";
     this.body.style.height = window.innerHeight + "px";
-  }
-
-  drawShapes() {
-    if (this.experimentType === "discrete") {
-      this.drawDiscreteShapes();
-    } else if (this.experimentType === "reciprocal") {
-      this.drawReciprocalShapes();
-    } else {
-      throw Error("[MY ERROR]: Experiment type undefined.");
-    }
   }
 
   drawDiscreteShapes() {
@@ -103,13 +111,21 @@ class Trial {
     this.setupEventHandlers();
   }
 
+  isPreviousTrial() {
+    return !!(
+      this.previousTrial.startX &&
+      this.previousTrial.startY &&
+      this.previousTrial.targetX &&
+      this.previousTrial.targetY &&
+      this.previousTrial.trialRep
+    );
+  }
+
   drawReciprocalShapes() {
     this.trialCompleted = false;
 
     const pos = this.generateReciprocalPositions();
     this.checkIfCoordinatesFitTheScreen(pos);
-
-    console.log(this.trialRep.toString());
 
     if (this.getParity(this.trialRep) === 0) {
       this.drawShape(pos.target, this.target, true);
@@ -167,8 +183,6 @@ class Trial {
   }
 
   handleStartPress(event) {
-    console.log("handleStartPress");
-
     if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
       this.successSound.play();
@@ -182,7 +196,6 @@ class Trial {
   }
 
   handleStartRelease(event) {
-    console.log("handleStartRelease");
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
       this.errorSound.play();
@@ -214,7 +227,6 @@ class Trial {
   }
 
   handleBodyPress(event) {
-    console.log("handleBodyPress");
     if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
@@ -230,7 +242,7 @@ class Trial {
           this.endTrial();
         } else if (!this.PressAndReleaseMustBeInsideTarget) {
           // Scenario (F & F): Press does not have to be inside target; ignore this scenario or treat as invalid
-          console.log("Scenario (F & F) is not handled or invalid.");
+          //console.log("Scenario (F & F) is not handled or invalid.");
         }
       } else {
         this.errorSound.play();
@@ -249,11 +261,8 @@ class Trial {
   }
 
   handleBodyRelease(event) {
-    console.log("handleBodyRelease");
     const insideTarget = this.isCursorInsideShape(event, this.target);
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
-      console.log("handleBodyRelease OK");
       this.logMouseEvent(event, 3);
 
       if (
@@ -269,7 +278,6 @@ class Trial {
           this.isFailedTrial = this.isFailed();
         }
       } else {
-        console.log("ERRR handleBodyRelease ");
       }
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
@@ -311,7 +319,6 @@ class Trial {
   }
 
   endTrial() {
-    console.log(this.clicksCoords);
     const trialData = this.getExportDataTrial();
     const trialCopy = JSON.parse(JSON.stringify(this));
 
@@ -461,37 +468,28 @@ class Trial {
     return { start, target };
   }
 
-  generateReciprocalPositions() {
-    let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startWidth);
-    let height1 = mmToPixels(this.startHeight);
-    let width2 = mmToPixels(this.targetWidth);
-    let height2 = mmToPixels(this.targetHeight);
-    let start, target, x1, y1, x2, y2;
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
-    const angle = this.trialDirection;
-
-    const radians = (angle * Math.PI) / 180; // Convert angle to radians
-
-    x1 = centerX + (amplitude / 2) * Math.cos(radians);
-    y1 = centerY + (amplitude / 2) * Math.sin(radians);
-
-    x2 = centerX - (amplitude / 2) * Math.cos(radians);
-    y2 = centerY - (amplitude / 2) * Math.sin(radians);
-
-    if (
-      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-      this.isShapeWithinBounds(x2, y2, width2, height2)
-    ) {
-      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-      return { start, target };
+  takeCoordsFromPrevTrial() {
+    if (!this.isPreviousTrial()) {
+      return false;
     }
-    if (!start || !target) {
-      throw Error("[MY ERROR]: Could not generate a valid position");
+    const isSameRepGroup =
+      Math.floor(this.previousTrial.trialRep) === Math.floor(this.trialRep);
+
+    const isNextRep = this.trialId === this.previousTrial.trialId + 1;
+
+    return isNextRep && isSameRepGroup;
+  }
+
+  generateReciprocalPositions() {
+    let start, target;
+
+    if (this.takeCoordsFromPrevTrial()) {
+      start = { x: this.previousTrial.startX, y: this.previousTrial.startY };
+      target = { x: this.previousTrial.targetX, y: this.previousTrial.targetY };
+    } else {
+      const point = this.generateDiscretePositions();
+      start = point.start;
+      target = point.target;
     }
     return { start, target };
   }
@@ -499,6 +497,10 @@ class Trial {
   logMouseEvent(event, index) {
     this.clicksTime[index] = new Date();
     this.clicksCoords[index] = { x: event.clientX, y: event.clientY };
+  }
+
+  setPreviousTrial(prevTrial) {
+    this.previousTrial = prevTrial;
   }
 
   getExportDataTrial() {
