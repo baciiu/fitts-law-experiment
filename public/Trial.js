@@ -3,8 +3,6 @@ class Trial {
   OTHER_MARGINS_PX = mmToPixels(3);
   FAILED_TRIAL_THRESHOLD = 4;
   AMBIGUITY_MARGIN_PX = mmToPixels(20);
-  PressAndReleaseMustBeInsideTarget = true;
-  EndTrialByTargetPress = false;
 
   constructor(
     trialId,
@@ -28,7 +26,7 @@ class Trial {
     this.amplitude = amplitude;
     this.maxScreenPercentage = MAX_DISTANCE_START_TARGET_PERCENTAGE;
     this.previousTrialEnd = {};
-    this.isAmbiguityMarginHit = false;
+    this.ambiguityMarginHit = false;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -39,12 +37,14 @@ class Trial {
 
     this.firstClickDone = false;
     this.trialCompleted = false;
-    this.isFailedTrial = false;
+    this.toBeRepeatedTrial = false;
     this.bodyIsPressed = false;
 
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
+    this.targetPressIn = false;
+    this.targetReleaseIn = false;
 
     this.previousTrial = {
       trialId: null,
@@ -127,17 +127,17 @@ class Trial {
     const pos = this.generateReciprocalPositions();
     this.checkIfCoordinatesFitTheScreen(pos);
 
-    if (this.getParity(this.trialRep) === 0) {
-      this.drawShape(pos.target, this.target, true);
-      this.target.style.backgroundColor = "green";
-      this.drawShape(pos.start, this.start, false);
-      this.start.style.backgroundColor = "yellow";
-    } else {
-      this.drawShape(pos.start, this.target, true);
-      this.target.style.backgroundColor = "green";
-      this.drawShape(pos.target, this.start, false);
-      this.start.style.backgroundColor = "yellow";
-    }
+    //if (this.getParity(this.trialRep) === 0) {
+    this.drawShape(pos.target, this.target, true);
+    this.target.style.backgroundColor = "green";
+    this.drawShape(pos.start, this.start, false);
+    this.start.style.backgroundColor = "yellow";
+    /*} else {
+                                                                                  this.drawShape(pos.start, this.target, true);
+                                                                                  this.target.style.backgroundColor = "green";
+                                                                                  this.drawShape(pos.target, this.start, false);
+                                                                                  this.start.style.backgroundColor = "yellow";
+                                                                                }*/
     if (this.isFirstTrial()) {
       this.start.style.backgroundColor = "gray";
     }
@@ -230,60 +230,40 @@ class Trial {
     if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
-      const insideTarget = this.isCursorInsideShape(event, this.target);
-      this.HIT = insideTarget ? 1 : 0;
+      this.targetPressIn = this.isCursorInsideShape(event, this.target);
       this.bodyIsPressed = true;
-
-      if (insideTarget) {
-        if (this.EndTrialByTargetPress) {
-          this.successSound.play();
-          this.target.style.display = "none";
-
-          this.endTrial();
-        } else if (!this.PressAndReleaseMustBeInsideTarget) {
-          // Scenario (F & F): Press does not have to be inside target; ignore this scenario or treat as invalid
-          //console.log("Scenario (F & F) is not handled or invalid.");
-        }
-      } else {
-        this.errorSound.play();
-        if (
-          this.PressAndReleaseMustBeInsideTarget ||
-          this.EndTrialByTargetPress
-        ) {
-          this.target.style.display = "none";
-          this.isFailedTrial = this.isFailed();
-          this.endTrial();
-        }
-      }
-      this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-      this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+    } else {
+      this.targetPressIn = false;
+      this.errorSound.play();
     }
+    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+    this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
   }
 
   handleBodyRelease(event) {
-    const insideTarget = this.isCursorInsideShape(event, this.target);
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       this.logMouseEvent(event, 3);
+      this.targetReleaseIn = this.isCursorInsideShape(event, this.target);
 
-      if (
-        this.PressAndReleaseMustBeInsideTarget &&
-        !this.EndTrialByTargetPress
-      ) {
-        // Scenario (T & F): Both press and release must be inside target
-        if (insideTarget && this.HIT === 1) {
-          this.successSound.play();
-          this.target.style.display = "none";
+      if (this.targetPressIn) {
+        this.successSound.play();
+
+        if (this.experimentType === "discrete") {
+          this.start.style.display = "none";
+          this.target.style.backgroundColor = "green";
         } else {
-          this.errorSound.play();
-          this.isFailedTrial = this.isFailed();
+          this.target.style.backgroundColor = "yellow";
+          this.start.style.backgroundColor = "green";
         }
       } else {
+        this.errorSound.play();
       }
+
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
       this.endTrial();
     } else if (this.trialStarted && this.firstClickDone) {
-      this.logMouseEvent(event, 3);
+      // release on start
     }
   }
 
@@ -296,7 +276,7 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (this.intDevice === "Touch") {
+    if (this.intDevice === "touch") {
       const extendedRect = {
         left: rect.left - this.AMBIGUITY_MARGIN_PX,
         top: rect.top - this.AMBIGUITY_MARGIN_PX,
@@ -311,7 +291,7 @@ class Trial {
         event.clientY <= extendedRect.bottom;
 
       if (!isCursorInsideShape && isTouchInsideMargin) {
-        this.isAmbiguityMarginHit = true;
+        this.ambiguityMarginHit = true;
       }
       return isTouchInsideMargin;
     }
@@ -319,6 +299,15 @@ class Trial {
   }
 
   endTrial() {
+    console.log("************** END TRIAL INFO START ******************");
+    console.log("targetPressIn: " + this.targetPressIn);
+    console.log("targetReleaseIn: " + this.targetReleaseIn);
+
+    console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
+    console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
+    console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
+    console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
+    console.log("************** END TRIAL INFO END ******************");
     const trialData = this.getExportDataTrial();
     const trialCopy = JSON.parse(JSON.stringify(this));
 
@@ -343,7 +332,54 @@ class Trial {
     return this.trialId;
   }
 
-  isFailed() {
+  isToBeRepeatedTrial() {
+    if (this.isClickAMistake()) {
+      console.log("Click was a mistake, trial to be repeated: " + true);
+      return true;
+    }
+    if (REP_PRESS_OUT_REL_OUT) {
+      return this.isPressOutReleaseOut();
+    }
+    if (REP_PRESS_OUT_REL_IN) {
+      return this.isPressOutReleaseIn();
+    }
+    if (REP_PRESS_IN_REL_OUT) {
+      return this.isPressInReleaseOut();
+    }
+    if (REP_PRESS_IN_REL_IN) {
+      return this.isPressInReleaseIn();
+    }
+  }
+
+  isPressOutReleaseOut() {
+    return !this.targetPressIn && !this.targetReleaseIn;
+  }
+
+  isPressOutReleaseIn() {
+    return !this.targetPressIn && this.targetReleaseIn;
+  }
+
+  isPressInReleaseOut() {
+    return this.targetPressIn && !this.targetReleaseIn;
+  }
+
+  isPressInReleaseIn() {
+    return this.targetPressIn && this.targetReleaseIn;
+  }
+
+  isHit() {
+    if (HIT_ON_PRESS_AND_RELEASE) {
+      return this.isPressInReleaseIn();
+    } else {
+      return this.isPressInReleaseOut() || this.isPressInReleaseIn();
+    }
+  }
+
+  isAmbiguityMarginHit() {
+    return this.ambiguityMarginHit;
+  }
+
+  isClickAMistake() {
     const clickStartX1 = this.startCoords.x;
     const clickStartY1 = this.startCoords.y;
 
@@ -448,24 +484,33 @@ class Trial {
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
         return { start, target };
       }
-    } while (!start || !target);
-    if (count > maxcount) {
-      const dis = this.generateReciprocalPositions();
-      if (
-        !dis.start ||
-        !dis.target ||
-        !dis.start.x ||
-        !dis.start.y ||
-        !dis.target.x ||
-        !dis.target.y
-      ) {
-        throw Error("[MY ERROR]:  Could not generate a valid position");
+      if (count === maxcount) {
+        console.log("Screen too small");
+        x1 = window.innerWidth / 2;
+        y1 = window.innerHeight / 2;
+
+        angle = this.trialDirection;
+
+        const targetCoord = generateCenterPointWithAmplitude(
+          x1,
+          y1,
+          amplitude,
+          angle,
+        );
+        x2 = targetCoord.x;
+        y2 = targetCoord.y;
+
+        if (
+          this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+          this.isShapeWithinBounds(x2, y2, width2, height2)
+        ) {
+          start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+          target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+          return { start, target };
+        }
       }
-      start = dis.start;
-      target = dis.target;
-      return { start, target };
-    }
-    return { start, target };
+    } while ((!start || !target) && count <= maxcount);
+    console.error("[MY ERROR] Couldn't find position");
   }
 
   takeCoordsFromPrevTrial() {
@@ -527,12 +572,12 @@ class Trial {
       targetWidthPx: mmToPixels(this.targetWidth),
       targetHeightPx: mmToPixels(this.targetHeight),
 
-      HIT: this.HIT ? 1 : 0,
-      AmbiguityMarginHIT: this.isAmbiguityMarginHit ? 1 : 0,
-      isFailedTrial: this.isFailedTrial,
+      targetPressIn: this.targetPressIn,
+      targetReleaseIn: this.targetReleaseIn,
 
-      PressAndReleaseMustBeInsideTarget: this.PressAndReleaseMustBeInsideTarget,
-      EndTrialByTargetPress: this.EndTrialByTargetPress,
+      HIT: this.isHit(),
+      AmbiguityMarginHIT: this.isAmbiguityMarginHit(),
+      toBeRepeatedTrial: this.isToBeRepeatedTrial(),
 
       T0: getTimeFormat(this.clicksTime.at(0)),
       T1: getTimeFormat(this.clicksTime.at(1)),

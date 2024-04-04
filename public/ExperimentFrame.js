@@ -68,7 +68,7 @@ class ExperimentFrame {
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
-    if (trialData.isFailedTrial) {
+    if (trialData.toBeRepeatedTrial) {
       const failedTrial = new Trial(
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
