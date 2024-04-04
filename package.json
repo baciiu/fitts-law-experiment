@@ -3,10 +3,6 @@
     "prettier": "3.1.0"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.3",
-    "http-server": "^14.1.1",
-    "nodemon": "^3.1.0",
     "vercel": "^33.6.3"
   },
   "name": "fitts-law-experiment",
@@ -14,8 +10,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
