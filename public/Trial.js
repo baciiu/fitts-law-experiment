@@ -28,7 +28,7 @@ class Trial {
     this.amplitude = amplitude;
     this.maxScreenPercentage = MAX_DISTANCE_START_TARGET_PERCENTAGE;
     this.previousTrialEnd = {};
-    this.isAmbiguityMarginHit = false;
+    this.ambiguityMarginHit = false;
 
     this.successSound = new Audio("./sounds/success.wav");
     this.errorSound = new Audio("./sounds/err1.wav");
@@ -39,7 +39,7 @@ class Trial {
 
     this.firstClickDone = false;
     this.trialCompleted = false;
-    this.isFailedTrial = false;
+    this.toBeRepeatedTrial = false;
     this.bodyIsPressed = false;
 
     this.startCoords = { x: null, y: null };
@@ -251,7 +251,7 @@ class Trial {
           this.EndTrialByTargetPress
         ) {
           this.target.style.display = "none";
-          this.isFailedTrial = this.isFailed();
+          this.toBeRepeatedTrial = this.isToBeRepeatedTrial();
           this.endTrial();
         }
       }
@@ -275,7 +275,7 @@ class Trial {
           this.target.style.display = "none";
         } else {
           this.errorSound.play();
-          this.isFailedTrial = this.isFailed();
+          this.toBeRepeatedTrial = this.isToBeRepeatedTrial();
         }
       } else {
       }
@@ -311,7 +311,7 @@ class Trial {
         event.clientY <= extendedRect.bottom;
 
       if (!isCursorInsideShape && isTouchInsideMargin) {
-        this.isAmbiguityMarginHit = true;
+        this.ambiguityMarginHit = true;
       }
       return isTouchInsideMargin;
     }
@@ -343,7 +343,45 @@ class Trial {
     return this.trialId;
   }
 
-  isFailed() {
+  isToBeRepeatedTrial() {
+    if (this.isClickAMistake()) {
+      return true;
+    }
+    if (REP_PRESS_OUT_REL_OUT) {
+      return this.isPressOutReleaseOut();
+    }
+    if (REP_PRESS_OUT_REL_IN) {
+      return this.isPressOutReleaseIn();
+    }
+    if (REP_PRESS_IN_REL_OUT) {
+      return this.isPressInReleaseOut();
+    }
+    if (REP_PRESS_IN_REL_IN) {
+      return this.isPressInReleaseIn();
+    }
+  }
+
+  isPressOutReleaseOut() {}
+
+  isPressOutReleaseIn() {}
+
+  isPressInReleaseOut() {}
+
+  isPressInReleaseIn() {}
+
+  isHit() {
+    if (HIT_ON_PRESS_AND_RELEASE) {
+      return this.isPressInReleaseIn();
+    } else {
+      return this.isPressInReleaseOut() || this.isPressInReleaseIn();
+    }
+  }
+
+  isAmbiguityMarginHit() {
+    return this.ambiguityMarginHit;
+  }
+
+  isClickAMistake() {
     const clickStartX1 = this.startCoords.x;
     const clickStartY1 = this.startCoords.y;
 
@@ -448,24 +486,33 @@ class Trial {
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
         return { start, target };
       }
-    } while (!start || !target);
-    if (count > maxcount) {
-      const dis = this.generateReciprocalPositions();
-      if (
-        !dis.start ||
-        !dis.target ||
-        !dis.start.x ||
-        !dis.start.y ||
-        !dis.target.x ||
-        !dis.target.y
-      ) {
-        throw Error("[MY ERROR]:  Could not generate a valid position");
+      if (count === maxcount) {
+        console.log("Screen too small");
+        x1 = window.innerWidth / 2;
+        y1 = window.innerHeight / 2;
+
+        angle = this.trialDirection;
+
+        const targetCoord = generateCenterPointWithAmplitude(
+          x1,
+          y1,
+          amplitude,
+          angle,
+        );
+        x2 = targetCoord.x;
+        y2 = targetCoord.y;
+
+        if (
+          this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+          this.isShapeWithinBounds(x2, y2, width2, height2)
+        ) {
+          start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+          target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+          return { start, target };
+        }
       }
-      start = dis.start;
-      target = dis.target;
-      return { start, target };
-    }
-    return { start, target };
+    } while ((!start || !target) && count <= maxcount);
+    console.error("[MY ERROR] Couldn't find position");
   }
 
   takeCoordsFromPrevTrial() {
@@ -527,9 +574,9 @@ class Trial {
       targetWidthPx: mmToPixels(this.targetWidth),
       targetHeightPx: mmToPixels(this.targetHeight),
 
-      HIT: this.HIT ? 1 : 0,
-      AmbiguityMarginHIT: this.isAmbiguityMarginHit ? 1 : 0,
-      isFailedTrial: this.isFailedTrial,
+      HIT: this.isHit(),
+      AmbiguityMarginHIT: this.isAmbiguityMarginHit(),
+      toBeRepeatedTrial: this.isToBeRepeatedTrial(),
 
       PressAndReleaseMustBeInsideTarget: this.PressAndReleaseMustBeInsideTarget,
       EndTrialByTargetPress: this.EndTrialByTargetPress,
