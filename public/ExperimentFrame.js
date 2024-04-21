@@ -8,7 +8,6 @@ class ExperimentFrame {
     this.repetitionPerTrial = REPETITION_PER_TRIAL;
     this.scrambleBlocks = SCRAMBLE_BLOCKS;
     this.experiment = new Experiment(
-      this.experimentType,
       this.totalBlocks,
       this.repetitionPerTrial,
       this.scrambleBlocks,
@@ -60,7 +59,7 @@ class ExperimentFrame {
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
-    if (trialData.isFailedTrial) {
+    if (trialData.toBeRepeatedTrial) {
       const failedTrial = new Trial(
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
@@ -115,7 +114,7 @@ class ExperimentFrame {
 
     this.showIndexes();
 
-    if (this.trialNumber % this.trialsPerBreak === 0) {
+    if (this.trialIndex % this.trialsPerBreak === 0) {
       this.displayBreakWindow();
     }
   }
@@ -214,7 +213,6 @@ class ExperimentFrame {
 
   getRemainingTrials() {
     let index = this.trialIndex;
-    index++;
     const a = index % this.trialsPerBreak;
     const b = this.trialsPerBreak;
     return b - a;
