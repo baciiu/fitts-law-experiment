@@ -148,6 +148,15 @@ class Trial {
     this.setupEventHandlers();
   }
 
+  getParity(number) {
+    const parts = number.toString().split(".");
+    if (parts[1] && Number(parts[1]) % 2 !== 0) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
   checkIfCoordinatesFitTheScreen(pos) {
     if (
       !(
@@ -250,7 +259,6 @@ class Trial {
       } else {
         this.errorSound.play();
       }
-
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
       this.endTrial();
@@ -531,6 +539,10 @@ class Trial {
   logMouseEvent(event, index) {
     this.clicksTime[index] = new Date();
     this.clicksCoords[index] = { x: event.clientX, y: event.clientY };
+  }
+
+  setPreviousTrial(prevTrial) {
+    this.previousTrial = prevTrial;
   }
 
   getExportDataTrial() {
