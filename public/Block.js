@@ -13,7 +13,7 @@ class Block {
     this.trials = [];
     this.generateTrials();
 
-    this.maxScreenPercentage = MAX_DISTANCE_START_TARGET_PERCENTAGE;
+    this.maxScreenPercentage = MAX_SCREEN_DISTANCE;
   }
 
   has2InputParams() {
@@ -78,6 +78,7 @@ class Block {
   }
 
   init4InputTrials() {
+    console.log("inside init ");
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
       this.addNewTrialForTarget(

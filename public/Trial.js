@@ -1,9 +1,4 @@
 class Trial {
-  TOP_MARGIN_PX = mmToPixels(5);
-  OTHER_MARGINS_PX = mmToPixels(3);
-  FAILED_TRIAL_THRESHOLD = 4;
-  AMBIGUITY_MARGIN_PX = mmToPixels(20);
-
   constructor(
     trialId,
     trialRep,
@@ -24,7 +19,6 @@ class Trial {
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
-    this.maxScreenPercentage = MAX_DISTANCE_START_TARGET_PERCENTAGE;
     this.previousTrialEnd = {};
     this.ambiguityMarginHit = false;
 
@@ -87,7 +81,20 @@ class Trial {
   }
 
   isFirstTrial() {
-    return this.trialId === 1;
+    if (this.experimentType === "discrete") {
+      return this.trialId === 1;
+    } else {
+      console.log(
+        "TrialRep " +
+          this.trialRep +
+          " TriaId " +
+          this.trialId +
+          " is " +
+          this.trialRep ===
+          this.trialId,
+      );
+      return this.trialRep === this.trialId;
+    }
   }
 
   drawBody() {
@@ -127,17 +134,11 @@ class Trial {
     const pos = this.generateReciprocalPositions();
     this.checkIfCoordinatesFitTheScreen(pos);
 
-    //if (this.getParity(this.trialRep) === 0) {
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "green";
+    this.target.style.backgroundColor = "orange";
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "yellow";
-    /*} else {
-                                                                                  this.drawShape(pos.start, this.target, true);
-                                                                                  this.target.style.backgroundColor = "green";
-                                                                                  this.drawShape(pos.target, this.start, false);
-                                                                                  this.start.style.backgroundColor = "yellow";
-                                                                                }*/
+    this.start.style.backgroundColor = "red";
+
     if (this.isFirstTrial()) {
       this.start.style.backgroundColor = "gray";
     }
@@ -207,8 +208,8 @@ class Trial {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          this.target.style.backgroundColor = "yellow";
-          this.start.style.backgroundColor = "green";
+          this.target.style.backgroundColor = "red";
+          this.start.style.backgroundColor = "orange";
         }
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
@@ -252,13 +253,12 @@ class Trial {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          this.target.style.backgroundColor = "yellow";
-          this.start.style.backgroundColor = "green";
+          this.target.style.backgroundColor = "red";
+          this.start.style.backgroundColor = "orange";
         }
       } else {
         this.errorSound.play();
       }
-
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
       this.endTrial();
@@ -278,10 +278,10 @@ class Trial {
 
     if (this.intDevice === "touch") {
       const extendedRect = {
-        left: rect.left - this.AMBIGUITY_MARGIN_PX,
-        top: rect.top - this.AMBIGUITY_MARGIN_PX,
-        right: rect.right + this.AMBIGUITY_MARGIN_PX,
-        bottom: rect.bottom + this.AMBIGUITY_MARGIN_PX,
+        left: rect.left - AMBIGUITY_MARGIN_PX,
+        top: rect.top - AMBIGUITY_MARGIN_PX,
+        right: rect.right + AMBIGUITY_MARGIN_PX,
+        bottom: rect.bottom + AMBIGUITY_MARGIN_PX,
       };
 
       let isTouchInsideMargin =
@@ -395,22 +395,19 @@ class Trial {
       clickTargetX2,
       clickTargetY2,
     );
-    return distance < mmToPixels(this.amplitude) / this.FAILED_TRIAL_THRESHOLD;
+    return distance < mmToPixels(this.amplitude) / FAILED_TRIAL_THRESHOLD;
   }
 
   getRandomPoint(width1, height1) {
     const x1 =
-      Math.random() * (window.innerWidth - width1 - 2 * this.OTHER_MARGINS_PX) +
+      Math.random() * (window.innerWidth - width1 - 2 * OTHER_MARGINS_PX) +
       width1 / 2 +
-      this.OTHER_MARGINS_PX;
+      OTHER_MARGINS_PX;
     const y1 =
       Math.random() *
-        (window.innerHeight -
-          height1 -
-          this.TOP_MARGIN_PX -
-          this.OTHER_MARGINS_PX) +
+        (window.innerHeight - height1 - TOP_MARGIN_PX - OTHER_MARGINS_PX) +
       height1 / 2 +
-      this.TOP_MARGIN_PX;
+      TOP_MARGIN_PX;
     return { x: x1, y: y1 };
   }
 
@@ -424,19 +421,19 @@ class Trial {
   }
 
   isLeftEdgeWithinBounds(x, width) {
-    return x - width / 2 > this.OTHER_MARGINS_PX;
+    return x - width / 2 > OTHER_MARGINS_PX;
   }
 
   isRightEdgeWithinBounds(x, width) {
-    return x + width / 2 < window.innerWidth - this.OTHER_MARGINS_PX;
+    return x + width / 2 < window.innerWidth - OTHER_MARGINS_PX;
   }
 
   isTopEdgeWithinBounds(y, height) {
-    return y - height / 2 > this.TOP_MARGIN_PX;
+    return y - height / 2 > TOP_MARGIN_PX;
   }
 
   isBottomEdgeWithinBounds(y, height) {
-    return y + height / 2 < window.innerHeight - this.TOP_MARGIN_PX;
+    return y + height / 2 < window.innerHeight - TOP_MARGIN_PX;
   }
 
   isAmplitude(x1, y1, x2, y2, amplitude) {
@@ -484,57 +481,57 @@ class Trial {
         target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
         return { start, target };
       }
-      if (count === maxcount) {
-        console.log("Screen too small");
-        x1 = window.innerWidth / 2;
-        y1 = window.innerHeight / 2;
-
-        angle = this.trialDirection;
-
-        const targetCoord = generateCenterPointWithAmplitude(
-          x1,
-          y1,
-          amplitude,
-          angle,
-        );
-        x2 = targetCoord.x;
-        y2 = targetCoord.y;
-
-        if (
-          this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-          this.isShapeWithinBounds(x2, y2, width2, height2)
-        ) {
-          start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-          target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
-          return { start, target };
-        }
+    } while (!start || !target);
+    if (count > maxcount) {
+      const dis = this.generateReciprocalPositions();
+      if (
+        !dis.start ||
+        !dis.target ||
+        !dis.start.x ||
+        !dis.start.y ||
+        !dis.target.x ||
+        !dis.target.y
+      ) {
+        throw Error("[MY ERROR]:  Could not generate a valid position");
       }
-    } while ((!start || !target) && count <= maxcount);
-    console.error("[MY ERROR] Couldn't find position");
-  }
-
-  takeCoordsFromPrevTrial() {
-    if (!this.isPreviousTrial()) {
-      return false;
+      start = dis.start;
+      target = dis.target;
+      return { start, target };
     }
-    const isSameRepGroup =
-      Math.floor(this.previousTrial.trialRep) === Math.floor(this.trialRep);
-
-    const isNextRep = this.trialId === this.previousTrial.trialId + 1;
-
-    return isNextRep && isSameRepGroup;
+    return { start, target };
   }
 
   generateReciprocalPositions() {
-    let start, target;
+    let amplitude = mmToPixels(this.amplitude);
+    let width1 = mmToPixels(this.startWidth);
+    let height1 = mmToPixels(this.startHeight);
+    let width2 = mmToPixels(this.targetWidth);
+    let height2 = mmToPixels(this.targetHeight);
+    let start, target, x1, y1, x2, y2;
 
-    if (this.takeCoordsFromPrevTrial()) {
-      start = { x: this.previousTrial.startX, y: this.previousTrial.startY };
-      target = { x: this.previousTrial.targetX, y: this.previousTrial.targetY };
-    } else {
-      const point = this.generateDiscretePositions();
-      start = point.start;
-      target = point.target;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    const angle = this.trialDirection;
+
+    const radians = (angle * Math.PI) / 180; // Convert angle to radians
+
+    x1 = centerX + (amplitude / 2) * Math.cos(radians);
+    y1 = centerY + (amplitude / 2) * Math.sin(radians);
+
+    x2 = centerX - (amplitude / 2) * Math.cos(radians);
+    y2 = centerY - (amplitude / 2) * Math.sin(radians);
+
+    if (
+      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
+      this.isShapeWithinBounds(x2, y2, width2, height2)
+    ) {
+      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
+      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+      return { start, target };
+    }
+    if (!start || !target) {
+      throw Error("[MY ERROR]: Could not generate a valid position");
     }
     return { start, target };
   }

@@ -124,10 +124,9 @@ class ExperimentFrame {
     }
 
     this.showIndexes();
-
     this.setThisPrevTrial();
 
-    if (this.trialNumber % this.trialsPerBreak === 0) {
+    if (this.trialIndex % this.trialsPerBreak === 0) {
       this.displayBreakWindow();
     }
   }
@@ -149,7 +148,7 @@ class ExperimentFrame {
       throw Error("[MY ERROR]: newItem must be an instance of Trial.");
     }
     // Ensure the startIndex is within the array bounds and not the last element
-    if (startIndex < 0 || startIndex >= array.length) {
+    if (startIndex < 0 || startIndex >= array.length - 1) {
       throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
     }
 
@@ -237,7 +236,6 @@ class ExperimentFrame {
 
   getRemainingTrials() {
     let index = this.trialIndex;
-    index++;
     const a = index % this.trialsPerBreak;
     const b = this.trialsPerBreak;
     return b - a;
