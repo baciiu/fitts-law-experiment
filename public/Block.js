@@ -58,9 +58,14 @@ class Block {
     for (let target of this.targetDimens) {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
-          let id = this.trialId;
           let temp_id = this.trialId;
-          this.addNewTrialForTarget(id, temp_id + "", angle, target, amplitude);
+          this.addNewTrialForTarget(
+            this.trialId++,
+            temp_id + "",
+            angle,
+            target,
+            amplitude,
+          );
 
           for (let i = 1; i < this.repetitionTrial; i++) {
             this.addNewTrialForTarget(
@@ -74,7 +79,7 @@ class Block {
         }
       }
     }
-    console.log(this.trials);
+    //console.log(this.trials);
   }
 
   init4InputTrials() {
