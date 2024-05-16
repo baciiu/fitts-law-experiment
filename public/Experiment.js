@@ -16,7 +16,10 @@ class Experiment {
     this.generateBlocks();
     if (this.scrambleBlocks && EXPERIMENT_TYPE === "discrete") {
       this.shuffleBlocks();
+    } else if (this.scrambleBlocks && EXPERIMENT_TYPE === "reciprocal") {
+      this.shuffleBlocksReciprocal();
     }
+    //console.log(this.blocks);
   }
 
   generateBlocks() {
@@ -27,25 +30,90 @@ class Experiment {
 
   shuffleBlocks() {
     let trial_pattern = this.getBlock(1).getTrials();
-    this.shuffleArray(trial_pattern);
+    trial_pattern = this.shuffleArraySmall(trial_pattern);
 
     if (this.numBlocks > 1) {
       const orderMap = new Map(
         trial_pattern.map((item, index) => [item.trialId, index]),
       );
 
-      const reorder = (arr, orderMap) => {
-        return arr
-          .slice()
-          .sort((a, b) => orderMap.get(a.trialId) - orderMap.get(b.trialId));
-      };
-
       for (let i = 2; i <= this.numBlocks; i++) {
         let trials = this.getBlock(i).getTrials();
-        let shuffled_trial = reorder(trials, orderMap);
+        let shuffled_trial = this.getOrderDiscrete(trials, orderMap);
         this.getBlock(i).setTrials(shuffled_trial);
       }
     }
+  }
+
+  getOrderDiscrete(arr, orderMap) {
+    return arr
+      .slice()
+      .sort((a, b) => orderMap.get(a.trialId) - orderMap.get(b.trialId));
+  }
+
+  shuffleBlocksReciprocal() {
+    let orderMap = this.getRepArray();
+
+    orderMap = this.shuffleArraySmall([...orderMap]);
+
+    for (let i = 2; i <= this.numBlocks; i++) {
+      let trials = this.getBlock(i).getTrials();
+      let shuffled_trial = this.rearrangeTrials(trials, orderMap);
+      this.getBlock(i).setTrials(shuffled_trial);
+    }
+  }
+
+  getRepArray() {
+    let arr = [];
+
+    if (REPETITION_PER_TRIAL === 0) {
+      console.error("[MY ERROR] Division by zero");
+    }
+    const numberOfTrials = Math.floor(
+      this.getBlock(1).getTrials().length / REPETITION_PER_TRIAL,
+    );
+
+    for (let i = 0; i < numberOfTrials; i++) {
+      if (i === 0) {
+        arr[0] = 1;
+      } else {
+        arr[i] = arr[i - 1] + REPETITION_PER_TRIAL;
+      }
+    }
+    //console.log(arr);
+    return arr;
+  }
+
+  rearrangeTrials(trials, pattern) {
+    // Create a map to group trials by their main trialRep number
+    let trialMap = new Map();
+
+    trials.forEach((trial) => {
+      let mainRep = trial.trialRep.split(".")[0];
+      if (!trialMap.has(mainRep)) {
+        trialMap.set(mainRep, []);
+      }
+      trialMap.get(mainRep).push(trial);
+    });
+
+    // Sort each group of trials with the same main trialRep number
+    trialMap.forEach((value, key) => {
+      value.sort((a, b) => {
+        let aSubRep = a.trialRep.split(".")[1] || 0;
+        let bSubRep = b.trialRep.split(".")[1] || 0;
+        return aSubRep - bSubRep;
+      });
+    });
+
+    let rearrangedTrials = [];
+    pattern.forEach((rep) => {
+      if (trialMap.has(rep.toString())) {
+        rearrangedTrials.push(...trialMap.get(rep.toString()));
+      }
+    });
+    // console.log(rearrangedTrials);
+
+    return rearrangedTrials;
   }
 
   setupContinueButton() {
@@ -86,19 +154,12 @@ class Experiment {
     return randomIndex;
   }
 
-  shuffleArray(array) {
+  shuffleArraySmall(array) {
     // Fisher-Yates algorithm
-    let currentIndex = array.length;
-    let temporaryValue, randomIndex;
-
-    while (currentIndex !== 0) {
-      const rand = Math.random();
-      randomIndex = Math.floor(rand * currentIndex);
-      currentIndex -= 1;
-
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
+    return array;
   }
 }
