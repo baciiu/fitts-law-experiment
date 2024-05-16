@@ -80,17 +80,18 @@ class Trial {
   isFirstTrial() {
     if (this.experimentType === "discrete") {
       return this.trialId === 1;
-    } else {
+    } else if (this.experimentType === "reciprocal") {
       console.log(
         "TrialRep " +
           this.trialRep +
           " TriaId " +
           this.trialId +
           " is " +
-          this.trialRep ===
-          this.trialId,
+          (this.trialRep == this.trialId),
       );
-      return this.trialRep === this.trialId;
+      return this.trialRep == this.trialId;
+    } else {
+      console.error("[MY ERROR]: EXPERIMENT TYPE !");
     }
   }
 
