@@ -175,6 +175,7 @@ class ExperimentFrame {
   }
 
   experimentFinished() {
+    this.cleanUpSounds();
     this.downloadCSV(this.trialsData);
     showFinishWindow();
   }
@@ -255,5 +256,14 @@ class ExperimentFrame {
         throw Error("[MY ERROR]: No trials found in the first block.");
       }
     }
+  }
+
+  cleanUpSounds() {
+    errorSound.remove();
+    successSound.remove();
+    errorSound.srcObject = null;
+    successSound.srcObject = null;
+    errorSound.src = "";
+    successSound.src = "";
   }
 }

@@ -22,9 +22,6 @@ class Trial {
     this.previousTrialEnd = {};
     this.ambiguityMarginHit = false;
 
-    this.successSound = new Audio("./sounds/success.wav");
-    this.errorSound = new Audio("./sounds/err1.wav");
-
     this.start = document.getElementById("start");
     this.target = document.getElementById("target");
     this.body = document.getElementById("body");
@@ -83,17 +80,18 @@ class Trial {
   isFirstTrial() {
     if (this.experimentType === "discrete") {
       return this.trialId === 1;
-    } else {
+    } else if (this.experimentType === "reciprocal") {
       console.log(
         "TrialRep " +
           this.trialRep +
           " TriaId " +
           this.trialId +
           " is " +
-          this.trialRep ===
-          this.trialId,
+          (this.trialRep == this.trialId),
       );
-      return this.trialRep === this.trialId;
+      return this.trialRep == this.trialId;
+    } else {
+      console.error("[MY ERROR]: EXPERIMENT TYPE !");
     }
   }
 
@@ -186,11 +184,11 @@ class Trial {
   handleStartPress(event) {
     if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
-      this.successSound.play();
+      successSound.play();
       this.firstClickDone = true;
       this.trialStarted = true;
     } else {
-      this.errorSound.play();
+      errorSound.play();
       this.start.removeEventListener("mousedown", this.boundHandleStartPress);
       this.start.removeEventListener("touchstart", this.boundHandleStartPress);
     }
@@ -199,7 +197,7 @@ class Trial {
   handleStartRelease(event) {
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
-      this.errorSound.play();
+      errorSound.play().then((r) => {});
     } else if (this.trialStarted) {
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
@@ -222,7 +220,7 @@ class Trial {
         this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
         this.body.addEventListener("touchend", this.boundHandleBodyRelease); // Add touchend listener for the body
       } else {
-        this.errorSound.play();
+        errorSound.play();
       }
     }
   }
@@ -235,7 +233,7 @@ class Trial {
       this.bodyIsPressed = true;
     } else {
       this.targetPressIn = false;
-      this.errorSound.play();
+      errorSound.play();
     }
     this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
     this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
@@ -247,7 +245,7 @@ class Trial {
       this.targetReleaseIn = this.isCursorInsideShape(event, this.target);
 
       if (this.targetPressIn) {
-        this.successSound.play();
+        successSound.play();
 
         if (this.experimentType === "discrete") {
           this.start.style.display = "none";
@@ -257,7 +255,7 @@ class Trial {
           this.start.style.backgroundColor = "orange";
         }
       } else {
-        this.errorSound.play();
+        errorSound.play();
       }
       this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
       this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
