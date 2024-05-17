@@ -54,14 +54,13 @@ class ExperimentFrame {
 
   // Other methods remain unchanged
 
-  trialCompleted(detail) {
-    let trialData = detail.trialData;
-    let trialCopy = detail.trialCopy;
+  trialCompleted(trialEmitted) {
+    let trialData = trialEmitted.trialData;
+    let trialCopy = trialEmitted.trialCopy;
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
-    if (trialData === undefined || trialData === null) {
-      throw Error("[MY ERROR]: Could not parse trial data");
-    }
+    this.checkForNullOrUndefined(trialData);
+
     trialData.blockNumber = this.blockNumber;
     trialData.userNumber = this.userNumber;
 
@@ -80,9 +79,8 @@ class ExperimentFrame {
         trialCopy.amplitude,
       );
 
-      if (!(failedTrial instanceof Trial)) {
-        throw Error("[MY ERROR]: newItem must be an instance of Trial.");
-      }
+      this.checkIfInstanceOfTrial(failedTrial);
+
       this.insertItemAfterGivenIndex(
         currentBlock.getTrials(),
         failedTrial,
@@ -90,6 +88,18 @@ class ExperimentFrame {
       );
     }
     this.prepareForNextTrialOrFinish(currentBlock);
+  }
+
+  checkForNullOrUndefined(input) {
+    if (input === undefined || input === null) {
+      throw Error("[MY ERROR]: Could not parse input");
+    }
+  }
+
+  checkIfInstanceOfTrial(trial) {
+    if (!(trial instanceof Trial)) {
+      throw Error("[MY ERROR]: newItem must be an instance of Trial.");
+    }
   }
 
   prepareForNextTrialOrFinish(currentBlock) {
