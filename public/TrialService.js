@@ -89,6 +89,28 @@ function testStartDistanceFromPreviousEnd(startX, startY) {
   return actualDistance <= screenWidth;
 }
 
+function deepCopy(obj) {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    const arrCopy = [];
+    for (let i = 0; i < obj.length; i++) {
+      arrCopy[i] = deepCopy(obj[i]);
+    }
+    return arrCopy;
+  }
+
+  const copy = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      copy[key] = deepCopy(obj[key]);
+    }
+  }
+  return copy;
+}
+
 function generateCenterPointWithAmplitude(x, y, amplitude, angle) {
   const angleRadians = angle * (Math.PI / 180);
   return {
