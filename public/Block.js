@@ -1,3 +1,5 @@
+"use strict";
+
 class Block {
   constructor(blockNumber, repTrial) {
     this.blockNumber = blockNumber;

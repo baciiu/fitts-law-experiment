@@ -1,3 +1,5 @@
+"use strict";
+
 class ExperimentFrame {
   constructor(userNumber) {
     this.blockNumber = 1;
@@ -87,63 +89,96 @@ class ExperimentFrame {
     } else {
       // TRUE REPEAT GROUP and RECIPROCAL
       if (trialData.toBeRepeatedTrial) {
-        const trialGroup = this.getTrialGroupToBeRepeated(trialData.trialRep);
-        // set the new trialId and trialRep for the new Trials
-        for (let i = 0; i < trialGroup.length; i++) {
-          if (i == 0) {
-            trialGroup[i].trialId = currentBlock.getTrialsNumber() + 1;
-          } else {
-            trialGroup[i].trialId = trialGroup[i - 1].trialId + 1;
-          }
-        }
-        // console.log(trialGroup);
+        const trialGroup = this.getReciprocalTrialGroup(
+          trialData.trialRep,
+          currentBlock.getTrialsNumber(),
+        );
+
         let newStartIndex = this.getRandomIndexForItem(
           currentBlock.getTrials(),
           this.trialIndex,
         );
 
+        console.log(trialGroup);
         // add the new Trials to the block
-        for (let i = 0; i < trialGroup.length; i++) {
+        for (const element of trialGroup) {
+          console.log(element);
+          this.checkIfInstanceOfTrial(element);
+
           this.insertItemAtPosition(
             currentBlock.getTrials(),
-            trialGroup[i],
+            element,
             newStartIndex++,
           );
         }
+        console.log(trialGroup);
       }
       console.log(currentBlock.getTrials());
+
+      if (INTERRUPT_RECIPROCAL_GROUP) {
+      }
     }
+
     this.prepareForNextTrialOrFinish(currentBlock);
+  }
+
+  getReciprocalTrialGroup(trialRep, blockTrialNumber) {
+    const trialGroup = this.getTrialGroupToBeRepeated(
+      trialRep,
+      blockTrialNumber,
+    );
+    // set the new trialId and trialRep for the new Trials
+    for (let i = 0; i < trialGroup.length; i++) {
+      if (i === 0) {
+        trialGroup[i].trialId = blockTrialNumber + 1;
+      } else {
+        trialGroup[i].trialId = trialGroup[i - 1].trialId + 1;
+      }
+    }
+    return trialGroup;
+  }
+
+  isTrialInstance(trial) {
+    return trial instanceof Trial;
   }
 
   getTrialGroupToBeRepeated(trialRep) {
     const currentBlock = this.experiment.getBlock(this.blockNumber);
-    const getGroup = trialRep.split(".")[0];
+    const getGroupId = trialRep.split(".")[0];
     let groupArray = [];
     console.log(currentBlock.getTrials());
 
-    for (let i = 0; i < currentBlock.getTrials().length; i++) {
-      let trial = deepCopy(currentBlock.getTrials()[i]);
-      const getTrialRep = trial.trialRep.split(".")[0] || 0;
-      if (getGroup == getTrialRep) {
-        console.log(true);
-        groupArray.push(trial);
+    for (const element of currentBlock.getTrials()) {
+      let trialCopy = getCopyTrial(element);
+
+      this.checkIfInstanceOfTrial(trialCopy);
+
+      const getTrialRep = trialCopy.trialRep.split(".")[0] || 0;
+
+      if (getGroupId === getTrialRep) {
+        const newTrial = new Trial(
+          trialCopy.trialId,
+          trialCopy.trialRep,
+          trialCopy.trialDirection,
+          trialCopy.startWidth,
+          trialCopy.startHeight,
+          trialCopy.targetWidth,
+          trialCopy.targetHeight,
+          trialCopy.amplitude,
+        );
+        this.checkIfInstanceOfTrial(newTrial);
+
+        console.log("ITEM INSERTED:");
+        console.log(newTrial);
+
+        groupArray.push(newTrial);
       }
     }
-    console.log(groupArray);
     return groupArray;
   }
 
   checkIfReciprocalGroupRepeat() {
-    if (EXPERIMENT_TYPE === "reciprocal" && REPEAT_RECIPROCAL_GROUP === true) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  isExperimentTypeDiscrete() {
-    return EXPERIMENT_TYPE === "discrete";
+    return EXPERIMENT_TYPE === "reciprocal" && REPEAT_RECIPROCAL_GROUP === true;
   }
 
   checkForNullOrUndefined(input) {
@@ -179,17 +214,18 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     this.trial = block.getTrials()[this.trialIndex];
 
-    this.trial.setPreviousTrial(this.prevTrial);
+    this.checkIfInstanceOfTrial(this.trial);
 
-    if (typeof this.trial.drawShapes === "function") {
-      this.trial.drawShapes();
-    } else {
-      throw Error(
-        "[MY ERROR]: drawShapes method not found on the current trial object.",
-      );
-    }
+    console.log(this.trial);
+
+    const prev = deepCopy(this.prevTrial);
+
+    this.trial.setPreviousTrial(prev);
+
+    this.trial.drawShapes();
 
     this.showIndexes();
+
     this.setThisPrevTrial();
 
     if (this.trialIndex % this.trialsPerBreak === 0) {
@@ -223,9 +259,7 @@ class ExperimentFrame {
 
   // Fisher-Yates Algorithm
   insertItemAfterGivenIndex(array, newItem, startIndex) {
-    if (!(newItem instanceof Trial)) {
-      throw Error("[MY ERROR]: newItem must be an instance of Trial.");
-    }
+    this.checkIfInstanceOfTrial(newItem);
     // Ensure the startIndex is within the array bounds and not the last element
     if (startIndex < 0 || startIndex >= array.length - 1) {
       throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
@@ -242,24 +276,27 @@ class ExperimentFrame {
 
   insertItemAtPosition(array, item, index) {
     // Check if the index is within the bounds of the array
+    this.checkIfInstanceOfTrial(item);
+    console.log(array);
     if (index >= 0 && index <= array.length) {
       // Use splice to add the item at the specified index
       array.splice(index, 0, item);
     } else {
       console.error("Index out of bounds");
     }
+    console.log(array);
   }
 
   showIndexes() {
     let index = this.trialIndex;
     index++;
-    const currentTrialIndexEl = document.getElementById("currentTrialIndex");
+    const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
 
-    const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
+    const currentBlockIndexEl = document.getElementById("totalTrials");
     currentBlockIndexEl.innerText = this.getTotalTrials() + "";
 
-    const trialsToBlockIndexEI = document.getElementById("trialsToBreakIndex");
+    const trialsToBlockIndexEI = document.getElementById("trialsToBreak");
     trialsToBlockIndexEI.innerText = this.getRemainingTrials() + "";
   }
 

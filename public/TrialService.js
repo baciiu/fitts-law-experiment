@@ -1,3 +1,5 @@
+"use strict";
+
 function mmToPixels(mm) {
   // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
   const screenWidth = 1512; // Screen width in pixels
@@ -108,6 +110,55 @@ function deepCopy(obj) {
       copy[key] = deepCopy(obj[key]);
     }
   }
+  return copy;
+}
+
+function calculateWrappingDimensions(
+  rect1Width,
+  rect1Height,
+  rect2Width,
+  rect2Height,
+  distance,
+  angle,
+) {
+  let radians = (angle * Math.PI) / 180;
+
+  let x2 = distance * Math.cos(radians);
+  let y2 = distance * Math.sin(radians);
+
+  let minX = Math.min(0, x2);
+  let maxX = Math.max(rect1Width, x2 + rect2Width);
+  let minY = Math.min(0, y2);
+  let maxY = Math.max(rect1Height, y2 + rect2Height);
+
+  let wrappingWidth = maxX - minX;
+  let wrappingHeight = maxY - minY;
+
+  return { width: wrappingWidth, height: wrappingHeight };
+}
+
+function getCopyTrial(trial) {
+  const copy = new Trial(
+    trial.trialRep,
+    trial.trialDirection,
+    trial.startWidth,
+    trial.startHeight,
+    trial.targetWidth,
+    trial.targetHeight,
+    trial.amplitude,
+  );
+  copy.HIT = trial.HIT;
+  copy.clicksCoords = trial.clicksCoords;
+  copy.startCoords = trial.startCoords;
+  copy.targetCoords = trial.targetCoords;
+  copy.endCoords = trial.endCoords;
+  copy.ambiguityMarginHit = trial.ambiguityMarginHit;
+  copy.firstClickDone = false;
+  copy.trialCompleted = false;
+  copy.toBeRepeatedTrial = false;
+  copy.targetPressIn = false;
+  copy.targetReleaseIn = false;
+  copy.previousTrial = null;
   return copy;
 }
 

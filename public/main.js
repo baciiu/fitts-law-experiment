@@ -1,3 +1,5 @@
+"use strict";
+
 function showStartWindow() {
   const startWindow = document.getElementById("startWindow");
   startWindow.style.display = "block";

@@ -1,3 +1,5 @@
+"use strict";
+
 class Experiment {
   constructor(numBlocks, repPerTrial, scramble) {
     this.numBlocks = numBlocks;
