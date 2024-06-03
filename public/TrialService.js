@@ -179,3 +179,80 @@ const DEV_TYPE = Object.freeze({
   TOUCH: "touch",
   MOUSE: "mouse",
 });
+
+function getRandomIndexForItem(array, startIndex) {
+  // Ensure the startIndex is within the array bounds and not the last element
+  if (startIndex < 0 || startIndex >= array.length - 1) {
+    throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
+  }
+
+  // Generate a random index in the range from startIndex + 1 to the array length inclusive
+  const rand = Math.random();
+  const randomIndex =
+    Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
+  return randomIndex;
+}
+
+// Fisher-Yates Algorithm
+function insertItemAfterGivenIndex(array, newItem, startIndex) {
+  checkIfInstanceOfTrial(newItem);
+  // Ensure the startIndex is within the array bounds and not the last element
+  if (startIndex < 0 || startIndex >= array.length - 1) {
+    throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
+  }
+
+  // Generate a random index in the range from startIndex + 1 to the array length inclusive
+  const rand = Math.random();
+  const randomIndex =
+    Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
+
+  // Insert the new item at the random index
+  array.splice(randomIndex, 0, newItem);
+}
+
+function checkIfInstanceOfTrial(trial) {
+  if (!(trial instanceof Trial)) {
+    throw Error("[MY ERROR]: newItem must be an instance of Trial.");
+  }
+}
+
+function checkIfReciprocalGroupRepeat() {
+  return isReciprocal() && REPEAT_RECIPROCAL_GROUP === true;
+}
+
+function insertItemAtPosition(array, item, index) {
+  // Check if the index is within the bounds of the array
+  this.checkIfInstanceOfTrial(item);
+  console.log(array);
+  if (index >= 0 && index <= array.length) {
+    // Use splice to add the item at the specified index
+    array.splice(index, 0, item);
+  } else {
+    console.error("Index out of bounds");
+  }
+  console.log(array);
+}
+
+function checkForNullOrUndefined(input) {
+  if (input === undefined || input === null) {
+    throw Error("[MY ERROR]: Could not parse input");
+  }
+}
+
+function isDiscrete() {
+  return EXPERIMENT_TYPE === "discrete";
+}
+
+function isReciprocal() {
+  return EXPERIMENT_TYPE === "reciprocal";
+}
+
+function getDirectionList(startAngle, stepSize) {
+  const endAngle = 360;
+  let angles = [];
+  for (let angle = startAngle; angle < endAngle; angle += stepSize) {
+    angles.push(angle);
+  }
+  console.log(angles);
+  return angles;
+}

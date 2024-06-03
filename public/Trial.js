@@ -194,7 +194,7 @@ class Trial {
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
 
-        if (this.experimentType === "discrete") {
+        if (isDiscrete()) {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
@@ -239,7 +239,7 @@ class Trial {
       if (this.targetPressIn) {
         successSound.play();
 
-        if (this.experimentType === "discrete") {
+        if (isDiscrete()) {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
@@ -266,7 +266,7 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (this.intDevice === "touch") {
+    if (DEV_TYPE === "touch") {
       const extendedRect = {
         left: rect.left - AMBIGUITY_MARGIN_PX,
         top: rect.top - AMBIGUITY_MARGIN_PX,
@@ -429,7 +429,7 @@ class Trial {
   isAmplitude(x1, y1, x2, y2, amplitude) {
     const distance = getDistance(x1, y1, x2, y2);
     const tolerance = 1;
-    return Math.abs(distance - amplitude) <= tolerance;
+    return distance - amplitude <= tolerance;
   }
 
   generateDiscretePositions() {
