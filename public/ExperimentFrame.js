@@ -8,12 +8,7 @@ class ExperimentFrame {
     this.trialsPerBreak = TRIALS_PER_BREAK;
     this.experimentType = EXPERIMENT_TYPE;
     this.repetitionPerTrial = REPETITION_PER_TRIAL;
-    this.scrambleBlocks = SCRAMBLE_BLOCKS;
-    this.experiment = new Experiment(
-      this.totalBlocks,
-      this.repetitionPerTrial,
-      this.scrambleBlocks,
-    );
+    this.experiment = new Experiment(this.totalBlocks, this.repetitionPerTrial);
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
     this.setupContinueButton();
@@ -59,7 +54,7 @@ class ExperimentFrame {
     let trialCopy = trialEmitted.trialCopy;
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
-    this.checkForNullOrUndefined(trialData);
+    checkForNullOrUndefined(trialData);
 
     trialData.blockNumber = this.blockNumber;
     trialData.userNumber = this.userNumber;
@@ -67,7 +62,7 @@ class ExperimentFrame {
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
-    if (!this.checkIfReciprocalGroupRepeat()) {
+    if (!checkIfReciprocalGroupRepeat()) {
       if (trialData.toBeRepeatedTrial) {
         const failedTrial = new Trial(
           currentBlock.getTrialsNumber() + 1,
@@ -79,8 +74,10 @@ class ExperimentFrame {
           trialCopy.targetHeight,
           trialCopy.amplitude,
         );
-        this.checkIfInstanceOfTrial(failedTrial);
-        this.insertItemAfterGivenIndex(
+
+        checkIfInstanceOfTrial(failedTrial);
+
+        insertItemAfterGivenIndex(
           currentBlock.getTrials(),
           failedTrial,
           this.trialIndex,
@@ -94,7 +91,7 @@ class ExperimentFrame {
           currentBlock.getTrialsNumber(),
         );
 
-        let newStartIndex = this.getRandomIndexForItem(
+        let newStartIndex = getRandomIndexForItem(
           currentBlock.getTrials(),
           this.trialIndex,
         );
@@ -105,7 +102,7 @@ class ExperimentFrame {
           console.log(element);
           this.checkIfInstanceOfTrial(element);
 
-          this.insertItemAtPosition(
+          insertItemAtPosition(
             currentBlock.getTrials(),
             element,
             newStartIndex++,
@@ -136,10 +133,6 @@ class ExperimentFrame {
       }
     }
     return trialGroup;
-  }
-
-  isTrialInstance(trial) {
-    return trial instanceof Trial;
   }
 
   getTrialGroupToBeRepeated(trialRep) {
@@ -175,16 +168,6 @@ class ExperimentFrame {
       }
     }
     return groupArray;
-  }
-
-  checkIfReciprocalGroupRepeat() {
-    return EXPERIMENT_TYPE === "reciprocal" && REPEAT_RECIPROCAL_GROUP === true;
-  }
-
-  checkForNullOrUndefined(input) {
-    if (input === undefined || input === null) {
-      throw Error("[MY ERROR]: Could not parse input");
-    }
   }
 
   checkIfInstanceOfTrial(trial) {
@@ -242,49 +225,6 @@ class ExperimentFrame {
       targetX: this.trial.targetCoords.x,
       targetY: this.trial.targetCoords.y,
     };
-  }
-
-  getRandomIndexForItem(array, startIndex) {
-    // Ensure the startIndex is within the array bounds and not the last element
-    if (startIndex < 0 || startIndex >= array.length - 1) {
-      throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
-    }
-
-    // Generate a random index in the range from startIndex + 1 to the array length inclusive
-    const rand = Math.random();
-    const randomIndex =
-      Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
-    return randomIndex;
-  }
-
-  // Fisher-Yates Algorithm
-  insertItemAfterGivenIndex(array, newItem, startIndex) {
-    this.checkIfInstanceOfTrial(newItem);
-    // Ensure the startIndex is within the array bounds and not the last element
-    if (startIndex < 0 || startIndex >= array.length - 1) {
-      throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
-    }
-
-    // Generate a random index in the range from startIndex + 1 to the array length inclusive
-    const rand = Math.random();
-    const randomIndex =
-      Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
-
-    // Insert the new item at the random index
-    array.splice(randomIndex, 0, newItem);
-  }
-
-  insertItemAtPosition(array, item, index) {
-    // Check if the index is within the bounds of the array
-    this.checkIfInstanceOfTrial(item);
-    console.log(array);
-    if (index >= 0 && index <= array.length) {
-      // Use splice to add the item at the specified index
-      array.splice(index, 0, item);
-    } else {
-      console.error("Index out of bounds");
-    }
-    console.log(array);
   }
 
   showIndexes() {

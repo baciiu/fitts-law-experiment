@@ -7,12 +7,13 @@ class Block {
     this.startSize = START_SIZE;
     this.repetitionTrial = repTrial;
     this.targetDimens = INPUT;
-    this.trialDirection = this.getAngles(RADIAN_START, RADIAN_STEP);
+    this.trialDirection = DIRECTION_LIST;
     this.amplitude = AMPLITUDE_LIST;
     this.blockNumber = blockNumber;
 
     this.trialId = 1;
     this.trials = [];
+    this.reciprocalTrialsList = [];
     this.generateTrials();
 
     this.maxScreenPercentage = MAX_SCREEN_DISTANCE;
@@ -25,14 +26,20 @@ class Block {
     );
   }
 
-  addNewTrialForTarget(id, trialRep, trialAngle, target, amplitude) {
+  addNewTrialForTargetAndReturnTrial(
+    id,
+    trialRep,
+    trialAngle,
+    target,
+    amplitude,
+  ) {
     let startWidth;
     let startHeight;
 
-    if (this.experimentType === "discrete") {
+    if (isDiscrete()) {
       startWidth = this.startSize;
       startHeight = this.startSize;
-    } else if (this.experimentType === "reciprocal") {
+    } else if (isReciprocal()) {
       startWidth = target.width;
       startHeight = target.height;
     } else {
@@ -50,6 +57,7 @@ class Block {
       amplitude,
     );
     this.trials.push(trial);
+    return trial;
   }
 
   init2InputParameters() {
@@ -61,7 +69,8 @@ class Block {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
-          this.addNewTrialForTarget(
+          let reciprocalTrial = new ReciprocalTrial(temp_id);
+          this.addNewTrialForTargetAndReturnTrial(
             this.trialId++,
             temp_id + "",
             angle,
@@ -70,7 +79,7 @@ class Block {
           );
 
           for (let i = 1; i < this.repetitionTrial; i++) {
-            this.addNewTrialForTarget(
+            this.addNewTrialForTargetAndReturnTrial(
               this.trialId++,
               temp_id + "." + i,
               angle,
@@ -85,19 +94,18 @@ class Block {
   }
 
   init4InputTrials() {
-    console.log("inside init ");
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
-      this.addNewTrialForTarget(
+      let reciprocalTrial = new ReciprocalTrial(temp_id);
+      this.addNewTrialForTargetAndReturnTrial(
         this.trialId++,
         temp_id + "",
         element.angle,
         element,
         element.amplitude,
       );
-
       for (let i = 1; i < this.repetitionTrial; i++) {
-        this.addNewTrialForTarget(
+        this.addNewTrialForTargetAndReturnTrial(
           this.trialId++,
           temp_id + "." + i,
           element.angle,
@@ -108,24 +116,92 @@ class Block {
     }
   }
 
-  generateTrials() {
-    if (this.has2InputParams()) {
-      // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
-      this.init2InputParameters();
-    } else {
-      // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
-      this.init4InputTrials();
+  init2InputParametersReciprocal() {
+    console.log(this.targetDimens);
+    console.log(this.trialDirection);
+    console.log(this.amplitude);
+
+    this.reciprocalTrialsList = [];
+    for (let target of this.targetDimens) {
+      for (let angle of this.trialDirection) {
+        for (let amplitude of this.amplitude) {
+          let temp_id = this.trialId;
+          let reciprocalTrial = new ReciprocalTrial(temp_id);
+          const t = this.addNewTrialForTargetAndReturnTrial(
+            this.trialId++,
+            temp_id + "",
+            angle,
+            target,
+            amplitude,
+          );
+
+          reciprocalTrial.addTrial(t);
+
+          for (let i = 1; i < this.repetitionTrial; i++) {
+            const t = this.addNewTrialForTargetAndReturnTrial(
+              this.trialId++,
+              temp_id + "." + i,
+              angle,
+              target,
+              amplitude,
+            );
+            reciprocalTrial.addTrial(t);
+          }
+          this.reciprocalTrialsList.push(reciprocalTrial);
+        }
+      }
+    }
+    //console.log(this.trials);
+    //console.log(this.reciprocalTrialsList);
+  }
+
+  init4InputTrialsReciprocal() {
+    this.reciprocalTrialsList = [];
+    for (const element of this.targetDimens) {
+      let temp_id = this.trialId;
+      let reciprocalTrial = new ReciprocalTrial(temp_id);
+      const t = this.addNewTrialForTargetAndReturnTrial(
+        this.trialId++,
+        temp_id + "",
+        element.angle,
+        element,
+        element.amplitude,
+      );
+      reciprocalTrial.addTrial(t);
+      for (let i = 1; i < this.repetitionTrial; i++) {
+        const t = this.addNewTrialForTargetAndReturnTrial(
+          this.trialId++,
+          temp_id + "." + i,
+          element.angle,
+          element,
+          element.amplitude,
+        );
+        reciprocalTrial.addTrial(t);
+      }
+      this.reciprocalTrialsList.push(reciprocalTrial);
     }
   }
 
-  getAngles(startAngle, stepSize) {
-    const endAngle = 360;
-    let angles = [];
-    for (let angle = startAngle; angle < endAngle; angle += stepSize) {
-      angles.push(angle);
+  generateTrials() {
+    if (isDiscrete()) {
+      if (this.has2InputParams()) {
+        // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
+        this.init2InputParameters();
+      } else {
+        // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
+        this.init4InputTrials();
+      }
+    } else if (isReciprocal()) {
+      if (this.has2InputParams) {
+        // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
+        this.init2InputParametersReciprocal();
+      } else {
+        // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
+        this.init4InputTrialsReciprocal();
+      }
+    } else {
+      throw Error("[MY ERROR]: Experiment Undefined.");
     }
-    console.log(angles);
-    return angles;
   }
 
   setTrials(trials) {
@@ -139,8 +215,24 @@ class Block {
     return 0;
   }
 
+  getReciprocalTrialsNumber() {
+    if (this.getReciprocalTrials() !== null) {
+      return this.reciprocalTrialsList.length;
+    }
+    return 0;
+  }
+
   getTrials() {
     if (this.trials) return this.trials;
+    return null;
+  }
+
+  setReciprocalTrials(trials) {
+    this.reciprocalTrialsList = trials;
+  }
+
+  getReciprocalTrials() {
+    if (this.reciprocalTrialsList) return this.reciprocalTrialsList;
     return null;
   }
 }

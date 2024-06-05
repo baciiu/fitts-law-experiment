@@ -5,7 +5,6 @@ class Experiment {
     this.numBlocks = numBlocks;
     this.blocks = [];
     this.repPerTrial = repPerTrial;
-    this.scrambleBlocks = scramble;
 
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
@@ -16,10 +15,12 @@ class Experiment {
   init() {
     this.setupContinueButton();
     this.generateBlocks();
-    if (this.scrambleBlocks && EXPERIMENT_TYPE === "discrete") {
+    if (SCRAMBLE_BLOCKS && isDiscrete()) {
       this.shuffleBlocks();
-    } else if (this.scrambleBlocks && EXPERIMENT_TYPE === "reciprocal") {
+      this.shuffleReciprocalBlocks();
+    } else if (SCRAMBLE_BLOCKS && isReciprocal()) {
       this.shuffleBlocksReciprocal();
+      this.shuffleReciprocalBlocks();
     }
     //console.log(this.blocks);
   }
@@ -43,6 +44,25 @@ class Experiment {
         let trials = this.getBlock(i).getTrials();
         let shuffled_trial = this.getOrderDiscrete(trials, orderMap);
         this.getBlock(i).setTrials(shuffled_trial);
+      }
+    }
+  }
+
+  shuffleReciprocalBlocks() {
+    const firstList = this.shuffleArraySmall(
+      this.getBlock(1).getReciprocalTrials(),
+    );
+
+    if (this.numBlocks > 1) {
+      for (let i = 2; i <= this.numBlocks; i++) {
+        let currentList = this.getBlock(i).getReciprocalTrials();
+
+        if (firstList.length !== currentList.length) {
+          throw new Error(
+            `Block ${i} does not have the same length as the first block.`,
+          );
+        }
+        this.getBlock(i).setReciprocalTrials(firstList);
       }
     }
   }
