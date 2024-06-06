@@ -195,7 +195,7 @@ function getRandomIndexForItem(array, startIndex) {
 
 // Fisher-Yates Algorithm
 function insertItemAfterGivenIndex(array, newItem, startIndex) {
-  checkIfInstanceOfTrial(newItem);
+  //checkIfInstanceOfTrial(newItem);
   // Ensure the startIndex is within the array bounds and not the last element
   if (startIndex < 0 || startIndex >= array.length - 1) {
     throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");

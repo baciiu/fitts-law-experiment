@@ -11,6 +11,10 @@ class ReciprocalTrial {
     return this.trialGroup;
   }
 
+  getTrialsGroupSize() {
+    return this.trialGroup.length;
+  }
+
   setReciprocalTrial(trialsGroup) {
     this.trialGroup = trialsGroup;
   }

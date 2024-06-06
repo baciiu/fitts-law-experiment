@@ -26,7 +26,7 @@ class Block {
       console.error("[MY ERROR] Experiment undefined");
     }
     //console.log(this.trials);
-    console.log(this.reciprocalTrialsList);
+    //console.log(this.reciprocalTrialsList);
   }
 
   has2InputParams() {
@@ -231,5 +231,12 @@ class Block {
   getReciprocalTrials() {
     if (this.reciprocalTrialsList) return this.reciprocalTrialsList;
     return null;
+  }
+
+  getReciprocalTotalTrials() {
+    let totalTrials = 0;
+    for (let i = 0; i < this.reciprocalTrialsList.length; i++) {
+      totalTrials += this.reciprocalTrialsList[i].getTrialsGroup().length;
+    }
   }
 }
