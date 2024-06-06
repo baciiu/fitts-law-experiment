@@ -14,9 +14,19 @@ class Block {
     this.trialId = 1;
     this.trials = [];
     this.reciprocalTrialsList = [];
-    this.generateTrials();
+    this.initializeTrials();
+  }
 
-    this.maxScreenPercentage = MAX_SCREEN_DISTANCE;
+  initializeTrials() {
+    if (isDiscrete()) {
+      this.generateDiscreteTrials();
+    } else if (isReciprocal()) {
+      this.generateReciprocalTrials();
+    } else {
+      console.error("[MY ERROR] Experiment undefined");
+    }
+    //console.log(this.trials);
+    console.log(this.reciprocalTrialsList);
   }
 
   has2InputParams() {
@@ -26,25 +36,12 @@ class Block {
     );
   }
 
-  addNewTrialForTargetAndReturnTrial(
-    id,
-    trialRep,
-    trialAngle,
-    target,
-    amplitude,
-  ) {
+  addNewTrialDiscrete(id, trialRep, trialAngle, target, amplitude) {
     let startWidth;
     let startHeight;
 
-    if (isDiscrete()) {
-      startWidth = this.startSize;
-      startHeight = this.startSize;
-    } else if (isReciprocal()) {
-      startWidth = target.width;
-      startHeight = target.height;
-    } else {
-      throw Error("[MY ERROR]: Experiment Undefined.");
-    }
+    startWidth = this.startSize;
+    startHeight = this.startSize;
 
     const trial = new Trial(
       id,
@@ -57,29 +54,44 @@ class Block {
       amplitude,
     );
     this.trials.push(trial);
+  }
+
+  addNewTrialReciprocal(id, trialRep, trialAngle, target, amplitude) {
+    let startWidth;
+    let startHeight;
+
+    startWidth = target.width;
+    startHeight = target.height;
+
+    const trial = new Trial(
+      id,
+      trialRep,
+      trialAngle,
+      startWidth,
+      startHeight,
+      target.width,
+      target.height,
+      amplitude,
+    );
+
+    this.trials.push(trial);
     return trial;
   }
 
-  init2InputParameters() {
-    console.log(this.targetDimens);
-    console.log(this.trialDirection);
-    console.log(this.amplitude);
-
+  init2InputParametersDiscrete() {
     for (let target of this.targetDimens) {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
-          let reciprocalTrial = new ReciprocalTrial(temp_id);
-          this.addNewTrialForTargetAndReturnTrial(
+          this.addNewTrialDiscrete(
             this.trialId++,
             temp_id + "",
             angle,
             target,
             amplitude,
           );
-
           for (let i = 1; i < this.repetitionTrial; i++) {
-            this.addNewTrialForTargetAndReturnTrial(
+            this.addNewTrialDiscrete(
               this.trialId++,
               temp_id + "." + i,
               angle,
@@ -90,14 +102,12 @@ class Block {
         }
       }
     }
-    //console.log(this.trials);
   }
 
-  init4InputTrials() {
+  init4InputTrialsDiscrete() {
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
-      let reciprocalTrial = new ReciprocalTrial(temp_id);
-      this.addNewTrialForTargetAndReturnTrial(
+      this.addNewTrialDiscrete(
         this.trialId++,
         temp_id + "",
         element.angle,
@@ -105,7 +115,7 @@ class Block {
         element.amplitude,
       );
       for (let i = 1; i < this.repetitionTrial; i++) {
-        this.addNewTrialForTargetAndReturnTrial(
+        this.addNewTrialDiscrete(
           this.trialId++,
           temp_id + "." + i,
           element.angle,
@@ -117,28 +127,23 @@ class Block {
   }
 
   init2InputParametersReciprocal() {
-    console.log(this.targetDimens);
-    console.log(this.trialDirection);
-    console.log(this.amplitude);
-
     this.reciprocalTrialsList = [];
     for (let target of this.targetDimens) {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
           let reciprocalTrial = new ReciprocalTrial(temp_id);
-          const t = this.addNewTrialForTargetAndReturnTrial(
+          const t = this.addNewTrialReciprocal(
             this.trialId++,
             temp_id + "",
             angle,
             target,
             amplitude,
           );
-
           reciprocalTrial.addTrial(t);
 
           for (let i = 1; i < this.repetitionTrial; i++) {
-            const t = this.addNewTrialForTargetAndReturnTrial(
+            const t = this.addNewTrialReciprocal(
               this.trialId++,
               temp_id + "." + i,
               angle,
@@ -151,8 +156,6 @@ class Block {
         }
       }
     }
-    //console.log(this.trials);
-    //console.log(this.reciprocalTrialsList);
   }
 
   init4InputTrialsReciprocal() {
@@ -160,7 +163,7 @@ class Block {
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
       let reciprocalTrial = new ReciprocalTrial(temp_id);
-      const t = this.addNewTrialForTargetAndReturnTrial(
+      const t = this.addNewTrialReciprocal(
         this.trialId++,
         temp_id + "",
         element.angle,
@@ -169,7 +172,7 @@ class Block {
       );
       reciprocalTrial.addTrial(t);
       for (let i = 1; i < this.repetitionTrial; i++) {
-        const t = this.addNewTrialForTargetAndReturnTrial(
+        const t = this.addNewTrialReciprocal(
           this.trialId++,
           temp_id + "." + i,
           element.angle,
@@ -182,25 +185,19 @@ class Block {
     }
   }
 
-  generateTrials() {
-    if (isDiscrete()) {
-      if (this.has2InputParams()) {
-        // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
-        this.init2InputParameters();
-      } else {
-        // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
-        this.init4InputTrials();
-      }
-    } else if (isReciprocal()) {
-      if (this.has2InputParams) {
-        // Target Dimensions x Angles x Amplitudes x Repetitions ( x Blocks )
-        this.init2InputParametersReciprocal();
-      } else {
-        // Target Dimensions x Amplitudes x Repetitions ( x Blocks )
-        this.init4InputTrialsReciprocal();
-      }
+  generateDiscreteTrials() {
+    if (this.has2InputParams()) {
+      this.init2InputParametersDiscrete();
     } else {
-      throw Error("[MY ERROR]: Experiment Undefined.");
+      this.init4InputTrialsDiscrete();
+    }
+  }
+
+  generateReciprocalTrials() {
+    if (this.has2InputParams()) {
+      this.init2InputParametersReciprocal();
+    } else {
+      this.init4InputTrialsReciprocal();
     }
   }
 
