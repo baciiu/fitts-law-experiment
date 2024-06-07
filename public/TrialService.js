@@ -193,9 +193,18 @@ function getRandomIndexForItem(array, startIndex) {
   return randomIndex;
 }
 
+function insertTrialInArray(array, trial, startIndex) {
+  checkIfInstanceOfTrial(trial);
+  insertItemAfterGivenIndex(array, trial, startIndex);
+}
+
+function insertReciprocalTrialInArray(array, reciprocalTrial, startIndex) {
+  checkIfInstanceOfReciprocalTrial(reciprocalTrial);
+  insertItemAfterGivenIndex(array, reciprocalTrial, startIndex);
+}
+
 // Fisher-Yates Algorithm
 function insertItemAfterGivenIndex(array, newItem, startIndex) {
-  //checkIfInstanceOfTrial(newItem);
   // Ensure the startIndex is within the array bounds and not the last element
   if (startIndex < 0 || startIndex >= array.length - 1) {
     throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
@@ -210,14 +219,16 @@ function insertItemAfterGivenIndex(array, newItem, startIndex) {
   array.splice(randomIndex, 0, newItem);
 }
 
-function checkIfInstanceOfTrial(trial) {
-  if (!(trial instanceof Trial)) {
-    throw Error("[MY ERROR]: newItem must be an instance of Trial.");
+function checkIfInstanceOfTrial(newItem) {
+  if (!(newItem instanceof Trial)) {
+    throw Error("[MY ERROR]: not an instance of Trial");
   }
 }
 
-function checkIfReciprocalGroupRepeat() {
-  return isReciprocal() && REPEAT_RECIPROCAL_GROUP === true;
+function checkIfInstanceOfReciprocalTrial(reciprocalTrial) {
+  if (!(reciprocalTrial instanceof ReciprocalTrial)) {
+    throw Error("[MY ERROR]: not an instance of ReciprocalTrial");
+  }
 }
 
 function insertItemAtPosition(array, item, index) {
