@@ -1,3 +1,5 @@
+"use strict";
+
 function mmToPixels(mm) {
   // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
   const screenWidth = 1512; // Screen width in pixels
@@ -89,6 +91,77 @@ function testStartDistanceFromPreviousEnd(startX, startY) {
   return actualDistance <= screenWidth;
 }
 
+function deepCopy(obj) {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    const arrCopy = [];
+    for (let i = 0; i < obj.length; i++) {
+      arrCopy[i] = deepCopy(obj[i]);
+    }
+    return arrCopy;
+  }
+
+  const copy = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      copy[key] = deepCopy(obj[key]);
+    }
+  }
+  return copy;
+}
+
+function calculateWrappingDimensions(
+  rect1Width,
+  rect1Height,
+  rect2Width,
+  rect2Height,
+  distance,
+  angle,
+) {
+  let radians = (angle * Math.PI) / 180;
+
+  let x2 = distance * Math.cos(radians);
+  let y2 = distance * Math.sin(radians);
+
+  let minX = Math.min(0, x2);
+  let maxX = Math.max(rect1Width, x2 + rect2Width);
+  let minY = Math.min(0, y2);
+  let maxY = Math.max(rect1Height, y2 + rect2Height);
+
+  let wrappingWidth = maxX - minX;
+  let wrappingHeight = maxY - minY;
+
+  return { width: wrappingWidth, height: wrappingHeight };
+}
+
+function getCopyTrial(trial) {
+  const copy = new Trial(
+    trial.trialRep,
+    trial.trialDirection,
+    trial.startWidth,
+    trial.startHeight,
+    trial.targetWidth,
+    trial.targetHeight,
+    trial.amplitude,
+  );
+  copy.HIT = trial.HIT;
+  copy.clicksCoords = trial.clicksCoords;
+  copy.startCoords = trial.startCoords;
+  copy.targetCoords = trial.targetCoords;
+  copy.endCoords = trial.endCoords;
+  copy.ambiguityMarginHit = trial.ambiguityMarginHit;
+  copy.firstClickDone = false;
+  copy.trialCompleted = false;
+  copy.toBeRepeatedTrial = false;
+  copy.targetPressIn = false;
+  copy.targetReleaseIn = false;
+  copy.previousTrial = null;
+  return copy;
+}
+
 function generateCenterPointWithAmplitude(x, y, amplitude, angle) {
   const angleRadians = angle * (Math.PI / 180);
   return {
@@ -106,3 +179,95 @@ const DEV_TYPE = Object.freeze({
   TOUCH: "touch",
   MOUSE: "mouse",
 });
+
+function getRandomIndexForItem(array, startIndex) {
+  // Ensure the startIndex is within the array bounds and not the last element
+  if (startIndex < 0 || startIndex >= array.length - 1) {
+    throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
+  }
+
+  // Generate a random index in the range from startIndex + 1 to the array length inclusive
+  const rand = Math.random();
+  const randomIndex =
+    Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
+  return randomIndex;
+}
+
+function insertTrialInArray(array, trial, startIndex) {
+  checkIfInstanceOfTrial(trial);
+  insertItemAfterGivenIndex(array, trial, startIndex);
+}
+
+function insertReciprocalTrialInArray(array, reciprocalTrial, startIndex) {
+  checkIfInstanceOfReciprocalTrial(reciprocalTrial);
+  insertItemAfterGivenIndex(array, reciprocalTrial, startIndex);
+}
+
+// Fisher-Yates Algorithm
+function insertItemAfterGivenIndex(array, newItem, startIndex) {
+  // Ensure the startIndex is within the array bounds and not the last element
+  if (startIndex < 0 || startIndex >= array.length - 1) {
+    throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
+  }
+
+  // Generate a random index in the range from startIndex + 1 to the array length inclusive
+  const rand = Math.random();
+  const randomIndex =
+    Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
+
+  // Insert the new item at the random index
+  array.splice(randomIndex, 0, newItem);
+}
+
+function checkIfInstanceOfTrial(newItem) {
+  if (!(newItem instanceof Trial)) {
+    throw Error("[MY ERROR]: not an instance of Trial");
+  } else {
+    return true;
+  }
+}
+
+function checkIfInstanceOfReciprocalTrial(reciprocalTrial) {
+  if (!(reciprocalTrial instanceof ReciprocalTrial)) {
+    throw Error("[MY ERROR]: not an instance of ReciprocalTrial");
+  } else {
+    return true;
+  }
+}
+
+function insertItemAtPosition(array, item, index) {
+  // Check if the index is within the bounds of the array
+  this.checkIfInstanceOfTrial(item);
+  console.log(array);
+  if (index >= 0 && index <= array.length) {
+    // Use splice to add the item at the specified index
+    array.splice(index, 0, item);
+  } else {
+    console.error("Index out of bounds");
+  }
+  console.log(array);
+}
+
+function checkForNullOrUndefined(input) {
+  if (input === undefined || input === null) {
+    throw Error("[MY ERROR]: Could not parse input");
+  }
+}
+
+function isDiscrete() {
+  return EXPERIMENT_TYPE === "discrete";
+}
+
+function isReciprocal() {
+  return EXPERIMENT_TYPE === "reciprocal";
+}
+
+function getDirectionList(startAngle, stepSize) {
+  const endAngle = 360;
+  let angles = [];
+  for (let angle = startAngle; angle < endAngle; angle += stepSize) {
+    angles.push(angle);
+  }
+  console.log(angles);
+  return angles;
+}

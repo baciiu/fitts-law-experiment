@@ -1,3 +1,5 @@
+"use strict";
+
 function showStartWindow() {
   const startWindow = document.getElementById("startWindow");
   startWindow.style.display = "block";
@@ -38,8 +40,15 @@ function startExperiment() {
   document.body.style.pointerEvents = "auto";
 
   /** START */
-  const experiment = new ExperimentFrame(USER, EXPERIMENT_TYPE);
-  experiment.init();
+  let experiment;
+
+  if (isDiscrete()) {
+    experiment = new ExperimentFrame(USER);
+    experiment.init();
+  } else if (isReciprocal()) {
+    experiment = new ReciprocalExperimentFrame(USER);
+    experiment.init();
+  }
 }
 
 const startButton = document.getElementById("startButton");

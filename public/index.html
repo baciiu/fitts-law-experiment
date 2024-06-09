@@ -4,31 +4,35 @@
     <meta charset="UTF-8"/>
     <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <link
-            crossorigin="anonymous"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
-            integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
-            rel="stylesheet"
-    />
+
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
+
     <title>Fitt's Law - Two Dimensional Touch</title>
     <link href="style.css" rel="stylesheet"/>
+    <link href="#" rel="shortcut icon">
 </head>
 
 <body id="body">
-<div class="nav-item" id="currentTrialText">Trial No.:</div>
-<div class="nav-item" id="currentTrialIndex"></div>
 
-<div class="nav-item" id="totalTrialsText">Total Trials:</div>
-<div class="nav-item" id="totalTrialsIndex"></div>
+<div class="text" id="header">
+    <div>
+        Break after
+        <span id="trialsToBreak"></span>
+        trials
+    </div>
+    <div>
+        Trial Number:
+        <span id="trialNumber"></span>
+        &emsp; &emsp;
+        Total Trials:
+        <span id="totalTrials"></span>
+    </div>
 
-<div class="nav-item" id="trialsToBreakText">
-    Next Break in
-    <p class="nav-item" id="trialsToBreakIndex"></p>
-    &emsp; &emsp; trials
 </div>
 
+
 <div id="start"></div>
-<!--<div id="start" style="border-radius: 50%;"> start </div>-->
 <div id="target"></div>
 
 <div class="grid-container"></div>
@@ -63,7 +67,6 @@
     </div>
 </div>
 
-<!-- Start Window Modal -->
 <div class="modal" id="startWindow">
     <div class="modal-content">
         <p>Press start once you are ready</p>
@@ -85,11 +88,21 @@
             Start
         </button>
     </div>
-
-    <button id="exportButton">Export Trial Data to CSV</button>
 </div>
 
-<!-- Calling Javascript sources -->
+<script crossorigin="anonymous"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+
+<script src="ReciprocalExperimentFrame.js"></script>
+<script src="ReciprocalTrial.js"></script>
 <script src="TrialService.js"></script>
 <script src="Settings.js"></script>
 <script src="Trial.js"></script>
