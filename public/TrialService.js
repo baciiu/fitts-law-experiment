@@ -222,12 +222,16 @@ function insertItemAfterGivenIndex(array, newItem, startIndex) {
 function checkIfInstanceOfTrial(newItem) {
   if (!(newItem instanceof Trial)) {
     throw Error("[MY ERROR]: not an instance of Trial");
+  } else {
+    return true;
   }
 }
 
 function checkIfInstanceOfReciprocalTrial(reciprocalTrial) {
   if (!(reciprocalTrial instanceof ReciprocalTrial)) {
     throw Error("[MY ERROR]: not an instance of ReciprocalTrial");
+  } else {
+    return true;
   }
 }
 

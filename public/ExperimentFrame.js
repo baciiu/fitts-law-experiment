@@ -58,118 +58,25 @@ class ExperimentFrame {
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
-    if (!checkIfReciprocalGroupRepeat()) {
-      if (trialData.toBeRepeatedTrial) {
-        const failedTrial = new Trial(
-          currentBlock.getTrialsNumber() + 1,
-          trialCopy.trialRep,
-          trialCopy.trialDirection,
-          trialCopy.startWidth,
-          trialCopy.startHeight,
-          trialCopy.targetWidth,
-          trialCopy.targetHeight,
-          trialCopy.amplitude,
-        );
+    if (trialData.toBeRepeatedTrial) {
+      const failedTrial = new Trial(
+        currentBlock.getTrialsNumber() + 1,
+        trialCopy.trialRep,
+        trialCopy.trialDirection,
+        trialCopy.startWidth,
+        trialCopy.startHeight,
+        trialCopy.targetWidth,
+        trialCopy.targetHeight,
+        trialCopy.amplitude,
+      );
 
-        checkIfInstanceOfTrial(failedTrial);
-
-        insertItemAfterGivenIndex(
-          currentBlock.getTrials(),
-          failedTrial,
-          this.trialIndex,
-        );
-      }
-    } else {
-      // TRUE REPEAT GROUP and RECIPROCAL
-      if (trialData.toBeRepeatedTrial) {
-        const trialGroup = this.getReciprocalTrialGroup(
-          trialData.trialRep,
-          currentBlock.getTrialsNumber(),
-        );
-
-        let newStartIndex = getRandomIndexForItem(
-          currentBlock.getTrials(),
-          this.trialIndex,
-        );
-
-        console.log(trialGroup);
-        // add the new Trials to the block
-        for (const element of trialGroup) {
-          console.log(element);
-          this.checkIfInstanceOfTrial(element);
-
-          insertItemAtPosition(
-            currentBlock.getTrials(),
-            element,
-            newStartIndex++,
-          );
-        }
-        console.log(trialGroup);
-      }
-      console.log(currentBlock.getTrials());
-
-      if (INTERRUPT_RECIPROCAL_GROUP) {
-      }
+      insertTrialInArray(
+        currentBlock.getTrials(),
+        failedTrial,
+        this.trialIndex,
+      );
     }
-
     this.prepareForNextTrialOrFinish(currentBlock);
-  }
-
-  getReciprocalTrialGroup(trialRep, blockTrialNumber) {
-    const trialGroup = this.getTrialGroupToBeRepeated(
-      trialRep,
-      blockTrialNumber,
-    );
-    // set the new trialId and trialRep for the new Trials
-    for (let i = 0; i < trialGroup.length; i++) {
-      if (i === 0) {
-        trialGroup[i].trialId = blockTrialNumber + 1;
-      } else {
-        trialGroup[i].trialId = trialGroup[i - 1].trialId + 1;
-      }
-    }
-    return trialGroup;
-  }
-
-  getTrialGroupToBeRepeated(trialRep) {
-    const currentBlock = this.experiment.getBlock(this.blockNumber);
-    const getGroupId = trialRep.split(".")[0];
-    let groupArray = [];
-    console.log(currentBlock.getTrials());
-
-    for (const element of currentBlock.getTrials()) {
-      let trialCopy = getCopyTrial(element);
-
-      this.checkIfInstanceOfTrial(trialCopy);
-
-      const getTrialRep = trialCopy.trialRep.split(".")[0] || 0;
-
-      if (getGroupId === getTrialRep) {
-        const newTrial = new Trial(
-          trialCopy.trialId,
-          trialCopy.trialRep,
-          trialCopy.trialDirection,
-          trialCopy.startWidth,
-          trialCopy.startHeight,
-          trialCopy.targetWidth,
-          trialCopy.targetHeight,
-          trialCopy.amplitude,
-        );
-        this.checkIfInstanceOfTrial(newTrial);
-
-        console.log("ITEM INSERTED:");
-        console.log(newTrial);
-
-        groupArray.push(newTrial);
-      }
-    }
-    return groupArray;
-  }
-
-  checkIfInstanceOfTrial(trial) {
-    if (!(trial instanceof Trial)) {
-      throw Error("[MY ERROR]: newItem must be an instance of Trial.");
-    }
   }
 
   prepareForNextTrialOrFinish(currentBlock) {
@@ -193,9 +100,7 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     this.trial = block.getTrials()[this.trialIndex];
 
-    this.checkIfInstanceOfTrial(this.trial);
-
-    console.log(this.trial);
+    checkIfInstanceOfTrial(this.trial);
 
     const prev = deepCopy(this.prevTrial);
 
@@ -321,11 +226,11 @@ class ExperimentFrame {
   }
 
   cleanUpSounds() {
-    errorSound.remove();
-    successSound.remove();
     errorSound.srcObject = null;
     successSound.srcObject = null;
     errorSound.src = "";
     successSound.src = "";
+    errorSound.remove();
+    successSound.remove();
   }
 }

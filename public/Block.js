@@ -212,31 +212,25 @@ class Block {
     return 0;
   }
 
-  getReciprocalTrialsNumber() {
-    if (this.getReciprocalTrials() !== null) {
-      return this.reciprocalTrialsList.length;
-    }
-    return 0;
-  }
-
   getTrials() {
     if (this.trials) return this.trials;
     return null;
   }
 
-  setReciprocalTrials(trials) {
+  setReciprocalList(trials) {
     this.reciprocalTrialsList = trials;
   }
 
-  getReciprocalTrials() {
+  getReciprocalList() {
     if (this.reciprocalTrialsList) return this.reciprocalTrialsList;
     return null;
   }
 
-  getReciprocalTotalTrials() {
+  getReciprocalTotalTrialsNumber() {
     let totalTrials = 0;
     for (let i = 0; i < this.reciprocalTrialsList.length; i++) {
       totalTrials += this.reciprocalTrialsList[i].getTrialsGroup().length;
     }
+    return totalTrials;
   }
 }

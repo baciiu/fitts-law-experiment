@@ -49,19 +49,19 @@ class Experiment {
 
   shuffleReciprocalBlocks() {
     const firstList = this.shuffleArraySmall(
-      this.getBlock(1).getReciprocalTrials(),
+      this.getBlock(1).getReciprocalList(),
     );
 
     if (this.numBlocks > 1) {
       for (let i = 2; i <= this.numBlocks; i++) {
-        let currentList = this.getBlock(i).getReciprocalTrials();
+        let currentList = this.getBlock(i).getReciprocalList();
 
         if (firstList.length !== currentList.length) {
           throw new Error(
             `Block ${i} does not have the same length as the first block.`,
           );
         }
-        this.getBlock(i).setReciprocalTrials(firstList);
+        this.getBlock(i).setReciprocalList(firstList);
       }
     }
   }
