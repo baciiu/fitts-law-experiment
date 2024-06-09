@@ -96,7 +96,14 @@ class Trial {
   drawDiscreteShapes() {
     this.trialCompleted = false;
 
-    const pos = this.generateDiscretePositions();
+    let pos;
+
+    if (USE_CENTER_OF_SCREEN) {
+      pos = this.generateCenteredPositions();
+    } else {
+      pos = this.generateNotCenteredPositions();
+    }
+
     this.checkIfCoordinatesFitTheScreen(pos);
 
     this.drawShape(pos.target, this.target, true);
@@ -121,7 +128,14 @@ class Trial {
   drawReciprocalShapes() {
     this.trialCompleted = false;
 
-    const pos = this.generateReciprocalPositions();
+    let pos;
+
+    if (USE_CENTER_OF_SCREEN) {
+      pos = this.generateCenteredPositions();
+    } else {
+      pos = this.generateNotCenteredPositions();
+    }
+
     this.checkIfCoordinatesFitTheScreen(pos);
 
     this.drawShape(pos.target, this.target, true);
@@ -206,11 +220,11 @@ class Trial {
         this.start.removeEventListener(
           "touchend",
           this.boundHandleStartRelease,
-        ); // Remove touchend listener if added
+        );
         this.body.addEventListener("mousedown", this.boundHandleBodyPress);
-        this.body.addEventListener("touchstart", this.boundHandleBodyPress); // Add touchstart listener for the body
+        this.body.addEventListener("touchstart", this.boundHandleBodyPress);
         this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
-        this.body.addEventListener("touchend", this.boundHandleBodyRelease); // Add touchend listener for the body
+        this.body.addEventListener("touchend", this.boundHandleBodyRelease);
       } else {
         errorSound.play();
       }
@@ -266,7 +280,7 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (DEV_TYPE === "touch") {
+    if (DEV_TYPE == "touch") {
       const extendedRect = {
         left: rect.left - AMBIGUITY_MARGIN_PX,
         top: rect.top - AMBIGUITY_MARGIN_PX,
@@ -290,17 +304,17 @@ class Trial {
 
   endTrial() {
     /*
-            console.log("************** END TRIAL INFO START ******************");
-            console.log("targetPressIn: " + this.targetPressIn);
-            console.log("targetReleaseIn: " + this.targetReleaseIn);
-        
-            console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
-            console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
-            console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
-            console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
-            console.log("************** END TRIAL INFO END ******************");
-            const trialData = this.getExportDataTrial();
-             */
+                                                                    console.log("************** END TRIAL INFO START ******************");
+                                                                    console.log("targetPressIn: " + this.targetPressIn);
+                                                                    console.log("targetReleaseIn: " + this.targetReleaseIn);
+                                                                
+                                                                    console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
+                                                                    console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
+                                                                    console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
+                                                                    console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
+                                                                    console.log("************** END TRIAL INFO END ******************");
+                                                                    const trialData = this.getExportDataTrial();
+                                                                     */
     const trialCopy = JSON.parse(JSON.stringify(this));
     const trialData = this.getExportDataTrial();
 
@@ -404,6 +418,25 @@ class Trial {
     return { x: x1, y: y1 };
   }
 
+  getRandomPointWithRespectToPreviousTarget() {
+    const previous = this.getPreviousTrial();
+
+    const midpoint = {
+      x: (previous.startX + previous.targetX) / 2,
+      y: (previous.startY + previous.targetY) / 2,
+    };
+
+    const radius = (window.innerWidth * MAX_SCREEN_DISTANCE) / 100;
+
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = Math.random() * radius;
+
+    const x = midpoint.x + distance * Math.cos(angle);
+    const y = midpoint.y + distance * Math.sin(angle);
+
+    return { x: x, y: y };
+  }
+
   isShapeWithinBounds(x, y, width, height) {
     return (
       this.isLeftEdgeWithinBounds(x, width) &&
@@ -435,7 +468,7 @@ class Trial {
     return distance - amplitude <= tolerance;
   }
 
-  generateDiscretePositions() {
+  generateNotCenteredPositions() {
     let amplitude = mmToPixels(this.amplitude);
     let width1 = mmToPixels(this.startWidth);
     let height1 = mmToPixels(this.startHeight);
@@ -451,7 +484,24 @@ class Trial {
       maxcount = 100;
 
     do {
-      const startCoords = this.getRandomPoint(width1, height1);
+      let startCoords;
+
+      if (this.getPreviousTrial().startY != null) {
+        startCoords = this.getRandomPointWithRespectToPreviousTarget();
+        while (
+          !this.isShapeWithinBounds(
+            startCoords.x,
+            startCoords.y,
+            width1,
+            height1,
+          )
+        ) {
+          startCoords = this.getRandomPointWithRespectToPreviousTarget();
+        }
+      } else {
+        startCoords = this.getRandomPoint(width1, height1);
+      }
+
       x1 = startCoords.x;
       y1 = startCoords.y;
 
@@ -476,7 +526,7 @@ class Trial {
       }
     } while (!start || !target);
     if (count > maxcount) {
-      const dis = this.generateReciprocalPositions();
+      const dis = this.generateCenteredPositions();
       if (
         !dis.start ||
         !dis.target ||
@@ -494,7 +544,7 @@ class Trial {
     return { start, target };
   }
 
-  generateReciprocalPositions() {
+  generateCenteredPositions() {
     let amplitude = mmToPixels(this.amplitude);
     let width1 = mmToPixels(this.startWidth);
     let height1 = mmToPixels(this.startHeight);
@@ -507,7 +557,8 @@ class Trial {
 
     const angle = this.trialDirection;
 
-    const radians = (angle * Math.PI) / 180; // Convert angle to radians
+    // Convert angle to radians
+    const radians = (angle * Math.PI) / 180;
 
     x1 = centerX + (amplitude / 2) * Math.cos(radians);
     y1 = centerY + (amplitude / 2) * Math.sin(radians);
@@ -536,6 +587,10 @@ class Trial {
 
   setPreviousTrial(prevTrial) {
     this.previousTrial = prevTrial;
+  }
+
+  getPreviousTrial() {
+    return this.previousTrial;
   }
 
   getExportDataTrial() {
