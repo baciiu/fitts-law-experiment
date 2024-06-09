@@ -1,27 +1,27 @@
 const INPUT = [
   /*{ width: 6, height: 6 },
-        { width: 6, height: 10 },
-        { width: 6, height: 12 },
-        { width: 8, height: 8 },
-        { width: 8, height: 12 },*/
+          { width: 6, height: 10 },
+          { width: 6, height: 12 },
+          { width: 8, height: 8 },
+          { width: 8, height: 12 },*/
   { width: 10, height: 10 },
   { width: 10, height: 12 },
   //  { width: 12, height: 12 },
 
   /*{ width: 10, height: 10, angle: 0, amplitude: 100 },
-                            { width: 15, height: 15, angle: 180, amplitude: 100 },
-                            { width: 20, height: 20, angle: 0, amplitude: 100 },
-                            { width: 8, height: 8, angle: 180, amplitude: 100 },
-                            { width: 20, height: 20, angle: 0, amplitude: 100 },
-                            { width: 20, height: 20, angle: 90, amplitude: 100 },
-                            { width: 10, height: 20, angle: 270, amplitude: 100 },
-                            { width: 8, height: 8, angle: 180, amplitude: 100 },
-                            { width: 20, height: 20, angle: 90, amplitude: 100 },
-                            { width: 15, height: 15, angle: 270, amplitude: 100 },
-                            { width: 20, height: 10 },
-                            { width: 15, height: 15 },
-                            { width: 10, height: 20 },
-                            { width: 15, height: 10 },*/
+                              { width: 15, height: 15, angle: 180, amplitude: 100 },
+                              { width: 20, height: 20, angle: 0, amplitude: 100 },
+                              { width: 8, height: 8, angle: 180, amplitude: 100 },
+                              { width: 20, height: 20, angle: 0, amplitude: 100 },
+                              { width: 20, height: 20, angle: 90, amplitude: 100 },
+                              { width: 10, height: 20, angle: 270, amplitude: 100 },
+                              { width: 8, height: 8, angle: 180, amplitude: 100 },
+                              { width: 20, height: 20, angle: 90, amplitude: 100 },
+                              { width: 15, height: 15, angle: 270, amplitude: 100 },
+                              { width: 20, height: 10 },
+                              { width: 15, height: 15 },
+                              { width: 10, height: 20 },
+                              { width: 15, height: 10 },*/
 ];
 const AMPLITUDE_LIST = [40, 30];
 
@@ -37,7 +37,7 @@ const DIRECTION_LIST = [0];
 // 180 => [0,180]  // 2 directions
 
 const DEVICE_TYPE = DEV_TYPE.MOUSE;
-const EXPERIMENT_TYPE = EX_TYPE.RECIPROCAL;
+const EXPERIMENT_TYPE = EX_TYPE.DISCRETE;
 
 const USE_CENTER_OF_SCREEN = false;
 
