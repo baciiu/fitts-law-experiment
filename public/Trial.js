@@ -1,3 +1,5 @@
+"use strict";
+
 class Trial {
   constructor(
     trialId,
@@ -12,8 +14,6 @@ class Trial {
     this.trialId = trialId;
     this.trialRep = trialRep;
     this.trialDirection = trialDirection;
-    this.experimentType = EXPERIMENT_TYPE;
-    this.intDevice = DEVICE_TYPE;
     this.startWidth = startWidth;
     this.startHeight = startHeight;
     this.targetWidth = targetWidth;
@@ -51,9 +51,9 @@ class Trial {
   }
 
   drawShapes() {
-    if (this.experimentType === "discrete") {
+    if (isDiscrete()) {
       this.drawDiscreteShapes();
-    } else if (this.experimentType === "reciprocal") {
+    } else if (isReciprocal()) {
       this.drawReciprocalShapes();
     } else {
       throw Error("[MY ERROR]: Experiment type undefined.");
@@ -78,17 +78,9 @@ class Trial {
   }
 
   isFirstTrial() {
-    if (this.experimentType === "discrete") {
+    if (isDiscrete()) {
       return this.trialId === 1;
-    } else if (this.experimentType === "reciprocal") {
-      console.log(
-        "TrialRep " +
-          this.trialRep +
-          " TriaId " +
-          this.trialId +
-          " is " +
-          (this.trialRep == this.trialId),
-      );
+    } else if (isReciprocal()) {
       return this.trialRep == this.trialId;
     } else {
       console.error("[MY ERROR]: EXPERIMENT TYPE !");
@@ -197,12 +189,12 @@ class Trial {
   handleStartRelease(event) {
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
-      errorSound.play().then((r) => {});
+      errorSound.play();
     } else if (this.trialStarted) {
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
 
-        if (this.experimentType === "discrete") {
+        if (isDiscrete()) {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
@@ -247,7 +239,7 @@ class Trial {
       if (this.targetPressIn) {
         successSound.play();
 
-        if (this.experimentType === "discrete") {
+        if (isDiscrete()) {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
@@ -274,7 +266,7 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (this.intDevice === "touch") {
+    if (DEV_TYPE === "touch") {
       const extendedRect = {
         left: rect.left - AMBIGUITY_MARGIN_PX,
         top: rect.top - AMBIGUITY_MARGIN_PX,
@@ -297,17 +289,20 @@ class Trial {
   }
 
   endTrial() {
-    console.log("************** END TRIAL INFO START ******************");
-    console.log("targetPressIn: " + this.targetPressIn);
-    console.log("targetReleaseIn: " + this.targetReleaseIn);
-
-    console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
-    console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
-    console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
-    console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
-    console.log("************** END TRIAL INFO END ******************");
-    const trialData = this.getExportDataTrial();
+    /*
+            console.log("************** END TRIAL INFO START ******************");
+            console.log("targetPressIn: " + this.targetPressIn);
+            console.log("targetReleaseIn: " + this.targetReleaseIn);
+        
+            console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
+            console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
+            console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
+            console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
+            console.log("************** END TRIAL INFO END ******************");
+            const trialData = this.getExportDataTrial();
+             */
     const trialCopy = JSON.parse(JSON.stringify(this));
+    const trialData = this.getExportDataTrial();
 
     this.cleanupTrial();
     const event = new CustomEvent("trialCompleted", {
@@ -437,7 +432,7 @@ class Trial {
   isAmplitude(x1, y1, x2, y2, amplitude) {
     const distance = getDistance(x1, y1, x2, y2);
     const tolerance = 1;
-    return Math.abs(distance - amplitude) <= tolerance;
+    return distance - amplitude <= tolerance;
   }
 
   generateDiscretePositions() {
@@ -549,8 +544,8 @@ class Trial {
       blockNumber: "",
       trialNumber: this.trialId,
       trialRep: this.trialRep,
-      experimentType: this.experimentType,
-      device: this.intDevice,
+      experimentType: EXPERIMENT_TYPE,
+      device: DEVICE_TYPE,
 
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),

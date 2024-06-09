@@ -1,9 +1,10 @@
+"use strict";
+
 class Experiment {
-  constructor(numBlocks, repPerTrial, scramble) {
+  constructor(numBlocks, repPerTrial) {
     this.numBlocks = numBlocks;
     this.blocks = [];
     this.repPerTrial = repPerTrial;
-    this.scrambleBlocks = scramble;
 
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
@@ -13,10 +14,14 @@ class Experiment {
 
   init() {
     this.setupContinueButton();
+
     this.generateBlocks();
-    if (this.scrambleBlocks && EXPERIMENT_TYPE === "discrete") {
+    if (SCRAMBLE_BLOCKS && isDiscrete()) {
       this.shuffleBlocks();
+    } else if (SCRAMBLE_BLOCKS && isReciprocal()) {
+      this.shuffleReciprocalBlocks();
     }
+    console.log(this.blocks);
   }
 
   generateBlocks() {
@@ -27,25 +32,44 @@ class Experiment {
 
   shuffleBlocks() {
     let trial_pattern = this.getBlock(1).getTrials();
-    this.shuffleArray(trial_pattern);
+    trial_pattern = this.shuffleArraySmall(trial_pattern);
 
     if (this.numBlocks > 1) {
       const orderMap = new Map(
         trial_pattern.map((item, index) => [item.trialId, index]),
       );
 
-      const reorder = (arr, orderMap) => {
-        return arr
-          .slice()
-          .sort((a, b) => orderMap.get(a.trialId) - orderMap.get(b.trialId));
-      };
-
       for (let i = 2; i <= this.numBlocks; i++) {
         let trials = this.getBlock(i).getTrials();
-        let shuffled_trial = reorder(trials, orderMap);
+        let shuffled_trial = this.getOrderDiscrete(trials, orderMap);
         this.getBlock(i).setTrials(shuffled_trial);
       }
     }
+  }
+
+  shuffleReciprocalBlocks() {
+    const firstList = this.shuffleArraySmall(
+      this.getBlock(1).getReciprocalList(),
+    );
+
+    if (this.numBlocks > 1) {
+      for (let i = 2; i <= this.numBlocks; i++) {
+        let currentList = this.getBlock(i).getReciprocalList();
+
+        if (firstList.length !== currentList.length) {
+          throw new Error(
+            `Block ${i} does not have the same length as the first block.`,
+          );
+        }
+        this.getBlock(i).setReciprocalList(firstList);
+      }
+    }
+  }
+
+  getOrderDiscrete(arr, orderMap) {
+    return arr
+      .slice()
+      .sort((a, b) => orderMap.get(a.trialId) - orderMap.get(b.trialId));
   }
 
   setupContinueButton() {
@@ -86,19 +110,12 @@ class Experiment {
     return randomIndex;
   }
 
-  shuffleArray(array) {
+  shuffleArraySmall(array) {
     // Fisher-Yates algorithm
-    let currentIndex = array.length;
-    let temporaryValue, randomIndex;
-
-    while (currentIndex !== 0) {
-      const rand = Math.random();
-      randomIndex = Math.floor(rand * currentIndex);
-      currentIndex -= 1;
-
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
+    return array;
   }
 }

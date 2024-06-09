@@ -1,20 +1,12 @@
+"use strict";
+
 class ExperimentFrame {
   constructor(userNumber) {
     this.blockNumber = 1;
     this.trialNumber = -1;
-    this.totalBlocks = BLOCKS_NUMBER;
-    this.trialsPerBreak = TRIALS_PER_BREAK;
-    this.experimentType = EXPERIMENT_TYPE;
-    this.repetitionPerTrial = REPETITION_PER_TRIAL;
-    this.scrambleBlocks = SCRAMBLE_BLOCKS;
-    this.experiment = new Experiment(
-      this.totalBlocks,
-      this.repetitionPerTrial,
-      this.scrambleBlocks,
-    );
+    this.experiment = new Experiment(BLOCKS_NUMBER, REPETITION_PER_TRIAL);
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
-    this.setupContinueButton();
     this.endTrialPos = null;
     this.trial = null;
     this.trialsData = [];
@@ -29,6 +21,7 @@ class ExperimentFrame {
       targetX: null,
       targetY: null,
     };
+    this.setupContinueButton();
 
     document.addEventListener(
       "trialCompleted",
@@ -52,16 +45,13 @@ class ExperimentFrame {
     this.trialCompleted(detail);
   }
 
-  // Other methods remain unchanged
-
-  trialCompleted(detail) {
-    let trialData = detail.trialData;
-    let trialCopy = detail.trialCopy;
+  trialCompleted(trialEmitted) {
+    let trialData = trialEmitted.trialData;
+    let trialCopy = trialEmitted.trialCopy;
     const currentBlock = this.experiment.getBlock(this.blockNumber);
 
-    if (trialData === undefined || trialData === null) {
-      throw Error("[MY ERROR]: Could not parse trial data");
-    }
+    checkForNullOrUndefined(trialData);
+
     trialData.blockNumber = this.blockNumber;
     trialData.userNumber = this.userNumber;
 
@@ -80,10 +70,7 @@ class ExperimentFrame {
         trialCopy.amplitude,
       );
 
-      if (!(failedTrial instanceof Trial)) {
-        throw Error("[MY ERROR]: newItem must be an instance of Trial.");
-      }
-      this.insertItemAfterGivenIndex(
+      insertTrialInArray(
         currentBlock.getTrials(),
         failedTrial,
         this.trialIndex,
@@ -96,7 +83,7 @@ class ExperimentFrame {
     this.trialIndex++;
     if (currentBlock.getTrials()[this.trialIndex]) {
       this.showTrial();
-    } else if (++this.blockNumber <= this.totalBlocks) {
+    } else if (++this.blockNumber <= BLOCKS_NUMBER) {
       this.trialIndex = 0;
       this.showTrial();
     } else {
@@ -113,20 +100,19 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     this.trial = block.getTrials()[this.trialIndex];
 
-    this.trial.setPreviousTrial(this.prevTrial);
+    checkIfInstanceOfTrial(this.trial);
 
-    if (typeof this.trial.drawShapes === "function") {
-      this.trial.drawShapes();
-    } else {
-      throw Error(
-        "[MY ERROR]: drawShapes method not found on the current trial object.",
-      );
-    }
+    const prev = deepCopy(this.prevTrial);
+
+    this.trial.setPreviousTrial(prev);
+
+    this.trial.drawShapes();
 
     this.showIndexes();
+
     this.setThisPrevTrial();
 
-    if (this.trialIndex % this.trialsPerBreak === 0) {
+    if (this.trialIndex % TRIALS_PER_BREAK === 0) {
       this.displayBreakWindow();
     }
   }
@@ -142,35 +128,16 @@ class ExperimentFrame {
     };
   }
 
-  // Fisher-Yates Algorithm
-  insertItemAfterGivenIndex(array, newItem, startIndex) {
-    if (!(newItem instanceof Trial)) {
-      throw Error("[MY ERROR]: newItem must be an instance of Trial.");
-    }
-    // Ensure the startIndex is within the array bounds and not the last element
-    if (startIndex < 0 || startIndex >= array.length - 1) {
-      throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
-    }
-
-    // Generate a random index in the range from startIndex + 1 to the array length inclusive
-    const rand = Math.random();
-    const randomIndex =
-      Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
-
-    // Insert the new item at the random index
-    array.splice(randomIndex, 0, newItem);
-  }
-
   showIndexes() {
     let index = this.trialIndex;
     index++;
-    const currentTrialIndexEl = document.getElementById("currentTrialIndex");
+    const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
 
-    const currentBlockIndexEl = document.getElementById("totalTrialsIndex");
+    const currentBlockIndexEl = document.getElementById("totalTrials");
     currentBlockIndexEl.innerText = this.getTotalTrials() + "";
 
-    const trialsToBlockIndexEI = document.getElementById("trialsToBreakIndex");
+    const trialsToBlockIndexEI = document.getElementById("trialsToBreak");
     trialsToBlockIndexEI.innerText = this.getRemainingTrials() + "";
   }
 
@@ -237,8 +204,8 @@ class ExperimentFrame {
 
   getRemainingTrials() {
     let index = this.trialIndex;
-    const a = index % this.trialsPerBreak;
-    const b = this.trialsPerBreak;
+    const a = index % TRIALS_PER_BREAK;
+    const b = TRIALS_PER_BREAK;
     return b - a;
   }
 
@@ -259,11 +226,11 @@ class ExperimentFrame {
   }
 
   cleanUpSounds() {
-    errorSound.remove();
-    successSound.remove();
     errorSound.srcObject = null;
     successSound.srcObject = null;
     errorSound.src = "";
     successSound.src = "";
+    errorSound.remove();
+    successSound.remove();
   }
 }
