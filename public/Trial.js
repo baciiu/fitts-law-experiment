@@ -289,17 +289,20 @@ class Trial {
   }
 
   endTrial() {
-    console.log("************** END TRIAL INFO START ******************");
-    console.log("targetPressIn: " + this.targetPressIn);
-    console.log("targetReleaseIn: " + this.targetReleaseIn);
-
-    console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
-    console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
-    console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
-    console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
-    console.log("************** END TRIAL INFO END ******************");
-    const trialData = this.getExportDataTrial();
+    /*
+            console.log("************** END TRIAL INFO START ******************");
+            console.log("targetPressIn: " + this.targetPressIn);
+            console.log("targetReleaseIn: " + this.targetReleaseIn);
+        
+            console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
+            console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
+            console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
+            console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
+            console.log("************** END TRIAL INFO END ******************");
+            const trialData = this.getExportDataTrial();
+             */
     const trialCopy = JSON.parse(JSON.stringify(this));
+    const trialData = this.getExportDataTrial();
 
     this.cleanupTrial();
     const event = new CustomEvent("trialCompleted", {
@@ -542,7 +545,7 @@ class Trial {
       trialNumber: this.trialId,
       trialRep: this.trialRep,
       experimentType: EXPERIMENT_TYPE,
-      device: DEV_TYPE,
+      device: DEVICE_TYPE,
 
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),
