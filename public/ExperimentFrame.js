@@ -12,6 +12,7 @@ class ExperimentFrame {
     this.trialsData = [];
     this.userNumber = userNumber;
     this.trialIndex = 0;
+    this.trialIndexInExperiment = -1;
 
     this.prevTrial = {
       trialId: null,
@@ -98,9 +99,16 @@ class ExperimentFrame {
     }
 
     let block = this.experiment.getBlock(this.blockNumber);
-    this.trial = block.getTrials()[this.trialIndex];
+    let trial = block.getTrials()[this.trialIndex];
 
-    checkIfInstanceOfTrial(this.trial);
+    if (checkIfInstanceOfTrial(trial)) {
+      this.trial = trial;
+    } else {
+      console.log("EXIT");
+      return;
+    }
+
+    this.increaseTrialIndexInExperiment();
 
     const prev = deepCopy(this.prevTrial);
 
@@ -112,9 +120,18 @@ class ExperimentFrame {
 
     this.setThisPrevTrial();
 
-    if (this.trialIndex % TRIALS_PER_BREAK === 0) {
+    if (this.getTrialIndexInExperiment() % TRIALS_PER_BREAK === 0) {
       this.displayBreakWindow();
     }
+  }
+
+  getTrialIndexInExperiment() {
+    return this.trialIndexInExperiment;
+  }
+
+  increaseTrialIndexInExperiment() {
+    this.trialIndexInExperiment++;
+    console.log("Trial Index In Experiment is " + this.trialIndexInExperiment);
   }
 
   setThisPrevTrial() {
@@ -203,7 +220,7 @@ class ExperimentFrame {
   }
 
   getRemainingTrials() {
-    let index = this.trialIndex;
+    let index = this.trialIndexInExperiment;
     const a = index % TRIALS_PER_BREAK;
     const b = TRIALS_PER_BREAK;
     return b - a;
