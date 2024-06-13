@@ -96,15 +96,7 @@ class Trial {
   drawDiscreteShapes() {
     this.trialCompleted = false;
 
-    let pos;
-
-    if (USE_CENTER_OF_SCREEN) {
-      pos = this.generateCenteredPositions();
-    } else {
-      pos = this.generateNotCenteredPositions();
-    }
-
-    this.checkIfCoordinatesFitTheScreen(pos);
+    let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
     this.target.style.backgroundColor = "yellow";
@@ -115,28 +107,10 @@ class Trial {
     this.setupEventHandlers();
   }
 
-  isPreviousTrial() {
-    return !!(
-      this.previousTrial.startX &&
-      this.previousTrial.startY &&
-      this.previousTrial.targetX &&
-      this.previousTrial.targetY &&
-      this.previousTrial.trialRep
-    );
-  }
-
   drawReciprocalShapes() {
     this.trialCompleted = false;
 
-    let pos;
-
-    if (USE_CENTER_OF_SCREEN) {
-      pos = this.generateCenteredPositions();
-    } else {
-      pos = this.generateNotCenteredPositions();
-    }
-
-    this.checkIfCoordinatesFitTheScreen(pos);
+    let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
     this.target.style.backgroundColor = "orange";
@@ -150,6 +124,28 @@ class Trial {
     this.drawBody();
 
     this.setupEventHandlers();
+  }
+
+  getPosition() {
+    let pos;
+    do {
+      if (USE_CENTER_OF_SCREEN) {
+        pos = this.generateCenteredPositions();
+      } else {
+        pos = this.generateNotCenteredPositions();
+      }
+    } while (!this.checkIfCoordinatesFitTheScreen(pos));
+    return pos;
+  }
+
+  isPreviousTrial() {
+    return !!(
+      this.previousTrial.startX &&
+      this.previousTrial.startY &&
+      this.previousTrial.targetX &&
+      this.previousTrial.targetY &&
+      this.previousTrial.trialRep
+    );
   }
 
   getParity(number) {
@@ -175,6 +171,8 @@ class Trial {
       throw Error(
         "[MY ERROR]: Could not generate a valid position for the screen size! ",
       );
+    } else {
+      return true;
     }
   }
 
@@ -303,20 +301,9 @@ class Trial {
   }
 
   endTrial() {
-    /*
-                                                                    console.log("************** END TRIAL INFO START ******************");
-                                                                    console.log("targetPressIn: " + this.targetPressIn);
-                                                                    console.log("targetReleaseIn: " + this.targetReleaseIn);
-                                                                
-                                                                    console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
-                                                                    console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
-                                                                    console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
-                                                                    console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
-                                                                    console.log("************** END TRIAL INFO END ******************");
-                                                                    const trialData = this.getExportDataTrial();
-                                                                     */
-    const trialCopy = JSON.parse(JSON.stringify(this));
+    this.trialCompleted = true;
     const trialData = this.getExportDataTrial();
+    const trialCopy = JSON.parse(JSON.stringify(this));
 
     this.cleanupTrial();
     const event = new CustomEvent("trialCompleted", {
@@ -486,7 +473,7 @@ class Trial {
     do {
       let startCoords;
 
-      if (this.getPreviousTrial().startY != null) {
+      if (this.isPreviousTrial()) {
         startCoords = this.getRandomPointWithRespectToPreviousTarget();
         while (
           !this.isShapeWithinBounds(

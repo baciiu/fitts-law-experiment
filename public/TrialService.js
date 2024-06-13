@@ -199,7 +199,7 @@ function insertTrialInArray(array, trial, startIndex) {
 }
 
 function insertReciprocalTrialInArray(array, reciprocalTrial, startIndex) {
-  checkIfInstanceOfReciprocalTrial(reciprocalTrial);
+  checkIfInstanceOfReciprocalGroup(reciprocalTrial);
   insertItemAfterGivenIndex(array, reciprocalTrial, startIndex);
 }
 
@@ -227,9 +227,9 @@ function checkIfInstanceOfTrial(newItem) {
   }
 }
 
-function checkIfInstanceOfReciprocalTrial(reciprocalTrial) {
-  if (!(reciprocalTrial instanceof ReciprocalTrial)) {
-    throw Error("[MY ERROR]: not an instance of ReciprocalTrial");
+function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
+  if (!(reciprocalGroup instanceof ReciprocalGroup)) {
+    throw Error("[MY ERROR]: not an instance of ReciprocalGroup");
   } else {
     return true;
   }
