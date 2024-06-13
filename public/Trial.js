@@ -588,6 +588,7 @@ class Trial {
       trialRep: this.trialRep,
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
+      centerOfScreen: USE_CENTER_OF_SCREEN,
 
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),
@@ -608,20 +609,8 @@ class Trial {
       targetReleaseIn: this.targetReleaseIn,
 
       HIT: this.isHit(),
-      AmbiguityMarginHIT: this.isAmbiguityMarginHit(),
+      //AmbiguityMarginHIT: this.isAmbiguityMarginHit(),
       toBeRepeatedTrial: this.isToBeRepeatedTrial(),
-
-      T0: getTimeFormat(this.clicksTime.at(0)),
-      T1: getTimeFormat(this.clicksTime.at(1)),
-      T2: getTimeFormat(this.clicksTime.at(2)),
-      T3: getTimeFormat(this.clicksTime.at(3)),
-
-      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
-      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
-      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
-      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
-      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
-      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
       "Click T0 Y": this.clicksCoords.at(0)?.y,
@@ -634,6 +623,18 @@ class Trial {
 
       "Click T3 X": this.clicksCoords.at(3)?.x,
       "Click T3 Y": this.clicksCoords.at(3)?.y,
+
+      T0: getTimeFormat(this.clicksTime.at(0)),
+      T1: getTimeFormat(this.clicksTime.at(1)),
+      T2: getTimeFormat(this.clicksTime.at(2)),
+      T3: getTimeFormat(this.clicksTime.at(3)),
+
+      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
+      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
+      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
+      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
+      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
+      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
 
       "Distance T1 to T0 ": getDistance(
         this.clicksCoords.at(0)?.x,
