@@ -348,7 +348,7 @@ class ReciprocalExperimentFrame {
   }
 
   getReciprocalRemainingTrials() {
-    let index = this.trialIndex;
+    let index = this.trialIndexInExperiment;
     const a = index % TRIALS_PER_BREAK;
     const b = TRIALS_PER_BREAK;
     return b - a;
@@ -360,9 +360,9 @@ class ReciprocalExperimentFrame {
 
       this.reciprocalGroupIndex = 0;
       if (block && block.getReciprocalList().length > 0) {
-        let firstTrialGroup = block.getReciprocalList()[0];
+        const firstTrialGroup = block.getReciprocalList()[0];
 
-        let firstTrial = firstTrialGroup.getTrialsGroup()[0];
+        const firstTrial = firstTrialGroup.getTrialsGroup()[0];
 
         this.trialNumber = firstTrial.getTrialID();
 
