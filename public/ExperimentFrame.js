@@ -146,7 +146,7 @@ class ExperimentFrame {
   }
 
   showIndexes() {
-    let index = this.trialIndex;
+    let index = this.trialIndexInExperiment;
     index++;
     const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
