@@ -74,18 +74,33 @@ class ReciprocalExperimentFrame {
       failedTrialGroupOriginal,
     );
 
-    insertReciprocalTrialInArray(
-      currentBlock.getReciprocalList(),
-      newReciprocalTrial,
-      this.reciprocalGroupIndex,
+    console.log(
+      "Trying to insert failed trial to the index: " +
+        this.reciprocalGroupIndex,
     );
+
+    if (
+      currentBlock.getReciprocalList().length - 1 >
+      this.reciprocalGroupIndex
+    ) {
+      insertReciprocalTrialInArray(
+        currentBlock.getReciprocalList(),
+        newReciprocalTrial,
+        this.reciprocalGroupIndex,
+      );
+    } else {
+      currentBlock.getReciprocalList().push(newReciprocalTrial);
+    }
   }
 
   getCopyOfGroup(trialRep, group) {
+    // TODO: every trial within group gets the same trial ID
     const reciprocalGroup = new ReciprocalGroup(trialRep);
+    let trialId = this.getCurrentBlock().getReciprocalTotalTrialsNumber() + 1;
     for (const trial of group) {
+      trialId++;
       const copyTrial = new Trial(
-        this.getCurrentBlock().getReciprocalTotalTrialsNumber() + 1,
+        trialId,
         trial.trialRep,
         trial.trialDirection,
         trial.startWidth,
@@ -248,7 +263,7 @@ class ReciprocalExperimentFrame {
   }
 
   increaseTrialIndexInExperiment() {
-    this.trialIndexInExperiment++;
+    ++this.trialIndexInExperiment;
     console.log("Trial Index In Experiment is " + this.trialIndexInExperiment);
   }
 
@@ -264,7 +279,7 @@ class ReciprocalExperimentFrame {
   }
 
   showReciprocalIndexes() {
-    let index = this.trialIndex;
+    let index = this.getTrialIndexInExperiment();
     index++;
     const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
