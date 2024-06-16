@@ -54,16 +54,46 @@ class Experiment {
 
     if (this.numBlocks > 1) {
       for (let i = 2; i <= this.numBlocks; i++) {
-        let currentList = this.getBlock(i).getReciprocalList();
+        const currentList = this.getBlock(i).getReciprocalList();
 
         if (firstList.length !== currentList.length) {
           throw new Error(
             `Block ${i} does not have the same length as the first block.`,
           );
         }
-        this.getBlock(i).setReciprocalList(firstList);
+        // TODO: ADD COPIES OF THE TRIALS
+        const copyOfFirstList = this.getCopyOfReciprocalList(firstList);
+        this.getBlock(i).setReciprocalList(copyOfFirstList);
       }
     }
+  }
+
+  getCopyOfReciprocalList(list) {
+    const newList = [];
+
+    for (const element of list) {
+      const reciprocalTrial = new ReciprocalGroup(element.getTrialRep());
+      const trials = element.getTrialsGroup();
+      const trialCopies = [];
+
+      for (const trial of trials) {
+        const newTrial = new Trial(
+          trial.trialId,
+          trial.trialRep,
+          trial.trialDirection,
+          trial.startWidth,
+          trial.startHeight,
+          trial.targetWidth,
+          trial.startHeight,
+          trial.amplitude,
+        );
+        trialCopies.push(newTrial);
+      }
+      reciprocalTrial.setReciprocalTrial(trialCopies);
+      newList.push(reciprocalTrial);
+    }
+    console.log(newList);
+    return newList;
   }
 
   getOrderDiscrete(arr, orderMap) {
