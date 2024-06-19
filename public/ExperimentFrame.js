@@ -12,7 +12,7 @@ class ExperimentFrame {
     this.trialsData = [];
     this.userNumber = userNumber;
     this.trialIndex = 0;
-    this.trialIndexInExperiment = -1;
+    this.trialIndexInExperiment = 0;
 
     this.prevTrial = {
       trialId: null,
@@ -53,6 +53,7 @@ class ExperimentFrame {
 
     checkForNullOrUndefined(trialData);
 
+    trialData.no = this.getTrialIndexInExperiment();
     trialData.blockNumber = this.blockNumber;
     trialData.userNumber = this.userNumber;
 
@@ -114,6 +115,10 @@ class ExperimentFrame {
 
     this.trial.setPreviousTrial(prev);
 
+    if (this.getTrialIndexInExperiment() == 1) {
+      this.trial.setIsFirstTrial(true);
+    }
+
     this.trial.drawShapes();
 
     this.showIndexes();
@@ -147,7 +152,6 @@ class ExperimentFrame {
 
   showIndexes() {
     let index = this.trialIndexInExperiment;
-    index++;
     const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
 
