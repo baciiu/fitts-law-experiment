@@ -37,6 +37,8 @@ class Trial {
     this.targetPressIn = false;
     this.targetReleaseIn = false;
 
+    this.firstTrial = false;
+
     this.previousTrial = {
       trialId: null,
       trialRep: null,
@@ -77,14 +79,8 @@ class Trial {
     }
   }
 
-  isFirstTrial() {
-    if (isDiscrete()) {
-      return this.trialId === 1;
-    } else if (isReciprocal()) {
-      return this.trialRep == this.trialId;
-    } else {
-      console.error("[MY ERROR]: EXPERIMENT TYPE !");
-    }
+  isFirstTrialInReciprocalGroup() {
+    return this.trialRep == this.trialId;
   }
 
   drawBody() {
@@ -117,7 +113,7 @@ class Trial {
     this.drawShape(pos.start, this.start, false);
     this.start.style.backgroundColor = "red";
 
-    if (this.isFirstTrial()) {
+    if (this.isFirstTrialInReciprocalGroup()) {
       this.start.style.backgroundColor = "gray";
     }
 
@@ -129,7 +125,7 @@ class Trial {
   getPosition() {
     let pos;
     do {
-      if (USE_CENTER_OF_SCREEN) {
+      if (this.firstTrial || USE_CENTER_OF_SCREEN) {
         pos = this.generateCenteredPositions();
       } else {
         pos = this.generateNotCenteredPositions();
@@ -582,6 +578,7 @@ class Trial {
 
   getExportDataTrial() {
     return {
+      no: "",
       userNumber: "",
       blockNumber: "",
       trialNumber: this.trialId,
@@ -673,5 +670,9 @@ class Trial {
         this.clicksCoords.at(3)?.y,
       ),
     };
+  }
+
+  setIsFirstTrial(isFirstTrial) {
+    this.firstTrial = isFirstTrial;
   }
 }
