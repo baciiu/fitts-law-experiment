@@ -17,6 +17,7 @@ class ReciprocalExperimentFrame {
     this.trialGroup = [];
     this.trialRep = null;
     this.trialIndexInExperiment = 0;
+    this.trialIsFailed = false;
 
     this.prevTrial = {
       trialId: null,
@@ -57,8 +58,11 @@ class ReciprocalExperimentFrame {
     this.trialsData.push(trialData);
 
     if (trialData.toBeRepeatedTrial) {
+      this.trialIsFailed = true;
       console.log("REPEAT TRIAL");
       this.insertReciprocalTrialToBlock(trialCopy);
+    } else {
+      this.trialIsFailed = false;
     }
     this.prepareForNextTrialOrFinishReciprocal();
   }
@@ -116,6 +120,13 @@ class ReciprocalExperimentFrame {
   }
 
   prepareForNextTrialOrFinishReciprocal() {
+    if (this.trialIsFailed) {
+      if (INTERRUPT_RECIPROCAL_GROUP) {
+        this.trialIndex = -1;
+        this.reciprocalGroupIndex++;
+      }
+      this.trialIsFailed = false;
+    }
     this.trialIndex++;
 
     if (this.blockNumber <= BLOCKS_NUMBER) {
