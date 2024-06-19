@@ -16,7 +16,8 @@ class ReciprocalExperimentFrame {
     this.reciprocalGroupIndex = 0;
     this.trialGroup = [];
     this.trialRep = null;
-    this.trialIndexInExperiment = -1;
+    this.trialIndexInExperiment = 0;
+    this.trialIsFailed = false;
 
     this.prevTrial = {
       trialId: null,
@@ -49,6 +50,7 @@ class ReciprocalExperimentFrame {
 
     checkForNullOrUndefined(trialData);
 
+    trialData.no = this.getTrialIndexInExperiment();
     trialData.blockNumber = this.blockNumber;
     trialData.userNumber = this.userNumber;
 
@@ -56,8 +58,11 @@ class ReciprocalExperimentFrame {
     this.trialsData.push(trialData);
 
     if (trialData.toBeRepeatedTrial) {
+      this.trialIsFailed = true;
       console.log("REPEAT TRIAL");
       this.insertReciprocalTrialToBlock(trialCopy);
+    } else {
+      this.trialIsFailed = false;
     }
     this.prepareForNextTrialOrFinishReciprocal();
   }
@@ -115,6 +120,13 @@ class ReciprocalExperimentFrame {
   }
 
   prepareForNextTrialOrFinishReciprocal() {
+    if (this.trialIsFailed) {
+      if (INTERRUPT_RECIPROCAL_GROUP) {
+        this.trialIndex = -1;
+        this.reciprocalGroupIndex++;
+      }
+      this.trialIsFailed = false;
+    }
     this.trialIndex++;
 
     if (this.blockNumber <= BLOCKS_NUMBER) {
@@ -242,6 +254,10 @@ class ReciprocalExperimentFrame {
 
     this.trial.setPreviousTrial(prev);
 
+    if (this.getTrialIndexInExperiment() == 1) {
+      this.trial.setIsFirstTrial(true);
+    }
+
     this.trial.drawShapes();
 
     this.showReciprocalIndexes();
@@ -263,7 +279,7 @@ class ReciprocalExperimentFrame {
   }
 
   increaseTrialIndexInExperiment() {
-    ++this.trialIndexInExperiment;
+    this.trialIndexInExperiment++;
     console.log("Trial Index In Experiment is " + this.trialIndexInExperiment);
   }
 
@@ -280,7 +296,6 @@ class ReciprocalExperimentFrame {
 
   showReciprocalIndexes() {
     let index = this.getTrialIndexInExperiment();
-    index++;
     const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
 
