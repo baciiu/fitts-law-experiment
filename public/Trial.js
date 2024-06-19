@@ -80,7 +80,7 @@ class Trial {
   }
 
   isFirstTrialInReciprocalGroup() {
-    return this.trialRep == this.trialId;
+    return !this.trialRep.toString().includes(".");
   }
 
   drawBody() {
@@ -125,6 +125,12 @@ class Trial {
   getPosition() {
     let pos;
     do {
+      if (this.isSamePositionAsPreviousTrial()) {
+        pos = this.getPreviousTrialPosition();
+        if (this.checkIfCoordinatesFitTheScreen(pos)) {
+          return pos;
+        }
+      }
       if (this.firstTrial || USE_CENTER_OF_SCREEN) {
         pos = this.generateCenteredPositions();
       } else {
@@ -132,6 +138,25 @@ class Trial {
       }
     } while (!this.checkIfCoordinatesFitTheScreen(pos));
     return pos;
+  }
+
+  getPreviousTrialPosition() {
+    const start = {
+      x: this.previousTrial.startX,
+      y: this.previousTrial.startY,
+    };
+    const target = {
+      x: this.previousTrial.targetX,
+      y: this.previousTrial.targetY,
+    };
+    return { start, target };
+  }
+
+  isSamePositionAsPreviousTrial() {
+    if (isDiscrete()) {
+      return false;
+    }
+    return !this.isFirstTrialInReciprocalGroup();
   }
 
   isPreviousTrial() {
