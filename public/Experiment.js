@@ -58,10 +58,9 @@ class Experiment {
 
         if (firstList.length !== currentList.length) {
           throw new Error(
-            `Block ${i} does not have the same length as the first block.`,
+            `[MY ERROR] Block ${i} does not have the same length as the first block.`,
           );
         }
-        // TODO: ADD COPIES OF THE TRIALS
         const copyOfFirstList = this.getCopyOfReciprocalList(firstList);
         this.getBlock(i).setReciprocalList(copyOfFirstList);
       }
