@@ -431,22 +431,44 @@ class Trial {
   }
 
   isClickAMistake() {
-    const clickStartX1 = this.startCoords.x;
-    const clickStartY1 = this.startCoords.y;
-
-    if (this.clicksCoords.at(2) === undefined) {
+    if (
+      this.clicksCoords.at(0) === undefined ||
+      this.clicksCoords.at(1) === undefined ||
+      this.clicksCoords.at(2) === undefined ||
+      this.clicksCoords.at(3) === undefined
+    ) {
       return true;
     }
-    const clickTargetX2 = this.clicksCoords.at(2).x;
-    const clickTargetY2 = this.clicksCoords.at(2).y;
+    let coordX1;
+    let coordY1;
+    let coordX2;
+    let coordY2;
 
-    let distance = getDistance(
-      clickStartX1,
-      clickStartY1,
-      clickTargetX2,
-      clickTargetY2,
-    );
+    if (!this.startPressIn && this.targetPressIn) {
+      return false;
+    } else if (this.startPressIn && !this.targetPressIn) {
+      coordX1 = this.getCenterCoordinatesOfStartShape().x;
+      coordY1 = this.getCenterCoordinatesOfStartShape().y;
+      coordX2 = this.targetCoords.x;
+      coordY2 = this.targetCoords.y;
+    } else if (!this.startPressIn && !this.targetPressIn) {
+      coordX1 = this.startCoords.x;
+      coordY1 = this.startCoords.y;
+      coordX2 = this.targetCoords.x;
+      coordY2 = this.targetCoords.y;
+    } else {
+      return false;
+    }
+
+    let distance = getDistance(coordX1, coordY1, coordX2, coordY2);
     return distance < mmToPixels(this.amplitude) / FAILED_TRIAL_THRESHOLD;
+  }
+
+  getCenterCoordinatesOfStartShape() {
+    console.log("getCenterOfStartShape() not implemented yet.");
+    const posX = this.startCoords.x + this.startWidth / 2;
+    const posY = this.startCoords.y + this.startHeight / 2;
+    return { x: posX, y: posY };
   }
 
   getRandomPoint(width1, height1) {
