@@ -132,7 +132,7 @@ class Block {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
-          let reciprocalTrial = new ReciprocalTrial(temp_id);
+          let reciprocalGroup = new ReciprocalGroup(temp_id);
           const t = this.addNewTrialReciprocal(
             this.trialId++,
             temp_id + "",
@@ -140,7 +140,7 @@ class Block {
             target,
             amplitude,
           );
-          reciprocalTrial.addTrial(t);
+          reciprocalGroup.addTrial(t);
 
           for (let i = 1; i < this.repetitionTrial; i++) {
             const t = this.addNewTrialReciprocal(
@@ -150,9 +150,9 @@ class Block {
               target,
               amplitude,
             );
-            reciprocalTrial.addTrial(t);
+            reciprocalGroup.addTrial(t);
           }
-          this.reciprocalTrialsList.push(reciprocalTrial);
+          this.reciprocalTrialsList.push(reciprocalGroup);
         }
       }
     }
@@ -162,7 +162,7 @@ class Block {
     this.reciprocalTrialsList = [];
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
-      let reciprocalTrial = new ReciprocalTrial(temp_id);
+      let reciprocalGroup = new ReciprocalGroup(temp_id);
       const t = this.addNewTrialReciprocal(
         this.trialId++,
         temp_id + "",
@@ -170,7 +170,7 @@ class Block {
         element,
         element.amplitude,
       );
-      reciprocalTrial.addTrial(t);
+      reciprocalGroup.addTrial(t);
       for (let i = 1; i < this.repetitionTrial; i++) {
         const t = this.addNewTrialReciprocal(
           this.trialId++,
@@ -179,9 +179,9 @@ class Block {
           element,
           element.amplitude,
         );
-        reciprocalTrial.addTrial(t);
+        reciprocalGroup.addTrial(t);
       }
-      this.reciprocalTrialsList.push(reciprocalTrial);
+      this.reciprocalTrialsList.push(reciprocalGroup);
     }
   }
 
