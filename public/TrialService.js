@@ -7,7 +7,7 @@ function mmToPixels(mm) {
   const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  let result = inches * 151;
+  let result = inches * 149.1;
   //result = result.toFixed(2);
   //let res = Number(result);
   return result;
