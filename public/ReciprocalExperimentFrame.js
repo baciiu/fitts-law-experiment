@@ -14,7 +14,6 @@ class ReciprocalExperimentFrame {
     this.userNumber = userNumber;
     this.trialIndex = 0;
     this.reciprocalGroupIndex = 0;
-    this.trialGroup = [];
     this.trialRep = null;
     this.trialIndexInExperiment = 0;
     this.trialIsFailed = false;
@@ -190,38 +189,6 @@ class ReciprocalExperimentFrame {
     } else {
       this.experimentFinished();
     }
-  }
-
-  hasListGroupIndex() {
-    return (
-      this.getCurrentBlock().getReciprocalList()[this.reciprocalGroupIndex] !=
-      null
-    );
-  }
-
-  hasNextTrialInGroup() {
-    return (
-      this.trialIndex <
-      this.getCurrentBlock()
-        .getReciprocalList()
-        [this.reciprocalGroupIndex].getTrialsGroup().length -
-        1
-    );
-  }
-
-  hasNextList() {
-    return (
-      this.reciprocalGroupIndex <
-      this.getCurrentBlock().getReciprocalList().length - 1
-    );
-  }
-
-  isExperimentFinished() {
-    return (
-      this.reciprocalGroupIndex >=
-        this.getCurrentBlock().getReciprocalList().length &&
-      this.blockNumber >= BLOCKS_NUMBER
-    );
   }
 
   getCurrentBlock() {
