@@ -34,6 +34,8 @@ class Trial {
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
+    this.startPressIn = false;
+    this.startReleaseIn = false;
     this.targetPressIn = false;
     this.targetReleaseIn = false;
 
@@ -169,15 +171,6 @@ class Trial {
     );
   }
 
-  getParity(number) {
-    const parts = number.toString().split(".");
-    if (parts[1] && Number(parts[1]) % 2 !== 0) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
   checkIfCoordinatesFitTheScreen(pos) {
     if (
       !(
@@ -197,18 +190,29 @@ class Trial {
     }
   }
 
+  isStartNotMandatoryOnReciprocal() {
+    return isReciprocal() && START_HIT_NOT_MANDATORY;
+  }
+
   setupEventHandlers() {
     this.boundHandleStartPress = this.handleStartPress.bind(this);
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
-    this.start.addEventListener("mousedown", this.boundHandleStartPress);
-    this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+
+    if (this.isStartNotMandatoryOnReciprocal()) {
+      this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
+    } else {
+      this.start.addEventListener("mousedown", this.boundHandleStartPress);
+      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+    }
   }
 
   handleStartPress(event) {
     if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
+      this.startPressIn = true;
       successSound.play();
       this.firstClickDone = true;
       this.trialStarted = true;
@@ -224,9 +228,9 @@ class Trial {
     if (!this.trialStarted) {
       errorSound.play();
     } else if (this.trialStarted) {
+      this.startReleaseIn = isInsideStart;
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
-
         if (isDiscrete()) {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
@@ -251,7 +255,9 @@ class Trial {
   }
 
   handleBodyPress(event) {
-    if (this.trialStarted && this.firstClickDone) {
+    if (!this.trialStarted) {
+      this.handleBodyPressAsStartPress(event);
+    } else if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
       this.targetPressIn = this.isCursorInsideShape(event, this.target);
@@ -260,8 +266,10 @@ class Trial {
       this.targetPressIn = false;
       errorSound.play();
     }
-    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-    this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+    if (!this.isStartNotMandatoryOnReciprocal()) {
+      this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+    }
   }
 
   handleBodyRelease(event) {
@@ -282,11 +290,41 @@ class Trial {
       } else {
         errorSound.play();
       }
-      this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
-      this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+      if (!this.isStartNotMandatoryOnReciprocal()) {
+        this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
+        this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+      }
       this.endTrial();
     } else if (this.trialStarted && this.firstClickDone) {
-      // release on start
+      this.handleBodyReleaseAsStartRelease(event);
+    }
+  }
+
+  handleBodyPressAsStartPress(event) {
+    console.log("start pressed");
+    this.logMouseEvent(event, 0);
+    this.firstClickDone = true;
+    this.trialStarted = true;
+    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    this.startPressIn = isInsideStart;
+    if (isInsideStart) {
+      successSound.play();
+    } else {
+      errorSound.play();
+    }
+  }
+
+  handleBodyReleaseAsStartRelease(event) {
+    console.log("release on start");
+    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    this.startReleaseIn = isInsideStart;
+    this.logMouseEvent(event, 1);
+    this.target.style.backgroundColor = "red";
+    this.start.style.backgroundColor = "orange";
+    if (isInsideStart) {
+      successSound.play();
+    } else {
+      errorSound.play();
     }
   }
 
@@ -388,10 +426,6 @@ class Trial {
     } else {
       return this.isPressInReleaseOut() || this.isPressInReleaseIn();
     }
-  }
-
-  isAmbiguityMarginHit() {
-    return this.ambiguityMarginHit;
   }
 
   isClickAMistake() {
@@ -622,6 +656,9 @@ class Trial {
       startWidthPx: mmToPixels(this.startWidth),
       startHeightPx: mmToPixels(this.startHeight),
 
+      startPressIn: this.startPressIn,
+      startReleaseIn: this.startReleaseIn,
+
       targetX: this.targetCoords.x,
       targetY: this.targetCoords.y,
       targetWidthPx: mmToPixels(this.targetWidth),
@@ -631,7 +668,6 @@ class Trial {
       targetReleaseIn: this.targetReleaseIn,
 
       HIT: this.isHit(),
-      //AmbiguityMarginHIT: this.isAmbiguityMarginHit(),
       toBeRepeatedTrial: this.isToBeRepeatedTrial(),
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
