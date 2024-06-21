@@ -7,11 +7,12 @@ function mmToPixels(mm) {
   const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  let result = inches * 149.1;
+  let result = inches * 100;
   //result = result.toFixed(2);
   //let res = Number(result);
   return result;
 
+  // Pixels per inch (PPI)
   // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1 // update 151 is more accurate
   // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
 }
