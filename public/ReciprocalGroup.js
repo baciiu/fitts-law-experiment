@@ -1,4 +1,4 @@
-class ReciprocalTrial {
+class ReciprocalGroup {
   trialGroup = [];
   trialRep = "";
 

@@ -34,8 +34,12 @@ class Trial {
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
     this.HIT = null;
+    this.startPressIn = false;
+    this.startReleaseIn = false;
     this.targetPressIn = false;
     this.targetReleaseIn = false;
+
+    this.firstTrial = false;
 
     this.previousTrial = {
       trialId: null,
@@ -77,14 +81,8 @@ class Trial {
     }
   }
 
-  isFirstTrial() {
-    if (isDiscrete()) {
-      return this.trialId === 1;
-    } else if (isReciprocal()) {
-      return this.trialRep == this.trialId;
-    } else {
-      console.error("[MY ERROR]: EXPERIMENT TYPE !");
-    }
+  isFirstTrialInReciprocalGroup() {
+    return !this.trialRep.toString().includes(".");
   }
 
   drawBody() {
@@ -96,8 +94,7 @@ class Trial {
   drawDiscreteShapes() {
     this.trialCompleted = false;
 
-    const pos = this.generateDiscretePositions();
-    this.checkIfCoordinatesFitTheScreen(pos);
+    let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
     this.target.style.backgroundColor = "yellow";
@@ -108,28 +105,17 @@ class Trial {
     this.setupEventHandlers();
   }
 
-  isPreviousTrial() {
-    return !!(
-      this.previousTrial.startX &&
-      this.previousTrial.startY &&
-      this.previousTrial.targetX &&
-      this.previousTrial.targetY &&
-      this.previousTrial.trialRep
-    );
-  }
-
   drawReciprocalShapes() {
     this.trialCompleted = false;
 
-    const pos = this.generateReciprocalPositions();
-    this.checkIfCoordinatesFitTheScreen(pos);
+    let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "orange";
+    this.target.style.backgroundColor = "yellow";
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "red";
+    this.start.style.backgroundColor = "green";
 
-    if (this.isFirstTrial()) {
+    if (this.isFirstTrialInReciprocalGroup()) {
       this.start.style.backgroundColor = "gray";
     }
 
@@ -138,13 +124,51 @@ class Trial {
     this.setupEventHandlers();
   }
 
-  getParity(number) {
-    const parts = number.toString().split(".");
-    if (parts[1] && Number(parts[1]) % 2 !== 0) {
-      return 1;
-    } else {
-      return 0;
+  getPosition() {
+    let pos;
+    do {
+      if (this.isSamePositionAsPreviousTrial()) {
+        pos = this.getPreviousTrialPosition();
+        if (this.checkIfCoordinatesFitTheScreen(pos)) {
+          return pos;
+        }
+      }
+      if (this.firstTrial || USE_CENTER_OF_SCREEN) {
+        pos = this.generateCenteredPositions();
+      } else {
+        pos = this.generateNotCenteredPositions();
+      }
+    } while (!this.checkIfCoordinatesFitTheScreen(pos));
+    return pos;
+  }
+
+  getPreviousTrialPosition() {
+    const start = {
+      x: this.previousTrial.startX,
+      y: this.previousTrial.startY,
+    };
+    const target = {
+      x: this.previousTrial.targetX,
+      y: this.previousTrial.targetY,
+    };
+    return { start, target };
+  }
+
+  isSamePositionAsPreviousTrial() {
+    if (isDiscrete()) {
+      return false;
     }
+    return !this.isFirstTrialInReciprocalGroup();
+  }
+
+  isPreviousTrial() {
+    return !!(
+      this.previousTrial.startX &&
+      this.previousTrial.startY &&
+      this.previousTrial.targetX &&
+      this.previousTrial.targetY &&
+      this.previousTrial.trialRep
+    );
   }
 
   checkIfCoordinatesFitTheScreen(pos) {
@@ -161,7 +185,13 @@ class Trial {
       throw Error(
         "[MY ERROR]: Could not generate a valid position for the screen size! ",
       );
+    } else {
+      return true;
     }
+  }
+
+  isStartNotMandatoryOnReciprocal() {
+    return isReciprocal() && START_HIT_NOT_MANDATORY;
   }
 
   setupEventHandlers() {
@@ -169,13 +199,20 @@ class Trial {
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
-    this.start.addEventListener("mousedown", this.boundHandleStartPress);
-    this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+
+    if (this.isStartNotMandatoryOnReciprocal()) {
+      this.body.addEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
+    } else {
+      this.start.addEventListener("mousedown", this.boundHandleStartPress);
+      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
+    }
   }
 
   handleStartPress(event) {
     if (!this.firstClickDone) {
       this.logMouseEvent(event, 0);
+      this.startPressIn = true;
       successSound.play();
       this.firstClickDone = true;
       this.trialStarted = true;
@@ -191,26 +228,26 @@ class Trial {
     if (!this.trialStarted) {
       errorSound.play();
     } else if (this.trialStarted) {
+      this.startReleaseIn = isInsideStart;
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
-
         if (isDiscrete()) {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          this.target.style.backgroundColor = "red";
-          this.start.style.backgroundColor = "orange";
+          this.target.style.backgroundColor = "green";
+          this.start.style.backgroundColor = "yellow";
         }
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
           "touchend",
           this.boundHandleStartRelease,
-        ); // Remove touchend listener if added
+        );
         this.body.addEventListener("mousedown", this.boundHandleBodyPress);
-        this.body.addEventListener("touchstart", this.boundHandleBodyPress); // Add touchstart listener for the body
+        this.body.addEventListener("touchstart", this.boundHandleBodyPress);
         this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
-        this.body.addEventListener("touchend", this.boundHandleBodyRelease); // Add touchend listener for the body
+        this.body.addEventListener("touchend", this.boundHandleBodyRelease);
       } else {
         errorSound.play();
       }
@@ -218,7 +255,9 @@ class Trial {
   }
 
   handleBodyPress(event) {
-    if (this.trialStarted && this.firstClickDone) {
+    if (!this.trialStarted && this.isStartNotMandatoryOnReciprocal()) {
+      this.handleBodyPressAsStartPress(event);
+    } else if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
       this.targetPressIn = this.isCursorInsideShape(event, this.target);
@@ -227,8 +266,10 @@ class Trial {
       this.targetPressIn = false;
       errorSound.play();
     }
-    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-    this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+    if (!this.isStartNotMandatoryOnReciprocal()) {
+      this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+      this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+    }
   }
 
   handleBodyRelease(event) {
@@ -243,17 +284,49 @@ class Trial {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          this.target.style.backgroundColor = "red";
-          this.start.style.backgroundColor = "orange";
+          this.target.style.backgroundColor = "green";
+          this.start.style.backgroundColor = "yellow";
         }
       } else {
         errorSound.play();
       }
-      this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
-      this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+      if (!this.isStartNotMandatoryOnReciprocal()) {
+        this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
+        this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+      }
       this.endTrial();
     } else if (this.trialStarted && this.firstClickDone) {
-      // release on start
+      if (this.isStartNotMandatoryOnReciprocal()) {
+        this.handleBodyReleaseAsStartRelease(event);
+      }
+    }
+  }
+
+  handleBodyPressAsStartPress(event) {
+    console.log("start pressed");
+    this.logMouseEvent(event, 0);
+    this.firstClickDone = true;
+    this.trialStarted = true;
+    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    this.startPressIn = isInsideStart;
+    if (isInsideStart) {
+      successSound.play();
+    } else {
+      errorSound.play();
+    }
+  }
+
+  handleBodyReleaseAsStartRelease(event) {
+    console.log("release on start");
+    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    this.startReleaseIn = isInsideStart;
+    this.logMouseEvent(event, 1);
+    this.target.style.backgroundColor = "green";
+    this.start.style.backgroundColor = "yellow";
+    if (isInsideStart) {
+      successSound.play();
+    } else {
+      errorSound.play();
     }
   }
 
@@ -266,7 +339,7 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (DEV_TYPE === "touch") {
+    if (DEV_TYPE == "touch") {
       const extendedRect = {
         left: rect.left - AMBIGUITY_MARGIN_PX,
         top: rect.top - AMBIGUITY_MARGIN_PX,
@@ -289,20 +362,9 @@ class Trial {
   }
 
   endTrial() {
-    /*
-            console.log("************** END TRIAL INFO START ******************");
-            console.log("targetPressIn: " + this.targetPressIn);
-            console.log("targetReleaseIn: " + this.targetReleaseIn);
-        
-            console.log("PressInReleaseIn: " + this.isPressInReleaseIn());
-            console.log("PressInReleaseOut: " + this.isPressInReleaseOut());
-            console.log("PressOutReleaseIn: " + this.isPressOutReleaseIn());
-            console.log("PressOutReleaseOut: " + this.isPressOutReleaseOut());
-            console.log("************** END TRIAL INFO END ******************");
-            const trialData = this.getExportDataTrial();
-             */
-    const trialCopy = JSON.parse(JSON.stringify(this));
+    this.trialCompleted = true;
     const trialData = this.getExportDataTrial();
+    const trialCopy = JSON.parse(JSON.stringify(this));
 
     this.cleanupTrial();
     const event = new CustomEvent("trialCompleted", {
@@ -368,10 +430,6 @@ class Trial {
     }
   }
 
-  isAmbiguityMarginHit() {
-    return this.ambiguityMarginHit;
-  }
-
   isClickAMistake() {
     const clickStartX1 = this.startCoords.x;
     const clickStartY1 = this.startCoords.y;
@@ -402,6 +460,25 @@ class Trial {
       height1 / 2 +
       TOP_MARGIN_PX;
     return { x: x1, y: y1 };
+  }
+
+  getRandomPointWithRespectToPreviousTarget() {
+    const previous = this.getPreviousTrial();
+
+    const midpoint = {
+      x: (previous.startX + previous.targetX) / 2,
+      y: (previous.startY + previous.targetY) / 2,
+    };
+
+    const radius = (window.innerWidth * MAX_SCREEN_DISTANCE) / 100;
+
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = Math.random() * radius;
+
+    const x = midpoint.x + distance * Math.cos(angle);
+    const y = midpoint.y + distance * Math.sin(angle);
+
+    return { x: x, y: y };
   }
 
   isShapeWithinBounds(x, y, width, height) {
@@ -435,7 +512,7 @@ class Trial {
     return distance - amplitude <= tolerance;
   }
 
-  generateDiscretePositions() {
+  generateNotCenteredPositions() {
     let amplitude = mmToPixels(this.amplitude);
     let width1 = mmToPixels(this.startWidth);
     let height1 = mmToPixels(this.startHeight);
@@ -451,7 +528,24 @@ class Trial {
       maxcount = 100;
 
     do {
-      const startCoords = this.getRandomPoint(width1, height1);
+      let startCoords;
+
+      if (this.isPreviousTrial()) {
+        startCoords = this.getRandomPointWithRespectToPreviousTarget();
+        while (
+          !this.isShapeWithinBounds(
+            startCoords.x,
+            startCoords.y,
+            width1,
+            height1,
+          )
+        ) {
+          startCoords = this.getRandomPointWithRespectToPreviousTarget();
+        }
+      } else {
+        startCoords = this.getRandomPoint(width1, height1);
+      }
+
       x1 = startCoords.x;
       y1 = startCoords.y;
 
@@ -476,7 +570,7 @@ class Trial {
       }
     } while (!start || !target);
     if (count > maxcount) {
-      const dis = this.generateReciprocalPositions();
+      const dis = this.generateCenteredPositions();
       if (
         !dis.start ||
         !dis.target ||
@@ -494,7 +588,7 @@ class Trial {
     return { start, target };
   }
 
-  generateReciprocalPositions() {
+  generateCenteredPositions() {
     let amplitude = mmToPixels(this.amplitude);
     let width1 = mmToPixels(this.startWidth);
     let height1 = mmToPixels(this.startHeight);
@@ -507,7 +601,8 @@ class Trial {
 
     const angle = this.trialDirection;
 
-    const radians = (angle * Math.PI) / 180; // Convert angle to radians
+    // Convert angle to radians
+    const radians = (angle * Math.PI) / 180;
 
     x1 = centerX + (amplitude / 2) * Math.cos(radians);
     y1 = centerY + (amplitude / 2) * Math.sin(radians);
@@ -538,14 +633,20 @@ class Trial {
     this.previousTrial = prevTrial;
   }
 
+  getPreviousTrial() {
+    return this.previousTrial;
+  }
+
   getExportDataTrial() {
     return {
+      no: "",
       userNumber: "",
       blockNumber: "",
       trialNumber: this.trialId,
       trialRep: this.trialRep,
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
+      centerOfScreen: USE_CENTER_OF_SCREEN,
 
       amplitudeMM: this.amplitude,
       amplitudePx: mmToPixels(this.amplitude),
@@ -557,6 +658,9 @@ class Trial {
       startWidthPx: mmToPixels(this.startWidth),
       startHeightPx: mmToPixels(this.startHeight),
 
+      startPressIn: this.startPressIn,
+      startReleaseIn: this.startReleaseIn,
+
       targetX: this.targetCoords.x,
       targetY: this.targetCoords.y,
       targetWidthPx: mmToPixels(this.targetWidth),
@@ -566,20 +670,7 @@ class Trial {
       targetReleaseIn: this.targetReleaseIn,
 
       HIT: this.isHit(),
-      AmbiguityMarginHIT: this.isAmbiguityMarginHit(),
       toBeRepeatedTrial: this.isToBeRepeatedTrial(),
-
-      T0: getTimeFormat(this.clicksTime.at(0)),
-      T1: getTimeFormat(this.clicksTime.at(1)),
-      T2: getTimeFormat(this.clicksTime.at(2)),
-      T3: getTimeFormat(this.clicksTime.at(3)),
-
-      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
-      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
-      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
-      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
-      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
-      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
       "Click T0 Y": this.clicksCoords.at(0)?.y,
@@ -592,6 +683,18 @@ class Trial {
 
       "Click T3 X": this.clicksCoords.at(3)?.x,
       "Click T3 Y": this.clicksCoords.at(3)?.y,
+
+      T0: getTimeFormat(this.clicksTime.at(0)),
+      T1: getTimeFormat(this.clicksTime.at(1)),
+      T2: getTimeFormat(this.clicksTime.at(2)),
+      T3: getTimeFormat(this.clicksTime.at(3)),
+
+      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
+      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
+      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
+      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
+      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
+      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
 
       "Distance T1 to T0 ": getDistance(
         this.clicksCoords.at(0)?.x,
@@ -630,5 +733,9 @@ class Trial {
         this.clicksCoords.at(3)?.y,
       ),
     };
+  }
+
+  setIsFirstTrial(isFirstTrial) {
+    this.firstTrial = isFirstTrial;
   }
 }

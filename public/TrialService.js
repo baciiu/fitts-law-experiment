@@ -137,31 +137,6 @@ function calculateWrappingDimensions(
   return { width: wrappingWidth, height: wrappingHeight };
 }
 
-function getCopyTrial(trial) {
-  const copy = new Trial(
-    trial.trialRep,
-    trial.trialDirection,
-    trial.startWidth,
-    trial.startHeight,
-    trial.targetWidth,
-    trial.targetHeight,
-    trial.amplitude,
-  );
-  copy.HIT = trial.HIT;
-  copy.clicksCoords = trial.clicksCoords;
-  copy.startCoords = trial.startCoords;
-  copy.targetCoords = trial.targetCoords;
-  copy.endCoords = trial.endCoords;
-  copy.ambiguityMarginHit = trial.ambiguityMarginHit;
-  copy.firstClickDone = false;
-  copy.trialCompleted = false;
-  copy.toBeRepeatedTrial = false;
-  copy.targetPressIn = false;
-  copy.targetReleaseIn = false;
-  copy.previousTrial = null;
-  return copy;
-}
-
 function generateCenterPointWithAmplitude(x, y, amplitude, angle) {
   const angleRadians = angle * (Math.PI / 180);
   return {
@@ -199,13 +174,14 @@ function insertTrialInArray(array, trial, startIndex) {
 }
 
 function insertReciprocalTrialInArray(array, reciprocalTrial, startIndex) {
-  checkIfInstanceOfReciprocalTrial(reciprocalTrial);
+  checkIfInstanceOfReciprocalGroup(reciprocalTrial);
   insertItemAfterGivenIndex(array, reciprocalTrial, startIndex);
 }
 
 // Fisher-Yates Algorithm
 function insertItemAfterGivenIndex(array, newItem, startIndex) {
   // Ensure the startIndex is within the array bounds and not the last element
+
   if (startIndex < 0 || startIndex >= array.length - 1) {
     throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
   }
@@ -227,9 +203,9 @@ function checkIfInstanceOfTrial(newItem) {
   }
 }
 
-function checkIfInstanceOfReciprocalTrial(reciprocalTrial) {
-  if (!(reciprocalTrial instanceof ReciprocalTrial)) {
-    throw Error("[MY ERROR]: not an instance of ReciprocalTrial");
+function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
+  if (!(reciprocalGroup instanceof ReciprocalGroup)) {
+    throw Error("[MY ERROR]: not an instance of ReciprocalGroup");
   } else {
     return true;
   }

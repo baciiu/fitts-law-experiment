@@ -12,6 +12,7 @@ class ExperimentFrame {
     this.trialsData = [];
     this.userNumber = userNumber;
     this.trialIndex = 0;
+    this.trialIndexInExperiment = 0;
 
     this.prevTrial = {
       trialId: null,
@@ -52,6 +53,7 @@ class ExperimentFrame {
 
     checkForNullOrUndefined(trialData);
 
+    trialData.no = this.getTrialIndexInExperiment();
     trialData.blockNumber = this.blockNumber;
     trialData.userNumber = this.userNumber;
 
@@ -98,13 +100,24 @@ class ExperimentFrame {
     }
 
     let block = this.experiment.getBlock(this.blockNumber);
-    this.trial = block.getTrials()[this.trialIndex];
+    let trial = block.getTrials()[this.trialIndex];
 
-    checkIfInstanceOfTrial(this.trial);
+    if (checkIfInstanceOfTrial(trial)) {
+      this.trial = trial;
+    } else {
+      console.log("EXIT");
+      return;
+    }
+
+    this.increaseTrialIndexInExperiment();
 
     const prev = deepCopy(this.prevTrial);
 
     this.trial.setPreviousTrial(prev);
+
+    if (this.getTrialIndexInExperiment() == 1) {
+      this.trial.setIsFirstTrial(true);
+    }
 
     this.trial.drawShapes();
 
@@ -112,9 +125,18 @@ class ExperimentFrame {
 
     this.setThisPrevTrial();
 
-    if (this.trialIndex % TRIALS_PER_BREAK === 0) {
+    if (this.getTrialIndexInExperiment() % TRIALS_PER_BREAK === 0) {
       this.displayBreakWindow();
     }
+  }
+
+  getTrialIndexInExperiment() {
+    return this.trialIndexInExperiment;
+  }
+
+  increaseTrialIndexInExperiment() {
+    this.trialIndexInExperiment++;
+    console.log("Trial Index In Experiment is " + this.trialIndexInExperiment);
   }
 
   setThisPrevTrial() {
@@ -129,8 +151,7 @@ class ExperimentFrame {
   }
 
   showIndexes() {
-    let index = this.trialIndex;
-    index++;
+    let index = this.trialIndexInExperiment;
     const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
 
@@ -203,7 +224,7 @@ class ExperimentFrame {
   }
 
   getRemainingTrials() {
-    let index = this.trialIndex;
+    let index = this.trialIndexInExperiment;
     const a = index % TRIALS_PER_BREAK;
     const b = TRIALS_PER_BREAK;
     return b - a;
