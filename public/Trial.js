@@ -111,9 +111,9 @@ class Trial {
     let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "orange";
+    this.target.style.backgroundColor = "yellow";
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "red";
+    this.start.style.backgroundColor = "green";
 
     if (this.isFirstTrialInReciprocalGroup()) {
       this.start.style.backgroundColor = "gray";
@@ -235,8 +235,8 @@ class Trial {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          this.target.style.backgroundColor = "red";
-          this.start.style.backgroundColor = "orange";
+          this.target.style.backgroundColor = "green";
+          this.start.style.backgroundColor = "yellow";
         }
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
@@ -255,7 +255,7 @@ class Trial {
   }
 
   handleBodyPress(event) {
-    if (!this.trialStarted) {
+    if (!this.trialStarted && this.isStartNotMandatoryOnReciprocal()) {
       this.handleBodyPressAsStartPress(event);
     } else if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
@@ -284,8 +284,8 @@ class Trial {
           this.start.style.display = "none";
           this.target.style.backgroundColor = "green";
         } else {
-          this.target.style.backgroundColor = "red";
-          this.start.style.backgroundColor = "orange";
+          this.target.style.backgroundColor = "green";
+          this.start.style.backgroundColor = "yellow";
         }
       } else {
         errorSound.play();
@@ -296,7 +296,9 @@ class Trial {
       }
       this.endTrial();
     } else if (this.trialStarted && this.firstClickDone) {
-      this.handleBodyReleaseAsStartRelease(event);
+      if (this.isStartNotMandatoryOnReciprocal()) {
+        this.handleBodyReleaseAsStartRelease(event);
+      }
     }
   }
 
@@ -319,8 +321,8 @@ class Trial {
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     this.startReleaseIn = isInsideStart;
     this.logMouseEvent(event, 1);
-    this.target.style.backgroundColor = "red";
-    this.start.style.backgroundColor = "orange";
+    this.target.style.backgroundColor = "green";
+    this.start.style.backgroundColor = "yellow";
     if (isInsideStart) {
       successSound.play();
     } else {
