@@ -1,29 +1,29 @@
 const INPUT = [
   /*{ width: 6, height: 6 },
-              { width: 6, height: 10 },
-              { width: 6, height: 12 },
-              { width: 8, height: 8 },
-              { width: 8, height: 12 },*/
+                { width: 6, height: 10 },
+                { width: 6, height: 12 },
+                { width: 8, height: 8 },
+                { width: 8, height: 12 },*/
   { width: 10, height: 10 },
   // { width: 10, height: 12 },
   //  { width: 12, height: 12 },
 
   /*{ width: 10, height: 10, angle: 0, amplitude: 100 },
-                                  { width: 15, height: 15, angle: 180, amplitude: 100 },
-                                  { width: 20, height: 20, angle: 0, amplitude: 100 },
-                                  { width: 8, height: 8, angle: 180, amplitude: 100 },
-                                  { width: 20, height: 20, angle: 0, amplitude: 100 },
-                                  { width: 20, height: 20, angle: 90, amplitude: 100 },
-                                  { width: 10, height: 20, angle: 270, amplitude: 100 },
-                                  { width: 8, height: 8, angle: 180, amplitude: 100 },
-                                  { width: 20, height: 20, angle: 90, amplitude: 100 },
-                                  { width: 15, height: 15, angle: 270, amplitude: 100 },
-                                  { width: 20, height: 10 },
-                                  { width: 15, height: 15 },
-                                  { width: 10, height: 20 },
-                                  { width: 15, height: 10 },*/
+                                    { width: 15, height: 15, angle: 180, amplitude: 100 },
+                                    { width: 20, height: 20, angle: 0, amplitude: 100 },
+                                    { width: 8, height: 8, angle: 180, amplitude: 100 },
+                                    { width: 20, height: 20, angle: 0, amplitude: 100 },
+                                    { width: 20, height: 20, angle: 90, amplitude: 100 },
+                                    { width: 10, height: 20, angle: 270, amplitude: 100 },
+                                    { width: 8, height: 8, angle: 180, amplitude: 100 },
+                                    { width: 20, height: 20, angle: 90, amplitude: 100 },
+                                    { width: 15, height: 15, angle: 270, amplitude: 100 },
+                                    { width: 20, height: 10 },
+                                    { width: 15, height: 15 },
+                                    { width: 10, height: 20 },
+                                    { width: 15, height: 10 },*/
 ];
-const AMPLITUDE_LIST = [100, 50];
+const AMPLITUDE_LIST = [50];
 
 const START_SIZE = 10; // if input has 2 parameters and discrete exp
 const RADIAN_START = 0;
