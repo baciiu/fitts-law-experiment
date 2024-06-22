@@ -145,7 +145,7 @@ function insertItemAfterGivenIndex(array, newItem, startIndex) {
 
 function checkIfInstanceOfTrial(newItem) {
   if (!(newItem instanceof Trial)) {
-    throw Error("[MY ERROR]: not an instance of Trial");
+    throw Error(ERROR_TRIAL_INSTANCE);
   } else {
     return true;
   }
@@ -153,7 +153,7 @@ function checkIfInstanceOfTrial(newItem) {
 
 function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
   if (!(reciprocalGroup instanceof ReciprocalGroup)) {
-    throw Error("[MY ERROR]: not an instance of ReciprocalGroup");
+    throw Error(ERROR_GROUP_INSTANCE);
   } else {
     return true;
   }
@@ -194,4 +194,20 @@ function getDirectionList(startAngle, stepSize) {
   }
   console.log(angles);
   return angles;
+}
+
+function isLeftEdgeWithinBounds(x, width) {
+  return x - width / 2 > OTHER_MARGINS_PX;
+}
+
+function isRightEdgeWithinBounds(x, width) {
+  return x + width / 2 < window.innerWidth - OTHER_MARGINS_PX;
+}
+
+function isTopEdgeWithinBounds(y, height) {
+  return y - height / 2 > TOP_MARGIN_PX;
+}
+
+function isBottomEdgeWithinBounds(y, height) {
+  return y + height / 2 < window.innerHeight - TOP_MARGIN_PX;
 }

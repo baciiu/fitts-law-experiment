@@ -1,52 +1,52 @@
 const INPUT = [
   { width: 4, height: 4 },
   /*{ width: 8, height: 8 },
-                { width: 10, height: 10 },
-              
-                { width: 4, height: 6 },*/
+                  { width: 10, height: 10 },
+                
+                  { width: 4, height: 6 },*/
   /* { width: 4, height: 8 },
-                       { width: 4, height: 10 },
-                       { width: 8, height: 12 },
-                       { width: 8, height: 16 },
-                       { width: 8, height: 20 },
-                       { width: 10, height: 15 },
-                       { width: 10, height: 20 },
-                       { width: 10, height: 25 },
-                     
-                       { width: 6, height: 4 },
-                       { width: 8, height: 4 },
-                       { width: 10, height: 4 },
-                       { width: 12, height: 8 },
-                       { width: 16, height: 8 },
-                       { width: 20, height: 8 },
-                       { width: 15, height: 10 },
-                       { width: 20, height: 10 },
-                       { width: 25, height: 10 },*/
+                         { width: 4, height: 10 },
+                         { width: 8, height: 12 },
+                         { width: 8, height: 16 },
+                         { width: 8, height: 20 },
+                         { width: 10, height: 15 },
+                         { width: 10, height: 20 },
+                         { width: 10, height: 25 },
+                       
+                         { width: 6, height: 4 },
+                         { width: 8, height: 4 },
+                         { width: 10, height: 4 },
+                         { width: 12, height: 8 },
+                         { width: 16, height: 8 },
+                         { width: 20, height: 8 },
+                         { width: 15, height: 10 },
+                         { width: 20, height: 10 },
+                         { width: 25, height: 10 },*/
   /*{ width: 6, height: 6 },
-                                                                                                            { width: 6, height: 10 },
-                                                                                                            { width: 6, height: 12 },
-                                                                                                            { width: 8, height: 8 },
-                                                                                                            { width: 8, height: 12 },
-                                                                { width: 4, height: 4 },
-                                                                { width: 8, height: 8 },
-                                                                { width: 10, height: 10 },
-                                                                // { width: 10, height: 12 },
-                                                                //  { width: 12, height: 12 },*/
+                                                                                                              { width: 6, height: 10 },
+                                                                                                              { width: 6, height: 12 },
+                                                                                                              { width: 8, height: 8 },
+                                                                                                              { width: 8, height: 12 },
+                                                                  { width: 4, height: 4 },
+                                                                  { width: 8, height: 8 },
+                                                                  { width: 10, height: 10 },
+                                                                  // { width: 10, height: 12 },
+                                                                  //  { width: 12, height: 12 },*/
 
   /*{ width: 10, height: 10, angle: 0, amplitude: 100 },
-                                                                                                                                { width: 15, height: 15, angle: 180, amplitude: 100 },
-                                                                                                                                { width: 20, height: 20, angle: 0, amplitude: 100 },
-                                                                                                                                { width: 8, height: 8, angle: 180, amplitude: 100 },
-                                                                                                                                { width: 20, height: 20, angle: 0, amplitude: 100 },
-                                                                                                                                { width: 20, height: 20, angle: 90, amplitude: 100 },
-                                                                                                                                { width: 10, height: 20, angle: 270, amplitude: 100 },
-                                                                                                                                { width: 8, height: 8, angle: 180, amplitude: 100 },
-                                                                                                                                { width: 20, height: 20, angle: 90, amplitude: 100 },
-                                                                                                                                { width: 15, height: 15, angle: 270, amplitude: 100 },
-                                                                                                                                { width: 20, height: 10 },
-                                                                                                                                { width: 15, height: 15 },
-                                                                                                                                { width: 10, height: 20 },
-                                                                                                                                { width: 15, height: 10 },*/
+                                                                                                                                  { width: 15, height: 15, angle: 180, amplitude: 100 },
+                                                                                                                                  { width: 20, height: 20, angle: 0, amplitude: 100 },
+                                                                                                                                  { width: 8, height: 8, angle: 180, amplitude: 100 },
+                                                                                                                                  { width: 20, height: 20, angle: 0, amplitude: 100 },
+                                                                                                                                  { width: 20, height: 20, angle: 90, amplitude: 100 },
+                                                                                                                                  { width: 10, height: 20, angle: 270, amplitude: 100 },
+                                                                                                                                  { width: 8, height: 8, angle: 180, amplitude: 100 },
+                                                                                                                                  { width: 20, height: 20, angle: 90, amplitude: 100 },
+                                                                                                                                  { width: 15, height: 15, angle: 270, amplitude: 100 },
+                                                                                                                                  { width: 20, height: 10 },
+                                                                                                                                  { width: 15, height: 15 },
+                                                                                                                                  { width: 10, height: 20 },
+                                                                                                                                  { width: 15, height: 10 },*/
 ];
 const AMPLITUDE_LIST = [36];
 
@@ -57,8 +57,8 @@ const DIRECTION_LIST = [
   0, 22.5,
 
   /*
-                      0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5,
-                      315, 337.5,*/
+                        0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5,
+                        315, 337.5,*/
 ];
 // 90 => [0,90,180,270] // 4 directions
 // 180 => [0,180]  // 2 directions
@@ -93,19 +93,10 @@ const USER = 8;
 
 const USE_CENTER_OF_SCREEN = true;
 
-const MAX_SCREEN_DISTANCE = 60;
+const MAX_SCREEN_DISTANCE = 60; // max percentage of screen distance
 
 const ENABLE_FULL_SCREEN = false;
 
 const TOP_MARGIN_PX = mmToPixels(10);
 const OTHER_MARGINS_PX = mmToPixels(5);
 const AMBIGUITY_MARGIN_PX = mmToPixels(20);
-
-const successSound = new Audio("./sounds/success.wav");
-const errorSound = new Audio("./sounds/err1.wav");
-
-const WAIT_COLOR = "yellow";
-const CLICK_COLOR = "green";
-const START_COLOR = "gray";
-
-const ERROR_MESSAGE_EXPERIMENT = "[MY ERROR]: Experiment type undefined.";

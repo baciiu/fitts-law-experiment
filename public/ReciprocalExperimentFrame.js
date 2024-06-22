@@ -362,7 +362,7 @@ class ReciprocalExperimentFrame {
 
         this.trial = firstTrial;
       } else {
-        throw Error("[MY ERROR]: No trials found in the first block.");
+        throw Error(ERROR_EMPTY_BLOCK);
       }
     }
   }
