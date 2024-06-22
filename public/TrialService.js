@@ -2,12 +2,12 @@
 
 function mmToPixels(mm) {
   // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-  const screenWidth = 1512; // Screen width in pixels
-  const screenHeight = 982; // Screen height in pixels
-  const screenDiagonal = 14.42; // Screen diagonal in pixel
+  //const screenWidth = 1512; // Screen width in pixels
+  //const screenHeight = 982; // Screen height in pixels
+  //const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  let result = inches * 100;
+  let result = inches * 126.5;
   //result = result.toFixed(2);
   //let res = Number(result);
   return result;
@@ -63,35 +63,6 @@ function getDistance(x1, y1, x2, y2) {
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
-function testStartDistanceFromPreviousEnd(startX, startY) {
-  if (!this.previousTrialEnd) {
-    console.log("No previous trial to compare with.");
-    return true;
-  }
-
-  let screenWidth = window.innerWidth;
-
-  // Calculate the distance between the previous trial's end (target) and current trial's start
-  let actualDistance = this.getDistance(
-    startX,
-    startY,
-    this.previousTrialEnd.x,
-    this.previousTrialEnd.y,
-  );
-
-  // Check if the actual distance is within the screen width
-  if (actualDistance <= screenWidth) {
-    console.log(
-      "Test passed: The start is within screen width from the previous end.",
-    );
-  } else {
-    console.log(
-      "Test failed: The start exceeds screen width from the previous end.",
-    );
-  }
-  return actualDistance <= screenWidth;
-}
-
 function deepCopy(obj) {
   if (obj === null || typeof obj !== "object") {
     return obj;
@@ -112,30 +83,6 @@ function deepCopy(obj) {
     }
   }
   return copy;
-}
-
-function calculateWrappingDimensions(
-  rect1Width,
-  rect1Height,
-  rect2Width,
-  rect2Height,
-  distance,
-  angle,
-) {
-  let radians = (angle * Math.PI) / 180;
-
-  let x2 = distance * Math.cos(radians);
-  let y2 = distance * Math.sin(radians);
-
-  let minX = Math.min(0, x2);
-  let maxX = Math.max(rect1Width, x2 + rect2Width);
-  let minY = Math.min(0, y2);
-  let maxY = Math.max(rect1Height, y2 + rect2Height);
-
-  let wrappingWidth = maxX - minX;
-  let wrappingHeight = maxY - minY;
-
-  return { width: wrappingWidth, height: wrappingHeight };
 }
 
 function generateCenterPointWithAmplitude(x, y, amplitude, angle) {
@@ -198,7 +145,7 @@ function insertItemAfterGivenIndex(array, newItem, startIndex) {
 
 function checkIfInstanceOfTrial(newItem) {
   if (!(newItem instanceof Trial)) {
-    throw Error("[MY ERROR]: not an instance of Trial");
+    throw Error(ERROR_TRIAL_INSTANCE);
   } else {
     return true;
   }
@@ -206,7 +153,7 @@ function checkIfInstanceOfTrial(newItem) {
 
 function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
   if (!(reciprocalGroup instanceof ReciprocalGroup)) {
-    throw Error("[MY ERROR]: not an instance of ReciprocalGroup");
+    throw Error(ERROR_GROUP_INSTANCE);
   } else {
     return true;
   }
@@ -220,7 +167,7 @@ function insertItemAtPosition(array, item, index) {
     // Use splice to add the item at the specified index
     array.splice(index, 0, item);
   } else {
-    console.error("Index out of bounds");
+    console.error("[MY ERROR]:Index out of bounds");
   }
   console.log(array);
 }
@@ -247,4 +194,20 @@ function getDirectionList(startAngle, stepSize) {
   }
   console.log(angles);
   return angles;
+}
+
+function isLeftEdgeWithinBounds(x, width) {
+  return x - width / 2 > OTHER_MARGINS_PX;
+}
+
+function isRightEdgeWithinBounds(x, width) {
+  return x + width / 2 < window.innerWidth - OTHER_MARGINS_PX;
+}
+
+function isTopEdgeWithinBounds(y, height) {
+  return y - height / 2 > TOP_MARGIN_PX;
+}
+
+function isBottomEdgeWithinBounds(y, height) {
+  return y + height / 2 < window.innerHeight - TOP_MARGIN_PX;
 }

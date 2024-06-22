@@ -19,28 +19,56 @@ class Trial {
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
-    this.previousTrialEnd = {};
-    this.ambiguityMarginHit = false;
 
+    this.initPXVariables();
+    this.initDOMElements();
+    this.initClickVariables();
+    this.initFlags();
+    this.initPreviousTrial();
+  }
+
+  initPXVariables() {
+    this.startWidthPx = mmToPixels(this.startWidth);
+    this.startHeightPX = mmToPixels(this.startHeight);
+    this.targetWidthPx = mmToPixels(this.targetWidth);
+    this.targetHeightPx = mmToPixels(this.targetHeight);
+    this.amplitudePX = mmToPixels(this.amplitude);
+  }
+
+  initDOMElements() {
     this.start = document.getElementById("start");
     this.target = document.getElementById("target");
     this.body = document.getElementById("body");
+  }
 
+  initFlags() {
     this.firstClickDone = false;
+    this.bodyIsPressed = false;
+
+    this.currentTravel = -1;
+    this.firstTrial = false;
+    this.isTrialAMistakeRepetition = false;
+
     this.trialCompleted = false;
     this.toBeRepeatedTrial = false;
-    this.bodyIsPressed = false;
+  }
+
+  initClickVariables() {
+    this.HIT = null;
 
     this.startCoords = { x: null, y: null };
     this.targetCoords = { x: null, y: null };
-    this.HIT = null;
+
     this.startPressIn = false;
     this.startReleaseIn = false;
     this.targetPressIn = false;
     this.targetReleaseIn = false;
 
-    this.firstTrial = false;
+    this.clicksTime = [];
+    this.clicksCoords = [];
+  }
 
+  initPreviousTrial() {
     this.previousTrial = {
       trialId: null,
       trialRep: null,
@@ -49,9 +77,6 @@ class Trial {
       targetX: null,
       targetY: null,
     };
-
-    this.clicksTime = [];
-    this.clicksCoords = [];
   }
 
   drawShapes() {
@@ -60,23 +85,23 @@ class Trial {
     } else if (isReciprocal()) {
       this.drawReciprocalShapes();
     } else {
-      throw Error("[MY ERROR]: Experiment type undefined.");
+      throw Error(ERROR_MESSAGE_EXPERIMENT);
     }
   }
 
   drawShape(coords, shape, isTarget) {
     shape.style.display = "block";
     shape.style.position = "absolute";
-    shape.style.left = coords.x + "px";
-    shape.style.top = coords.y + "px";
+    shape.style.left = `${coords.x}px`;
+    shape.style.top = `${coords.y}px`;
 
     if (isTarget) {
-      shape.style.width = mmToPixels(this.targetWidth) + "px";
-      shape.style.height = mmToPixels(this.targetHeight) + "px";
+      shape.style.width = `${this.targetWidthPx}px`;
+      shape.style.height = `${this.targetHeightPx}px`;
       this.targetCoords = coords;
     } else {
-      shape.style.width = mmToPixels(this.startWidth) + "px";
-      shape.style.height = mmToPixels(this.startHeight) + "px";
+      shape.style.width = `${this.startWidthPx}px`;
+      shape.style.height = `${this.startHeightPX}px`;
       this.startCoords = coords;
     }
   }
@@ -87,8 +112,8 @@ class Trial {
 
   drawBody() {
     this.body.style.display = "block";
-    this.body.style.width = window.innerWidth + "px";
-    this.body.style.height = window.innerHeight + "px";
+    this.body.style.width = `${window.innerWidth}px`;
+    this.body.style.height = `${window.innerHeight}px`;
   }
 
   drawDiscreteShapes() {
@@ -97,9 +122,9 @@ class Trial {
     let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "yellow";
+    this.target.style.backgroundColor = WAIT_COLOR;
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "grey";
+    this.start.style.backgroundColor = START_COLOR;
     this.drawBody();
 
     this.setupEventHandlers();
@@ -111,12 +136,12 @@ class Trial {
     let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "yellow";
+    this.target.style.backgroundColor = WAIT_COLOR;
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "green";
+    this.start.style.backgroundColor = CLICK_COLOR;
 
     if (this.isFirstTrialInReciprocalGroup()) {
-      this.start.style.backgroundColor = "gray";
+      this.start.style.backgroundColor = START_COLOR;
     }
 
     this.drawBody();
@@ -161,7 +186,7 @@ class Trial {
     return !this.isFirstTrialInReciprocalGroup();
   }
 
-  isPreviousTrial() {
+  isPreviousTrialValid() {
     return !!(
       this.previousTrial.startX &&
       this.previousTrial.startY &&
@@ -182,9 +207,7 @@ class Trial {
         pos.target.y
       )
     ) {
-      throw Error(
-        "[MY ERROR]: Could not generate a valid position for the screen size! ",
-      );
+      throw Error(ERROR_GENERATE_POSITION);
     } else {
       return true;
     }
@@ -233,10 +256,10 @@ class Trial {
         this.logMouseEvent(event, 1);
         if (isDiscrete()) {
           this.start.style.display = "none";
-          this.target.style.backgroundColor = "green";
+          this.target.style.backgroundColor = CLICK_COLOR;
         } else {
-          this.target.style.backgroundColor = "green";
-          this.start.style.backgroundColor = "yellow";
+          this.target.style.backgroundColor = CLICK_COLOR;
+          this.start.style.backgroundColor = WAIT_COLOR;
         }
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
@@ -282,10 +305,10 @@ class Trial {
 
         if (isDiscrete()) {
           this.start.style.display = "none";
-          this.target.style.backgroundColor = "green";
+          this.target.style.backgroundColor = CLICK_COLOR;
         } else {
-          this.target.style.backgroundColor = "green";
-          this.start.style.backgroundColor = "yellow";
+          this.target.style.backgroundColor = CLICK_COLOR;
+          this.start.style.backgroundColor = WAIT_COLOR;
         }
       } else {
         errorSound.play();
@@ -321,8 +344,8 @@ class Trial {
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     this.startReleaseIn = isInsideStart;
     this.logMouseEvent(event, 1);
-    this.target.style.backgroundColor = "green";
-    this.start.style.backgroundColor = "yellow";
+    this.target.style.backgroundColor = CLICK_COLOR;
+    this.start.style.backgroundColor = WAIT_COLOR;
     if (isInsideStart) {
       successSound.play();
     } else {
@@ -339,25 +362,6 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (DEV_TYPE == "touch") {
-      const extendedRect = {
-        left: rect.left - AMBIGUITY_MARGIN_PX,
-        top: rect.top - AMBIGUITY_MARGIN_PX,
-        right: rect.right + AMBIGUITY_MARGIN_PX,
-        bottom: rect.bottom + AMBIGUITY_MARGIN_PX,
-      };
-
-      let isTouchInsideMargin =
-        event.clientX >= extendedRect.left &&
-        event.clientX <= extendedRect.right &&
-        event.clientY >= extendedRect.top &&
-        event.clientY <= extendedRect.bottom;
-
-      if (!isCursorInsideShape && isTouchInsideMargin) {
-        this.ambiguityMarginHit = true;
-      }
-      return isTouchInsideMargin;
-    }
     return isCursorInsideShape;
   }
 
@@ -431,22 +435,49 @@ class Trial {
   }
 
   isClickAMistake() {
-    const clickStartX1 = this.startCoords.x;
-    const clickStartY1 = this.startCoords.y;
-
-    if (this.clicksCoords.at(2) === undefined) {
+    if (
+      this.clicksCoords.at(0) === undefined ||
+      this.clicksCoords.at(1) === undefined ||
+      this.clicksCoords.at(2) === undefined ||
+      this.clicksCoords.at(3) === undefined
+    ) {
       return true;
     }
-    const clickTargetX2 = this.clicksCoords.at(2).x;
-    const clickTargetY2 = this.clicksCoords.at(2).y;
+    let coordX1;
+    let coordY1;
+    let coordX2;
+    let coordY2;
 
-    let distance = getDistance(
-      clickStartX1,
-      clickStartY1,
-      clickTargetX2,
-      clickTargetY2,
+    if (!this.startPressIn && this.targetPressIn) {
+      return false;
+    } else if (this.startPressIn && !this.targetPressIn) {
+      const startCenterCoords = this.getCenterCoordinatesOfStartShape();
+      coordX1 = startCenterCoords.x;
+      coordY1 = startCenterCoords.y;
+      coordX2 = this.clicksCoords.at(2).x;
+      coordY2 = this.clicksCoords.at(2).y;
+    } else if (!this.startPressIn && !this.targetPressIn) {
+      coordX1 = this.clicksCoords.at(0).x;
+      coordY1 = this.clicksCoords.at(0).y;
+      coordX2 = this.clicksCoords.at(2).x;
+      coordY2 = this.clicksCoords.at(2).y;
+    } else {
+      return false;
+    }
+
+    let distance = getDistance(coordX1, coordY1, coordX2, coordY2);
+    console.log("Distance is: " + distance);
+    console.log(
+      "Amplitude / threshold  is: " + this.amplitudePX / FAILED_TRIAL_THRESHOLD,
     );
-    return distance < mmToPixels(this.amplitude) / FAILED_TRIAL_THRESHOLD;
+    return distance < this.amplitudePX / FAILED_TRIAL_THRESHOLD;
+  }
+
+  getCenterCoordinatesOfStartShape() {
+    console.log("getCenterOfStartShape() not implemented yet.");
+    const posX = this.startCoords.x + this.startWidth / 2;
+    const posY = this.startCoords.y + this.startHeight / 2;
+    return { x: posX, y: posY };
   }
 
   getRandomPoint(width1, height1) {
@@ -483,27 +514,11 @@ class Trial {
 
   isShapeWithinBounds(x, y, width, height) {
     return (
-      this.isLeftEdgeWithinBounds(x, width) &&
-      this.isRightEdgeWithinBounds(x, width) &&
-      this.isTopEdgeWithinBounds(y, height) &&
-      this.isBottomEdgeWithinBounds(y, height)
+      isLeftEdgeWithinBounds(x, width) &&
+      isRightEdgeWithinBounds(x, width) &&
+      isTopEdgeWithinBounds(y, height) &&
+      isBottomEdgeWithinBounds(y, height)
     );
-  }
-
-  isLeftEdgeWithinBounds(x, width) {
-    return x - width / 2 > OTHER_MARGINS_PX;
-  }
-
-  isRightEdgeWithinBounds(x, width) {
-    return x + width / 2 < window.innerWidth - OTHER_MARGINS_PX;
-  }
-
-  isTopEdgeWithinBounds(y, height) {
-    return y - height / 2 > TOP_MARGIN_PX;
-  }
-
-  isBottomEdgeWithinBounds(y, height) {
-    return y + height / 2 < window.innerHeight - TOP_MARGIN_PX;
   }
 
   isAmplitude(x1, y1, x2, y2, amplitude) {
@@ -513,11 +528,6 @@ class Trial {
   }
 
   generateNotCenteredPositions() {
-    let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startWidth);
-    let height1 = mmToPixels(this.startHeight);
-    let width2 = mmToPixels(this.targetWidth);
-    let height2 = mmToPixels(this.targetHeight);
     let start,
       target,
       x1,
@@ -530,20 +540,23 @@ class Trial {
     do {
       let startCoords;
 
-      if (this.isPreviousTrial()) {
+      if (this.isPreviousTrialValid()) {
         startCoords = this.getRandomPointWithRespectToPreviousTarget();
         while (
           !this.isShapeWithinBounds(
             startCoords.x,
             startCoords.y,
-            width1,
-            height1,
+            this.startWidthPx,
+            this.startHeightPX,
           )
         ) {
           startCoords = this.getRandomPointWithRespectToPreviousTarget();
         }
       } else {
-        startCoords = this.getRandomPoint(width1, height1);
+        startCoords = this.getRandomPoint(
+          this.startWidthPx,
+          this.startHeightPX,
+        );
       }
 
       x1 = startCoords.x;
@@ -554,18 +567,29 @@ class Trial {
       const targetCoords = generateCenterPointWithAmplitude(
         x1,
         y1,
-        amplitude,
+        this.amplitudePX,
         angle,
       );
       x2 = targetCoords.x;
       y2 = targetCoords.y;
 
       if (
-        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-        this.isShapeWithinBounds(x2, y2, width2, height2)
+        this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+        this.isShapeWithinBounds(
+          x2,
+          y2,
+          this.targetWidthPx,
+          this.targetHeightPx,
+        )
       ) {
-        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        start = {
+          x: x1 - this.startWidthPx / 2,
+          y: y1 - this.startHeightPX / 2,
+        };
+        target = {
+          x: x2 - this.targetWidthPx / 2,
+          y: y2 - this.targetHeightPx / 2,
+        };
         return { start, target };
       }
     } while (!start || !target);
@@ -579,7 +603,7 @@ class Trial {
         !dis.target.x ||
         !dis.target.y
       ) {
-        throw Error("[MY ERROR]:  Could not generate a valid position");
+        throw Error(ERROR_GENERATE_POSITION);
       }
       start = dis.start;
       target = dis.target;
@@ -589,11 +613,6 @@ class Trial {
   }
 
   generateCenteredPositions() {
-    let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startWidth);
-    let height1 = mmToPixels(this.startHeight);
-    let width2 = mmToPixels(this.targetWidth);
-    let height2 = mmToPixels(this.targetHeight);
     let start, target, x1, y1, x2, y2;
 
     const centerX = window.innerWidth / 2;
@@ -604,22 +623,25 @@ class Trial {
     // Convert angle to radians
     const radians = (angle * Math.PI) / 180;
 
-    x1 = centerX + (amplitude / 2) * Math.cos(radians);
-    y1 = centerY + (amplitude / 2) * Math.sin(radians);
+    x1 = centerX + (this.amplitudePX / 2) * Math.cos(radians);
+    y1 = centerY + (this.amplitudePX / 2) * Math.sin(radians);
 
-    x2 = centerX - (amplitude / 2) * Math.cos(radians);
-    y2 = centerY - (amplitude / 2) * Math.sin(radians);
+    x2 = centerX - (this.amplitudePX / 2) * Math.cos(radians);
+    y2 = centerY - (this.amplitudePX / 2) * Math.sin(radians);
 
     if (
-      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-      this.isShapeWithinBounds(x2, y2, width2, height2)
+      this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+      this.isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
     ) {
-      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+      start = { x: x1 - this.startWidthPx / 2, y: y1 - this.startHeightPX / 2 };
+      target = {
+        x: x2 - this.targetWidthPx / 2,
+        y: y2 - this.targetHeightPx / 2,
+      };
       return { start, target };
     }
     if (!start || !target) {
-      throw Error("[MY ERROR]: Could not generate a valid position");
+      throw Error(ERROR_GENERATE_POSITION);
     }
     return { start, target };
   }
@@ -644,33 +666,46 @@ class Trial {
       blockNumber: "",
       trialNumber: this.trialId,
       trialRep: this.trialRep,
+      currentTravel: this.currentTravel,
+      travelsNumber: TRAVELS_NUMBER,
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
-      centerOfScreen: USE_CENTER_OF_SCREEN,
 
       amplitudeMM: this.amplitude,
-      amplitudePx: mmToPixels(this.amplitude),
+      amplitudePx: this.amplitudePX,
       directionDegree: this.trialDirection,
-      direction: getDirection(this.trialDirection),
 
-      startX: this.startCoords.x,
-      startY: this.startCoords.y,
-      startWidthPx: mmToPixels(this.startWidth),
-      startHeightPx: mmToPixels(this.startHeight),
+      rect1_PressIn: this.startPressIn,
+      rect1_ReleaseIn: this.startReleaseIn,
 
-      startPressIn: this.startPressIn,
-      startReleaseIn: this.startReleaseIn,
-
-      targetX: this.targetCoords.x,
-      targetY: this.targetCoords.y,
-      targetWidthPx: mmToPixels(this.targetWidth),
-      targetHeightPx: mmToPixels(this.targetHeight),
-
-      targetPressIn: this.targetPressIn,
-      targetReleaseIn: this.targetReleaseIn,
+      rect2_PressIn: this.targetPressIn,
+      rect2_ReleaseIn: this.targetReleaseIn,
 
       HIT: this.isHit(),
+
+      isRepetitionOfMistake: this.isTrialAMistakeRepetition,
+
       toBeRepeatedTrial: this.isToBeRepeatedTrial(),
+
+      /** Start info **/
+      rect1_X: this.startCoords.x,
+      rect1_Y: this.startCoords.y,
+
+      rect1_WidthMM: this.startWidth,
+      rect1_HeightMM: this.startHeight,
+
+      rect1_WidthPx: this.startWidthPx,
+      rect1_HeightPx: this.startHeightPX,
+
+      /** Target info **/
+      rect2_X: this.targetCoords.x,
+      rect2_Y: this.targetCoords.y,
+
+      rect2_WidthMM: this.targetWidth,
+      rect2_HeightMM: this.targetHeight,
+
+      rect2_WidthPx: this.targetWidthPx,
+      rect2_HeightPx: this.targetHeightPx,
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
       "Click T0 Y": this.clicksCoords.at(0)?.y,
@@ -737,5 +772,13 @@ class Trial {
 
   setIsFirstTrial(isFirstTrial) {
     this.firstTrial = isFirstTrial;
+  }
+
+  setIsTrialAMistakeRepetition(isMistake) {
+    this.isTrialAMistakeRepetition = isMistake;
+  }
+
+  setCurrentTravel(travel) {
+    this.currentTravel = travel;
   }
 }
