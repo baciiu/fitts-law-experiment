@@ -67,7 +67,7 @@ class Trial {
     } else if (isReciprocal()) {
       this.drawReciprocalShapes();
     } else {
-      throw Error("[MY ERROR]: Experiment type undefined.");
+      throw Error(ERROR_MESSAGE_EXPERIMENT);
     }
   }
 
@@ -104,9 +104,9 @@ class Trial {
     let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "yellow";
+    this.target.style.backgroundColor = WAIT_COLOR;
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "grey";
+    this.start.style.backgroundColor = START_COLOR;
     this.drawBody();
 
     this.setupEventHandlers();
@@ -118,12 +118,12 @@ class Trial {
     let pos = this.getPosition();
 
     this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = "yellow";
+    this.target.style.backgroundColor = WAIT_COLOR;
     this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = "green";
+    this.start.style.backgroundColor = CLICK_COLOR;
 
     if (this.isFirstTrialInReciprocalGroup()) {
-      this.start.style.backgroundColor = "gray";
+      this.start.style.backgroundColor = START_COLOR;
     }
 
     this.drawBody();
@@ -240,10 +240,10 @@ class Trial {
         this.logMouseEvent(event, 1);
         if (isDiscrete()) {
           this.start.style.display = "none";
-          this.target.style.backgroundColor = "green";
+          this.target.style.backgroundColor = CLICK_COLOR;
         } else {
-          this.target.style.backgroundColor = "green";
-          this.start.style.backgroundColor = "yellow";
+          this.target.style.backgroundColor = CLICK_COLOR;
+          this.start.style.backgroundColor = WAIT_COLOR;
         }
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
@@ -289,10 +289,10 @@ class Trial {
 
         if (isDiscrete()) {
           this.start.style.display = "none";
-          this.target.style.backgroundColor = "green";
+          this.target.style.backgroundColor = CLICK_COLOR;
         } else {
-          this.target.style.backgroundColor = "green";
-          this.start.style.backgroundColor = "yellow";
+          this.target.style.backgroundColor = CLICK_COLOR;
+          this.start.style.backgroundColor = WAIT_COLOR;
         }
       } else {
         errorSound.play();
@@ -328,8 +328,8 @@ class Trial {
     const isInsideStart = this.isCursorInsideShape(event, this.start);
     this.startReleaseIn = isInsideStart;
     this.logMouseEvent(event, 1);
-    this.target.style.backgroundColor = "green";
-    this.start.style.backgroundColor = "yellow";
+    this.target.style.backgroundColor = CLICK_COLOR;
+    this.start.style.backgroundColor = WAIT_COLOR;
     if (isInsideStart) {
       successSound.play();
     } else {
@@ -346,25 +346,6 @@ class Trial {
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
 
-    if (DEV_TYPE == "touch") {
-      const extendedRect = {
-        left: rect.left - AMBIGUITY_MARGIN_PX,
-        top: rect.top - AMBIGUITY_MARGIN_PX,
-        right: rect.right + AMBIGUITY_MARGIN_PX,
-        bottom: rect.bottom + AMBIGUITY_MARGIN_PX,
-      };
-
-      let isTouchInsideMargin =
-        event.clientX >= extendedRect.left &&
-        event.clientX <= extendedRect.right &&
-        event.clientY >= extendedRect.top &&
-        event.clientY <= extendedRect.bottom;
-
-      if (!isCursorInsideShape && isTouchInsideMargin) {
-        this.ambiguityMarginHit = true;
-      }
-      return isTouchInsideMargin;
-    }
     return isCursorInsideShape;
   }
 
@@ -694,8 +675,8 @@ class Trial {
       amplitudePx: this.amplitudePX,
       directionDegree: this.trialDirection,
 
-      startPressIn: this.startPressIn,
-      startReleaseIn: this.startReleaseIn,
+      rect1_PressIn: this.startPressIn,
+      rect1_ReleaseIn: this.startReleaseIn,
 
       targetPressIn: this.targetPressIn,
       targetReleaseIn: this.targetReleaseIn,
@@ -707,24 +688,24 @@ class Trial {
       toBeRepeatedTrial: this.isToBeRepeatedTrial(),
 
       /** Start info **/
-      startX: this.startCoords.x,
-      startY: this.startCoords.y,
+      rect1_X: this.startCoords.x,
+      rect1_Y: this.startCoords.y,
 
-      startWidthMM: this.startWidth,
-      startHeightMM: this.startHeight,
+      rect1_WidthMM: this.startWidth,
+      rect1_HeightMM: this.startHeight,
 
-      startWidthPx: this.startWidthPx,
-      startHeightPx: this.startHeightPX,
+      rect1_WidthPx: this.startWidthPx,
+      rect1_HeightPx: this.startHeightPX,
 
       /** Target info **/
-      targetX: this.targetCoords.x,
-      targetY: this.targetCoords.y,
+      rect2_X: this.targetCoords.x,
+      rect2_Y: this.targetCoords.y,
 
-      targetWidthMM: this.targetWidth,
-      targetHeightMM: this.targetHeight,
+      rect2_WidthMM: this.targetWidth,
+      rect2_HeightMM: this.targetHeight,
 
-      targetWidthPx: this.targetWidthPx,
-      targetHeightPx: this.targetHeightPx,
+      rect2_WidthPx: this.targetWidthPx,
+      rect2_HeightPx: this.targetHeightPx,
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
       "Click T0 Y": this.clicksCoords.at(0)?.y,
