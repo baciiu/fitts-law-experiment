@@ -20,7 +20,12 @@ class Trial {
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
     this.previousTrialEnd = {};
-    this.ambiguityMarginHit = false;
+
+    this.startWidthPx = mmToPixels(startWidth);
+    this.startHeightPX = mmToPixels(startHeight);
+    this.targetWidthPx = mmToPixels(targetWidth);
+    this.targetHeightPx = mmToPixels(targetHeight);
+    this.amplitudePX = mmToPixels(amplitude);
 
     this.start = document.getElementById("start");
     this.target = document.getElementById("target");
@@ -71,12 +76,12 @@ class Trial {
     shape.style.top = coords.y + "px";
 
     if (isTarget) {
-      shape.style.width = mmToPixels(this.targetWidth) + "px";
-      shape.style.height = mmToPixels(this.targetHeight) + "px";
+      shape.style.width = this.targetWidthPx + "px";
+      shape.style.height = this.targetHeightPx + "px";
       this.targetCoords = coords;
     } else {
-      shape.style.width = mmToPixels(this.startWidth) + "px";
-      shape.style.height = mmToPixels(this.startHeight) + "px";
+      shape.style.width = this.startWidthPx + "px";
+      shape.style.height = this.startHeightPX + "px";
       this.startCoords = coords;
     }
   }
@@ -461,7 +466,11 @@ class Trial {
     }
 
     let distance = getDistance(coordX1, coordY1, coordX2, coordY2);
-    return distance < mmToPixels(this.amplitude) / FAILED_TRIAL_THRESHOLD;
+    console.log("Distance is: " + distance);
+    console.log(
+      "Amplitude / threshold  is: " + this.amplitudePX / FAILED_TRIAL_THRESHOLD,
+    );
+    return distance < this.amplitudePX / FAILED_TRIAL_THRESHOLD;
   }
 
   getCenterCoordinatesOfStartShape() {
@@ -535,11 +544,6 @@ class Trial {
   }
 
   generateNotCenteredPositions() {
-    let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startWidth);
-    let height1 = mmToPixels(this.startHeight);
-    let width2 = mmToPixels(this.targetWidth);
-    let height2 = mmToPixels(this.targetHeight);
     let start,
       target,
       x1,
@@ -558,14 +562,17 @@ class Trial {
           !this.isShapeWithinBounds(
             startCoords.x,
             startCoords.y,
-            width1,
-            height1,
+            this.startWidthPx,
+            this.startHeightPX,
           )
         ) {
           startCoords = this.getRandomPointWithRespectToPreviousTarget();
         }
       } else {
-        startCoords = this.getRandomPoint(width1, height1);
+        startCoords = this.getRandomPoint(
+          this.startWidthPx,
+          this.startHeightPX,
+        );
       }
 
       x1 = startCoords.x;
@@ -576,18 +583,29 @@ class Trial {
       const targetCoords = generateCenterPointWithAmplitude(
         x1,
         y1,
-        amplitude,
+        this.amplitudePX,
         angle,
       );
       x2 = targetCoords.x;
       y2 = targetCoords.y;
 
       if (
-        this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-        this.isShapeWithinBounds(x2, y2, width2, height2)
+        this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+        this.isShapeWithinBounds(
+          x2,
+          y2,
+          this.targetWidthPx,
+          this.targetHeightPx,
+        )
       ) {
-        start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-        target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+        start = {
+          x: x1 - this.startWidthPx / 2,
+          y: y1 - this.startHeightPX / 2,
+        };
+        target = {
+          x: x2 - this.targetWidthPx / 2,
+          y: y2 - this.targetHeightPx / 2,
+        };
         return { start, target };
       }
     } while (!start || !target);
@@ -611,11 +629,6 @@ class Trial {
   }
 
   generateCenteredPositions() {
-    let amplitude = mmToPixels(this.amplitude);
-    let width1 = mmToPixels(this.startWidth);
-    let height1 = mmToPixels(this.startHeight);
-    let width2 = mmToPixels(this.targetWidth);
-    let height2 = mmToPixels(this.targetHeight);
     let start, target, x1, y1, x2, y2;
 
     const centerX = window.innerWidth / 2;
@@ -626,18 +639,21 @@ class Trial {
     // Convert angle to radians
     const radians = (angle * Math.PI) / 180;
 
-    x1 = centerX + (amplitude / 2) * Math.cos(radians);
-    y1 = centerY + (amplitude / 2) * Math.sin(radians);
+    x1 = centerX + (this.amplitudePX / 2) * Math.cos(radians);
+    y1 = centerY + (this.amplitudePX / 2) * Math.sin(radians);
 
-    x2 = centerX - (amplitude / 2) * Math.cos(radians);
-    y2 = centerY - (amplitude / 2) * Math.sin(radians);
+    x2 = centerX - (this.amplitudePX / 2) * Math.cos(radians);
+    y2 = centerY - (this.amplitudePX / 2) * Math.sin(radians);
 
     if (
-      this.isAmplitude(x1, y1, x2, y2, amplitude) &&
-      this.isShapeWithinBounds(x2, y2, width2, height2)
+      this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+      this.isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
     ) {
-      start = { x: x1 - width1 / 2, y: y1 - height1 / 2 };
-      target = { x: x2 - width2 / 2, y: y2 - height2 / 2 };
+      start = { x: x1 - this.startWidthPx / 2, y: y1 - this.startHeightPX / 2 };
+      target = {
+        x: x2 - this.targetWidthPx / 2,
+        y: y2 - this.targetHeightPx / 2,
+      };
       return { start, target };
     }
     if (!start || !target) {
@@ -671,22 +687,22 @@ class Trial {
       centerOfScreen: USE_CENTER_OF_SCREEN,
 
       amplitudeMM: this.amplitude,
-      amplitudePx: mmToPixels(this.amplitude),
+      amplitudePx: this.amplitudePX,
       directionDegree: this.trialDirection,
       direction: getDirection(this.trialDirection),
 
       startX: this.startCoords.x,
       startY: this.startCoords.y,
-      startWidthPx: mmToPixels(this.startWidth),
-      startHeightPx: mmToPixels(this.startHeight),
+      startWidthPx: this.startWidthPx,
+      startHeightPx: this.startHeightPX,
 
       startPressIn: this.startPressIn,
       startReleaseIn: this.startReleaseIn,
 
       targetX: this.targetCoords.x,
       targetY: this.targetCoords.y,
-      targetWidthPx: mmToPixels(this.targetWidth),
-      targetHeightPx: mmToPixels(this.targetHeight),
+      targetWidthPx: this.targetWidthPx,
+      targetHeightPx: this.targetHeightPx,
 
       targetPressIn: this.targetPressIn,
       targetReleaseIn: this.targetReleaseIn,
