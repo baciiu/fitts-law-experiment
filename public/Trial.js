@@ -20,6 +20,7 @@ class Trial {
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
     this.previousTrialEnd = {};
+    this.currentTravel = -1;
 
     this.startWidthPx = mmToPixels(startWidth);
     this.startHeightPX = mmToPixels(startHeight);
@@ -683,6 +684,8 @@ class Trial {
       blockNumber: "",
       trialNumber: this.trialId,
       trialRep: this.trialRep,
+      currentTravel: this.currentTravel,
+      travelsNumber: TRAVELS_NUMBER,
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
       centerOfScreen: USE_CENTER_OF_SCREEN,
@@ -691,6 +694,19 @@ class Trial {
       amplitudePx: this.amplitudePX,
       directionDegree: this.trialDirection,
 
+      startPressIn: this.startPressIn,
+      startReleaseIn: this.startReleaseIn,
+
+      targetPressIn: this.targetPressIn,
+      targetReleaseIn: this.targetReleaseIn,
+
+      HIT: this.isHit(),
+
+      isRepetitionOfMistake: this.isTrialAMistakeRepetition,
+
+      toBeRepeatedTrial: this.isToBeRepeatedTrial(),
+
+      /** Start info **/
       startX: this.startCoords.x,
       startY: this.startCoords.y,
 
@@ -700,9 +716,7 @@ class Trial {
       startWidthPx: this.startWidthPx,
       startHeightPx: this.startHeightPX,
 
-      startPressIn: this.startPressIn,
-      startReleaseIn: this.startReleaseIn,
-
+      /** Target info **/
       targetX: this.targetCoords.x,
       targetY: this.targetCoords.y,
 
@@ -711,13 +725,6 @@ class Trial {
 
       targetWidthPx: this.targetWidthPx,
       targetHeightPx: this.targetHeightPx,
-
-      targetPressIn: this.targetPressIn,
-      targetReleaseIn: this.targetReleaseIn,
-
-      HIT: this.isHit(),
-      isTrialRepetition: this.isTrialAMistakeRepetition,
-      toBeRepeatedTrial: this.isToBeRepeatedTrial(),
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
       "Click T0 Y": this.clicksCoords.at(0)?.y,
@@ -788,5 +795,9 @@ class Trial {
 
   setIsTrialAMistakeRepetition(isMistake) {
     this.isTrialAMistakeRepetition = isMistake;
+  }
+
+  setCurrentTravel(travel) {
+    this.currentTravel = travel;
   }
 }
