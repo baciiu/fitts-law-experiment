@@ -669,7 +669,6 @@ class Trial {
       travelsNumber: TRAVELS_NUMBER,
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
-      centerOfScreen: USE_CENTER_OF_SCREEN,
 
       amplitudeMM: this.amplitude,
       amplitudePx: this.amplitudePX,
