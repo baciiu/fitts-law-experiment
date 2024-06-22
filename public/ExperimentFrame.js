@@ -72,6 +72,8 @@ class ExperimentFrame {
         trialCopy.amplitude,
       );
 
+      failedTrial.setIsTrialAMistakeRepetition(true);
+
       insertTrialInArray(
         currentBlock.getTrials(),
         failedTrial,

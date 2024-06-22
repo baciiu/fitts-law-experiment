@@ -113,6 +113,9 @@ class ReciprocalExperimentFrame {
         trial.targetHeight,
         trial.amplitude,
       );
+
+      copyTrial.setIsTrialAMistakeRepetition(true);
+
       reciprocalGroup.addTrial(copyTrial);
     }
     return reciprocalGroup;

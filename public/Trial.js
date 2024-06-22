@@ -45,6 +45,7 @@ class Trial {
     this.targetReleaseIn = false;
 
     this.firstTrial = false;
+    this.isTrialAMistakeRepetition = false;
 
     this.previousTrial = {
       trialId: null,
@@ -689,10 +690,13 @@ class Trial {
       amplitudeMM: this.amplitude,
       amplitudePx: this.amplitudePX,
       directionDegree: this.trialDirection,
-      direction: getDirection(this.trialDirection),
 
       startX: this.startCoords.x,
       startY: this.startCoords.y,
+
+      startWidthMM: this.startWidth,
+      startHeightMM: this.startHeight,
+
       startWidthPx: this.startWidthPx,
       startHeightPx: this.startHeightPX,
 
@@ -701,6 +705,10 @@ class Trial {
 
       targetX: this.targetCoords.x,
       targetY: this.targetCoords.y,
+
+      targetWidthMM: this.targetWidth,
+      targetHeightMM: this.targetHeight,
+
       targetWidthPx: this.targetWidthPx,
       targetHeightPx: this.targetHeightPx,
 
@@ -708,6 +716,7 @@ class Trial {
       targetReleaseIn: this.targetReleaseIn,
 
       HIT: this.isHit(),
+      isTrialRepetition: this.isTrialAMistakeRepetition,
       toBeRepeatedTrial: this.isToBeRepeatedTrial(),
 
       "Click T0 X": this.clicksCoords.at(0)?.x,
@@ -775,5 +784,9 @@ class Trial {
 
   setIsFirstTrial(isFirstTrial) {
     this.firstTrial = isFirstTrial;
+  }
+
+  setIsTrialAMistakeRepetition(isMistake) {
+    this.isTrialAMistakeRepetition = isMistake;
   }
 }
