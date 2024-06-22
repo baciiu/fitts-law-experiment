@@ -72,11 +72,17 @@ class ExperimentFrame {
         trialCopy.amplitude,
       );
 
-      insertTrialInArray(
-        currentBlock.getTrials(),
-        failedTrial,
-        this.trialIndex,
-      );
+      failedTrial.setIsTrialAMistakeRepetition(true);
+
+      if (currentBlock.getTrials().length - 1 > this.trialIndex) {
+        insertTrialInArray(
+          currentBlock.getTrials(),
+          failedTrial,
+          this.trialIndex,
+        );
+      } else {
+        currentBlock.getTrials().push(failedTrial);
+      }
     }
     this.prepareForNextTrialOrFinish(currentBlock);
   }
@@ -241,7 +247,7 @@ class ExperimentFrame {
 
         this.trial = firstTrial;
       } else {
-        throw Error("[MY ERROR]: No trials found in the first block.");
+        throw Error(ERROR_EMPTY_BLOCK);
       }
     }
   }

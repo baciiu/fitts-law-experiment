@@ -113,6 +113,9 @@ class ReciprocalExperimentFrame {
         trial.targetHeight,
         trial.amplitude,
       );
+
+      copyTrial.setIsTrialAMistakeRepetition(true);
+
       reciprocalGroup.addTrial(copyTrial);
     }
     return reciprocalGroup;
@@ -359,7 +362,7 @@ class ReciprocalExperimentFrame {
 
         this.trial = firstTrial;
       } else {
-        throw Error("[MY ERROR]: No trials found in the first block.");
+        throw Error(ERROR_EMPTY_BLOCK);
       }
     }
   }

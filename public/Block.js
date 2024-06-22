@@ -23,7 +23,7 @@ class Block {
     } else if (isReciprocal()) {
       this.generateReciprocalTrials();
     } else {
-      console.error("[MY ERROR] Experiment undefined");
+      console.error(ERROR_MESSAGE_EXPERIMENT);
     }
     //console.log(this.trials);
     //console.log(this.reciprocalTrialsList);
