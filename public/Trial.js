@@ -677,8 +677,8 @@ class Trial {
       rect1_PressIn: this.startPressIn,
       rect1_ReleaseIn: this.startReleaseIn,
 
-      targetPressIn: this.targetPressIn,
-      targetReleaseIn: this.targetReleaseIn,
+      rect2_PressIn: this.targetPressIn,
+      rect2_ReleaseIn: this.targetReleaseIn,
 
       HIT: this.isHit(),
 
