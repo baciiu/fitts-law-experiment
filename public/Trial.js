@@ -107,7 +107,7 @@ class Trial {
   }
 
   isFirstTrialInReciprocalGroup() {
-    return !this.trialRep.toString().includes(".");
+    return this.currentTravel == 0;
   }
 
   drawBody() {
@@ -130,19 +130,39 @@ class Trial {
     this.setupEventHandlers();
   }
 
+  drawTravelForth(pos) {
+    this.drawShape(pos.target, this.target, true);
+    this.target.style.backgroundColor = WAIT_COLOR;
+    this.drawShape(pos.start, this.start, false);
+    this.start.style.backgroundColor = CLICK_COLOR;
+  }
+
+  drawTravelBack(pos) {
+    this.drawShape(pos.target, this.target, true);
+    this.target.style.backgroundColor = WAIT_COLOR;
+    this.drawShape(pos.start, this.start, false);
+    this.start.style.backgroundColor = CLICK_COLOR;
+  }
+
+  drawTravelStart() {
+    if (this.isFirstTrialInReciprocalGroup()) {
+      this.start.style.backgroundColor = START_COLOR;
+    }
+  }
+
   drawReciprocalShapes() {
     this.trialCompleted = false;
 
     let pos = this.getPosition();
 
-    this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = WAIT_COLOR;
-    this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = CLICK_COLOR;
-
-    if (this.isFirstTrialInReciprocalGroup()) {
-      this.start.style.backgroundColor = START_COLOR;
+    if (this.currentTravel % 2 != 0) {
+      console.log("travel forth: " + this.currentTravel);
+      this.drawTravelForth(pos);
+    } else {
+      console.log("travel back: " + this.currentTravel);
+      this.drawTravelBack(pos);
     }
+    this.drawTravelStart();
 
     this.drawBody();
 
@@ -666,7 +686,7 @@ class Trial {
       blockNumber: "",
       trialNumber: this.trialId,
       trialRep: this.trialRep,
-      currentTravel: this.currentTravel,
+      currTravel: this.currentTravel,
       travelsNumber: TRAVELS_NUMBER,
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,

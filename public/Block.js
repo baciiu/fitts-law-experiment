@@ -133,24 +133,23 @@ class Block {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
           let reciprocalGroup = new ReciprocalGroup(temp_id);
-          const t = this.addNewTrialReciprocal(
-            this.trialId++,
-            temp_id + "",
-            angle,
-            target,
-            amplitude,
-          );
-          reciprocalGroup.addTrial(t);
+          for (let i = 0; i <= this.repetitionTrial; i++) {
+            for (let j = 0; j <= TRAVELS_NUMBER; j++) {
+              let trialRep;
 
-          for (let i = 1; i < this.repetitionTrial; i++) {
-            const t = this.addNewTrialReciprocal(
-              this.trialId++,
-              temp_id + "." + i,
-              angle,
-              target,
-              amplitude,
-            );
-            reciprocalGroup.addTrial(t);
+              trialRep = temp_id + "." + i + "." + j;
+
+              const t = this.addNewTrialReciprocal(
+                this.trialId++,
+                trialRep,
+                angle,
+                target,
+                amplitude,
+              );
+
+              t.setCurrentTravel(j);
+              reciprocalGroup.addTrial(t);
+            }
           }
           this.reciprocalTrialsList.push(reciprocalGroup);
         }

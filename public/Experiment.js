@@ -1,10 +1,10 @@
 "use strict";
 
 class Experiment {
-  constructor(numBlocks, repPerTrial) {
-    this.numBlocks = numBlocks;
+  constructor() {
+    this.numBlocks = BLOCKS_NUMBER;
     this.blocks = [];
-    this.repPerTrial = repPerTrial;
+    this.repPerTrial = REPETITION_PER_TRIAL;
 
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
