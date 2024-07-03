@@ -4,7 +4,7 @@ class ReciprocalExperimentFrame {
   constructor(userNumber) {
     this.blockNumber = 1;
     this.trialNumber = -1;
-    this.experiment = new Experiment(BLOCKS_NUMBER, REPETITION_PER_TRIAL);
+    this.experiment = new Experiment();
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
     this.setupContinueButton();
@@ -113,7 +113,7 @@ class ReciprocalExperimentFrame {
         trial.targetHeight,
         trial.amplitude,
       );
-
+      copyTrial.setCurrentTravel(trial.currentTravel);
       copyTrial.setIsTrialAMistakeRepetition(true);
 
       reciprocalGroup.addTrial(copyTrial);
