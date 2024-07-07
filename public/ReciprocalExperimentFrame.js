@@ -107,10 +107,8 @@ class ReciprocalExperimentFrame {
         trialId,
         trial.trialRep,
         trial.trialDirection,
-        trial.startWidth,
-        trial.startHeight,
-        trial.targetWidth,
-        trial.targetHeight,
+        new Rectangle(trial.startWidth, trial.startHeight),
+        new Rectangle(trial.targetWidth, trial.startHeight),
         trial.amplitude,
       );
       copyTrial.setCurrentTravel(trial.currentTravel);

@@ -5,19 +5,17 @@ class TrialReciprocal {
     trialId,
     trialRep,
     trialDirection,
-    startWidth,
-    startHeight,
-    targetWidth,
-    targetHeight,
+    rectangleStart,
+    rectangleTarget,
     amplitude,
   ) {
     this.trialId = trialId;
     this.trialRep = trialRep;
     this.trialDirection = trialDirection;
-    this.startWidth = startWidth;
-    this.startHeight = startHeight;
-    this.targetWidth = targetWidth;
-    this.targetHeight = targetHeight;
+    this.startWidth = rectangleStart.width;
+    this.startHeight = rectangleStart.height;
+    this.targetWidth = rectangleTarget.width;
+    this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
 
     this.printTrialConstructor();

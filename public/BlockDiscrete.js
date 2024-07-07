@@ -37,10 +37,8 @@ class BlockDiscrete {
       id,
       trialRep,
       trialAngle,
-      startWidth,
-      startHeight,
-      target.width,
-      target.height,
+      new Rectangle(startWidth, startHeight),
+      new Rectangle(target.width, target.height),
       amplitude,
     );
     this.trials.push(trial);

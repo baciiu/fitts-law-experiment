@@ -97,10 +97,8 @@ class Experiment {
           trial.trialId,
           trial.trialRep,
           trial.trialDirection,
-          trial.startWidth,
-          trial.startHeight,
-          trial.targetWidth,
-          trial.startHeight,
+          new Rectangle(trial.startWidth, trial.startHeight),
+          new Rectangle(trial.targetWidth, trial.startHeight),
           trial.amplitude,
         );
         trialCopies.push(newTrial);

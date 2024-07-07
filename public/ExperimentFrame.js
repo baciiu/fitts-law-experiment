@@ -65,10 +65,8 @@ class ExperimentFrame {
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
         trialCopy.trialDirection,
-        trialCopy.startWidth,
-        trialCopy.startHeight,
-        trialCopy.targetWidth,
-        trialCopy.targetHeight,
+        new Rectangle(trialCopy.startWidth, trialCopy.startHeight),
+        new Rectangle(trialCopy.targetWidth, trialCopy.targetHeight),
         trialCopy.amplitude,
       );
 

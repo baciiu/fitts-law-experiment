@@ -39,10 +39,8 @@ class BlockReciprocal {
       id,
       trialRep,
       trialAngle,
-      startWidth,
-      startHeight,
-      target.width,
-      target.height,
+      new Rectangle(startWidth, startHeight),
+      new Rectangle(target.width, target.height),
       amplitude,
     );
 
