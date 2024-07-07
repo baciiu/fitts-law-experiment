@@ -234,7 +234,10 @@ class TrialReciprocal {
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
 
-    if (this.isStartNotMandatoryOnReciprocal()) {
+    if (
+      this.isStartNotMandatoryOnReciprocal() &&
+      !this.isFirstTrialInReciprocalGroup()
+    ) {
       this.body.addEventListener("mousedown", this.boundHandleBodyPress);
       this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
     } else {
