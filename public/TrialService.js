@@ -143,9 +143,17 @@ function insertItemAfterGivenIndex(array, newItem, startIndex) {
   array.splice(randomIndex, 0, newItem);
 }
 
-function checkIfInstanceOfTrial(newItem) {
-  if (!(newItem instanceof Trial)) {
-    throw Error(ERROR_TRIAL_INSTANCE);
+function checkIfInstanceOfTrialDiscrete(newItem) {
+  if (!(newItem instanceof TrialDiscrete)) {
+    throw Error(ERROR_TRIAL_INSTANCE_DISCRETE);
+  } else {
+    return true;
+  }
+}
+
+function checkIfInstanceOfTrialReciprocal(newItem) {
+  if (!(newItem instanceof TrialReciprocal)) {
+    throw Error(ERROR_TRIAL_INSTANCE_RECIPROCAL);
   } else {
     return true;
   }
@@ -161,7 +169,7 @@ function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
 
 function insertItemAtPosition(array, item, index) {
   // Check if the index is within the bounds of the array
-  this.checkIfInstanceOfTrial(item);
+  this.checkIfInstanceOfTrialDiscrete(item);
   console.log(array);
   if (index >= 0 && index <= array.length) {
     // Use splice to add the item at the specified index
@@ -196,6 +204,21 @@ function getDirectionList(startAngle, stepSize) {
   return angles;
 }
 
+function isShapeWithinBounds(x, y, width, height) {
+  return (
+    isLeftEdgeWithinBounds(x, width) &&
+    isRightEdgeWithinBounds(x, width) &&
+    isTopEdgeWithinBounds(y, height) &&
+    isBottomEdgeWithinBounds(y, height)
+  );
+}
+
+function isAmplitude(x1, y1, x2, y2, amplitude) {
+  const distance = getDistance(x1, y1, x2, y2);
+  const tolerance = 1;
+  return distance - amplitude <= tolerance;
+}
+
 function isLeftEdgeWithinBounds(x, width) {
   return x - width / 2 > OTHER_MARGINS_PX;
 }
@@ -210,4 +233,46 @@ function isTopEdgeWithinBounds(y, height) {
 
 function isBottomEdgeWithinBounds(y, height) {
   return y + height / 2 < window.innerHeight - TOP_MARGIN_PX;
+}
+
+function getRandomPoint(width1, height1) {
+  const x1 =
+    Math.random() * (window.innerWidth - width1 - 2 * OTHER_MARGINS_PX) +
+    width1 / 2 +
+    OTHER_MARGINS_PX;
+  const y1 =
+    Math.random() *
+      (window.innerHeight - height1 - TOP_MARGIN_PX - OTHER_MARGINS_PX) +
+    height1 / 2 +
+    TOP_MARGIN_PX;
+  return { x: x1, y: y1 };
+}
+
+function getRandomPointWithRespectToPreviousTarget(previous) {
+  const midpoint = {
+    x: (previous.startX + previous.targetX) / 2,
+    y: (previous.startY + previous.targetY) / 2,
+  };
+
+  const radius = (window.innerWidth * MAX_SCREEN_DISTANCE) / 100;
+
+  const angle = Math.random() * 2 * Math.PI;
+  const distance = Math.random() * radius;
+
+  const x = midpoint.x + distance * Math.cos(angle);
+  const y = midpoint.y + distance * Math.sin(angle);
+
+  return { x: x, y: y };
+}
+
+function isCursorInsideShape(event, shape) {
+  const rect = shape.getBoundingClientRect();
+
+  let isCursorInsideShape =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+
+  return isCursorInsideShape;
 }

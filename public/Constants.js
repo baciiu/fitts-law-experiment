@@ -3,7 +3,10 @@ const ERROR_MESSAGE_EXPERIMENT = "[MY ERROR]: Experiment type is undefined.";
 const ERROR_GENERATE_POSITION =
   "[MY ERROR]: Could not generate a valid position.";
 const ERROR_EMPTY_BLOCK = "[MY ERROR]: No trials found in the Block.";
-const ERROR_TRIAL_INSTANCE = "[MY ERROR]: Not an instance of Trial.";
+const ERROR_TRIAL_INSTANCE_DISCRETE =
+  "[MY ERROR]: Not an instance of TrialDiscrete.";
+const ERROR_TRIAL_INSTANCE_RECIPROCAL =
+  "[MY ERROR]: Not an instance of TrialReciprocal.";
 const ERROR_GROUP_INSTANCE = "[MY ERROR]: Not an instance of Group.";
 
 /** SOUNDS */

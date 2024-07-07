@@ -61,7 +61,7 @@ class ExperimentFrame {
     this.trialsData.push(trialData);
 
     if (trialData.toBeRepeatedTrial) {
-      const failedTrial = new Trial(
+      const failedTrial = new TrialDiscrete(
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
         trialCopy.trialDirection,
@@ -108,7 +108,7 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     let trial = block.getTrials()[this.trialIndex];
 
-    if (checkIfInstanceOfTrial(trial)) {
+    if (checkIfInstanceOfTrialDiscrete(trial)) {
       this.trial = trial;
     } else {
       console.log("EXIT");
