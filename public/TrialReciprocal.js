@@ -1,6 +1,6 @@
 "use strict";
 
-class Trial {
+class TrialReciprocal {
   constructor(
     trialId,
     trialRep,
@@ -20,11 +20,23 @@ class Trial {
     this.targetHeight = targetHeight;
     this.amplitude = amplitude;
 
+    this.printTrialConstructor();
+
     this.initPXVariables();
     this.initDOMElements();
     this.initClickVariables();
     this.initFlags();
     this.initPreviousTrial();
+  }
+
+  printTrialConstructor() {
+    console.log(this.trialId);
+    console.log(this.trialRep);
+    console.log(this.trialDirection);
+    console.log(this.startHeight);
+    console.log(this.targetWidth);
+    console.log(this.targetHeight);
+    console.log(this.amplitude);
   }
 
   initPXVariables() {
@@ -80,13 +92,7 @@ class Trial {
   }
 
   drawShapes() {
-    if (isDiscrete()) {
-      this.drawDiscreteShapes();
-    } else if (isReciprocal()) {
-      this.drawReciprocalShapes();
-    } else {
-      throw Error(ERROR_MESSAGE_EXPERIMENT);
-    }
+    this.drawReciprocalShapes();
   }
 
   drawShape(coords, shape, isTarget) {
@@ -114,20 +120,6 @@ class Trial {
     this.body.style.display = "block";
     this.body.style.width = `${window.innerWidth}px`;
     this.body.style.height = `${window.innerHeight}px`;
-  }
-
-  drawDiscreteShapes() {
-    this.trialCompleted = false;
-
-    let pos = this.getPosition();
-
-    this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = WAIT_COLOR;
-    this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = START_COLOR;
-    this.drawBody();
-
-    this.setupEventHandlers();
   }
 
   drawTravelForth(pos) {
@@ -172,7 +164,7 @@ class Trial {
   getPosition() {
     let pos;
     do {
-      if (this.isSamePositionAsPreviousTrial()) {
+      if (this.isSamePositionAsPreviousTrial() && this.isPreviousTrialValid()) {
         pos = this.getPreviousTrialPosition();
         if (this.checkIfCoordinatesFitTheScreen(pos)) {
           return pos;
@@ -200,9 +192,9 @@ class Trial {
   }
 
   isSamePositionAsPreviousTrial() {
-    if (isDiscrete()) {
-      return false;
-    }
+    console.log(
+      `isSamePositionAsPreviousTrial ${!this.isFirstTrialInReciprocalGroup()}`,
+    );
     return !this.isFirstTrialInReciprocalGroup();
   }
 
@@ -217,6 +209,7 @@ class Trial {
   }
 
   checkIfCoordinatesFitTheScreen(pos) {
+    console.log(pos);
     if (
       !(
         pos.start &&
@@ -234,7 +227,7 @@ class Trial {
   }
 
   isStartNotMandatoryOnReciprocal() {
-    return isReciprocal() && START_HIT_NOT_MANDATORY;
+    return START_HIT_NOT_MANDATORY;
   }
 
   setupEventHandlers() {
@@ -267,20 +260,16 @@ class Trial {
   }
 
   handleStartRelease(event) {
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    const isInsideStart = isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
       errorSound.play();
     } else if (this.trialStarted) {
       this.startReleaseIn = isInsideStart;
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
-        if (isDiscrete()) {
-          this.start.style.display = "none";
-          this.target.style.backgroundColor = CLICK_COLOR;
-        } else {
-          this.target.style.backgroundColor = CLICK_COLOR;
-          this.start.style.backgroundColor = WAIT_COLOR;
-        }
+
+        this.target.style.backgroundColor = CLICK_COLOR;
+        this.start.style.backgroundColor = WAIT_COLOR;
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
@@ -303,7 +292,7 @@ class Trial {
     } else if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
 
-      this.targetPressIn = this.isCursorInsideShape(event, this.target);
+      this.targetPressIn = isCursorInsideShape(event, this.target);
       this.bodyIsPressed = true;
     } else {
       this.targetPressIn = false;
@@ -318,7 +307,7 @@ class Trial {
   handleBodyRelease(event) {
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       this.logMouseEvent(event, 3);
-      this.targetReleaseIn = this.isCursorInsideShape(event, this.target);
+      this.targetReleaseIn = isCursorInsideShape(event, this.target);
 
       if (this.targetPressIn) {
         successSound.play();
@@ -348,9 +337,10 @@ class Trial {
   handleBodyPressAsStartPress(event) {
     console.log("start pressed");
     this.logMouseEvent(event, 0);
+    this.startPressIn = true;
     this.firstClickDone = true;
     this.trialStarted = true;
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    const isInsideStart = isCursorInsideShape(event, this.start);
     this.startPressIn = isInsideStart;
     if (isInsideStart) {
       successSound.play();
@@ -361,7 +351,7 @@ class Trial {
 
   handleBodyReleaseAsStartRelease(event) {
     console.log("release on start");
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    const isInsideStart = isCursorInsideShape(event, this.start);
     this.startReleaseIn = isInsideStart;
     this.logMouseEvent(event, 1);
     this.target.style.backgroundColor = CLICK_COLOR;
@@ -371,18 +361,6 @@ class Trial {
     } else {
       errorSound.play();
     }
-  }
-
-  isCursorInsideShape(event, shape) {
-    const rect = shape.getBoundingClientRect();
-
-    let isCursorInsideShape =
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom;
-
-    return isCursorInsideShape;
   }
 
   endTrial() {
@@ -500,54 +478,8 @@ class Trial {
     return { x: posX, y: posY };
   }
 
-  getRandomPoint(width1, height1) {
-    const x1 =
-      Math.random() * (window.innerWidth - width1 - 2 * OTHER_MARGINS_PX) +
-      width1 / 2 +
-      OTHER_MARGINS_PX;
-    const y1 =
-      Math.random() *
-        (window.innerHeight - height1 - TOP_MARGIN_PX - OTHER_MARGINS_PX) +
-      height1 / 2 +
-      TOP_MARGIN_PX;
-    return { x: x1, y: y1 };
-  }
-
-  getRandomPointWithRespectToPreviousTarget() {
-    const previous = this.getPreviousTrial();
-
-    const midpoint = {
-      x: (previous.startX + previous.targetX) / 2,
-      y: (previous.startY + previous.targetY) / 2,
-    };
-
-    const radius = (window.innerWidth * MAX_SCREEN_DISTANCE) / 100;
-
-    const angle = Math.random() * 2 * Math.PI;
-    const distance = Math.random() * radius;
-
-    const x = midpoint.x + distance * Math.cos(angle);
-    const y = midpoint.y + distance * Math.sin(angle);
-
-    return { x: x, y: y };
-  }
-
-  isShapeWithinBounds(x, y, width, height) {
-    return (
-      isLeftEdgeWithinBounds(x, width) &&
-      isRightEdgeWithinBounds(x, width) &&
-      isTopEdgeWithinBounds(y, height) &&
-      isBottomEdgeWithinBounds(y, height)
-    );
-  }
-
-  isAmplitude(x1, y1, x2, y2, amplitude) {
-    const distance = getDistance(x1, y1, x2, y2);
-    const tolerance = 1;
-    return distance - amplitude <= tolerance;
-  }
-
   generateNotCenteredPositions() {
+    // TODO: refactor to reduce complexity
     let start,
       target,
       x1,
@@ -561,22 +493,23 @@ class Trial {
       let startCoords;
 
       if (this.isPreviousTrialValid()) {
-        startCoords = this.getRandomPointWithRespectToPreviousTarget();
+        startCoords = getRandomPointWithRespectToPreviousTarget(
+          this.getPreviousTrial(),
+        );
         while (
-          !this.isShapeWithinBounds(
+          !isShapeWithinBounds(
             startCoords.x,
             startCoords.y,
             this.startWidthPx,
             this.startHeightPX,
           )
         ) {
-          startCoords = this.getRandomPointWithRespectToPreviousTarget();
+          startCoords = getRandomPointWithRespectToPreviousTarget(
+            this.getPreviousTrial(),
+          );
         }
       } else {
-        startCoords = this.getRandomPoint(
-          this.startWidthPx,
-          this.startHeightPX,
-        );
+        startCoords = getRandomPoint(this.startWidthPx, this.startHeightPX);
       }
 
       x1 = startCoords.x;
@@ -594,13 +527,8 @@ class Trial {
       y2 = targetCoords.y;
 
       if (
-        this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
-        this.isShapeWithinBounds(
-          x2,
-          y2,
-          this.targetWidthPx,
-          this.targetHeightPx,
-        )
+        isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+        isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
       ) {
         start = {
           x: x1 - this.startWidthPx / 2,
@@ -637,8 +565,10 @@ class Trial {
 
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-
+    console.log(centerX);
+    console.log(centerY);
     const angle = this.trialDirection;
+    console.log(angle);
 
     // Convert angle to radians
     const radians = (angle * Math.PI) / 180;
@@ -650,8 +580,8 @@ class Trial {
     y2 = centerY - (this.amplitudePX / 2) * Math.sin(radians);
 
     if (
-      this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
-      this.isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
+      isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+      isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
     ) {
       start = { x: x1 - this.startWidthPx / 2, y: y1 - this.startHeightPX / 2 };
       target = {

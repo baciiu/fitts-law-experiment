@@ -103,7 +103,7 @@ class ReciprocalExperimentFrame {
     let trialId = this.getCurrentBlock().getReciprocalTotalTrialsNumber() + 1;
     for (const trial of group) {
       trialId++;
-      const copyTrial = new Trial(
+      const copyTrial = new TrialReciprocal(
         trialId,
         trial.trialRep,
         trial.trialDirection,
@@ -211,7 +211,7 @@ class ReciprocalExperimentFrame {
 
     const trial = trialList[this.trialIndex];
 
-    if (checkIfInstanceOfTrial(trial)) {
+    if (checkIfInstanceOfTrialReciprocal(trial)) {
       this.trial = trial;
     } else {
       console.log("EXIT");

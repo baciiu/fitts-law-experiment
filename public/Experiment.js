@@ -14,19 +14,36 @@ class Experiment {
 
   init() {
     this.setupContinueButton();
-
-    this.generateBlocks();
-    if (SCRAMBLE_BLOCKS && isDiscrete()) {
-      this.shuffleBlocks();
-    } else if (SCRAMBLE_BLOCKS && isReciprocal()) {
-      this.shuffleReciprocalBlocks();
+    if (isDiscrete()) {
+      this.initDiscreteBlocks();
+    } else {
+      this.initReciprocalBlocks();
     }
-    console.log(this.blocks);
+  }
+
+  initDiscreteBlocks() {
+    this.generateBlocks();
+    if (SCRAMBLE_BLOCKS) {
+      this.shuffleBlocks();
+    }
+  }
+
+  initReciprocalBlocks() {
+    this.generateBlocksReciprocal();
+    if (SCRAMBLE_BLOCKS) {
+      this.shuffleBlocksReciprocal();
+    }
   }
 
   generateBlocks() {
     for (let i = 1; i <= this.numBlocks; i++) {
-      this.blocks.push(new Block(i, this.repPerTrial));
+      this.blocks.push(new BlockDiscrete(i, this.repPerTrial));
+    }
+  }
+
+  generateBlocksReciprocal() {
+    for (let i = 1; i <= this.numBlocks; i++) {
+      this.blocks.push(new BlockReciprocal(i, this.repPerTrial));
     }
   }
 
@@ -47,7 +64,7 @@ class Experiment {
     }
   }
 
-  shuffleReciprocalBlocks() {
+  shuffleBlocksReciprocal() {
     const firstList = this.shuffleArraySmall(
       this.getBlock(1).getReciprocalList(),
     );
@@ -76,7 +93,7 @@ class Experiment {
       const trialCopies = [];
 
       for (const trial of trials) {
-        const newTrial = new Trial(
+        const newTrial = new TrialReciprocal(
           trial.trialId,
           trial.trialRep,
           trial.trialDirection,
@@ -108,18 +125,10 @@ class Experiment {
     });
   }
 
-  getNumBlocks() {
-    return this.blocks.length;
-  }
-
   getBlock(blockNumber) {
     if (blockNumber >= 1 && blockNumber <= this.numBlocks) {
       return this.blocks[blockNumber - 1];
     }
-  }
-
-  hasNextBlock(blockNumber) {
-    return this.numBlocks > blockNumber;
   }
 
   getRandomNonRepeat() {

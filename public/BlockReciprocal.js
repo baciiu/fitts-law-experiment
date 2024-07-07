@@ -1,6 +1,6 @@
 "use strict";
 
-class Block {
+class BlockReciprocal {
   constructor(blockNumber, repTrial) {
     this.blockNumber = blockNumber;
     this.experimentType = EXPERIMENT_TYPE;
@@ -10,7 +10,6 @@ class Block {
     this.trialDirection = DIRECTION_LIST;
     this.amplitude = AMPLITUDE_LIST;
     this.blockNumber = blockNumber;
-
     this.trialId = 1;
     this.trials = [];
     this.reciprocalTrialsList = [];
@@ -18,15 +17,8 @@ class Block {
   }
 
   initializeTrials() {
-    if (isDiscrete()) {
-      this.generateDiscreteTrials();
-    } else if (isReciprocal()) {
-      this.generateReciprocalTrials();
-    } else {
-      console.error(ERROR_MESSAGE_EXPERIMENT);
-    }
-    //console.log(this.trials);
-    //console.log(this.reciprocalTrialsList);
+    this.generateReciprocalTrials();
+    console.log(this.reciprocalTrialsList);
   }
 
   has2InputParams() {
@@ -36,26 +28,6 @@ class Block {
     );
   }
 
-  addNewTrialDiscrete(id, trialRep, trialAngle, target, amplitude) {
-    let startWidth;
-    let startHeight;
-
-    startWidth = this.startSize;
-    startHeight = this.startSize;
-
-    const trial = new Trial(
-      id,
-      trialRep,
-      trialAngle,
-      startWidth,
-      startHeight,
-      target.width,
-      target.height,
-      amplitude,
-    );
-    this.trials.push(trial);
-  }
-
   addNewTrialReciprocal(id, trialRep, trialAngle, target, amplitude) {
     let startWidth;
     let startHeight;
@@ -63,7 +35,7 @@ class Block {
     startWidth = target.width;
     startHeight = target.height;
 
-    const trial = new Trial(
+    const trial = new TrialReciprocal(
       id,
       trialRep,
       trialAngle,
@@ -76,54 +48,6 @@ class Block {
 
     this.trials.push(trial);
     return trial;
-  }
-
-  init2InputParametersDiscrete() {
-    for (let target of this.targetDimens) {
-      for (let angle of this.trialDirection) {
-        for (let amplitude of this.amplitude) {
-          let temp_id = this.trialId;
-          this.addNewTrialDiscrete(
-            this.trialId++,
-            temp_id + "",
-            angle,
-            target,
-            amplitude,
-          );
-          for (let i = 1; i < this.repetitionTrial; i++) {
-            this.addNewTrialDiscrete(
-              this.trialId++,
-              temp_id + "." + i,
-              angle,
-              target,
-              amplitude,
-            );
-          }
-        }
-      }
-    }
-  }
-
-  init4InputTrialsDiscrete() {
-    for (const element of this.targetDimens) {
-      let temp_id = this.trialId;
-      this.addNewTrialDiscrete(
-        this.trialId++,
-        temp_id + "",
-        element.angle,
-        element,
-        element.amplitude,
-      );
-      for (let i = 1; i < this.repetitionTrial; i++) {
-        this.addNewTrialDiscrete(
-          this.trialId++,
-          temp_id + "." + i,
-          element.angle,
-          element,
-          element.amplitude,
-        );
-      }
-    }
   }
 
   init2InputParametersReciprocal() {
@@ -181,14 +105,6 @@ class Block {
         reciprocalGroup.addTrial(t);
       }
       this.reciprocalTrialsList.push(reciprocalGroup);
-    }
-  }
-
-  generateDiscreteTrials() {
-    if (this.has2InputParams()) {
-      this.init2InputParametersDiscrete();
-    } else {
-      this.init4InputTrialsDiscrete();
     }
   }
 
