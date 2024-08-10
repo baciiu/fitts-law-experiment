@@ -1,6 +1,7 @@
 # Ignore IDEA
 .idea/
-
+.idea/sonarlint/issuestore
+.idea/sonarlint/securityhotspotstore
 # Ignore node_modules
 node_modules/
 
