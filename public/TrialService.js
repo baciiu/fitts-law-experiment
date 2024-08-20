@@ -76,6 +76,10 @@ function deepCopy(obj) {
     return arrCopy;
   }
 
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+
   const copy = {};
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {

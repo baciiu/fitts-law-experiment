@@ -4,6 +4,7 @@ class TrialReciprocal {
   constructor(
     trialId,
     trialRep,
+    currentTravel,
     trialDirection,
     rectangleStart,
     rectangleTarget,
@@ -11,14 +12,13 @@ class TrialReciprocal {
   ) {
     this.trialId = trialId;
     this.trialRep = trialRep;
+    this.currentTravel = currentTravel;
     this.trialDirection = trialDirection;
     this.startWidth = rectangleStart.width;
     this.startHeight = rectangleStart.height;
     this.targetWidth = rectangleTarget.width;
     this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
-
-    this.printTrialConstructor();
 
     this.initPXVariables();
     this.initDOMElements();
@@ -55,7 +55,6 @@ class TrialReciprocal {
     this.firstClickDone = false;
     this.bodyIsPressed = false;
 
-    this.currentTravel = -1;
     this.firstTrial = false;
     this.isTrialAMistakeRepetition = false;
 
@@ -86,6 +85,10 @@ class TrialReciprocal {
       startY: null,
       targetX: null,
       targetY: null,
+      clicksTime: [],
+      clicksCoords: [],
+      startCoords: {},
+      targetCoords: {},
     };
   }
 
@@ -114,24 +117,18 @@ class TrialReciprocal {
     return this.currentTravel == 0;
   }
 
+  isBackTravelTrialInReciprocalGroup() {
+    return this.currentTravel % 2 != 0 && !this.isFirstTrialInReciprocalGroup();
+  }
+
+  isForthTravelTrialInReciprocalGroup() {
+    return this.currentTravel % 2 == 0 && !this.isFirstTrialInReciprocalGroup();
+  }
+
   drawBody() {
     this.body.style.display = "block";
     this.body.style.width = `${window.innerWidth}px`;
     this.body.style.height = `${window.innerHeight}px`;
-  }
-
-  drawTravelForth(pos) {
-    this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = WAIT_COLOR;
-    this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = CLICK_COLOR;
-  }
-
-  drawTravelBack(pos) {
-    this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = WAIT_COLOR;
-    this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = CLICK_COLOR;
   }
 
   drawTravelStart() {
@@ -145,13 +142,20 @@ class TrialReciprocal {
 
     let pos = this.getPosition();
 
-    if (this.currentTravel % 2 != 0) {
-      console.log("travel forth: " + this.currentTravel);
-      this.drawTravelForth(pos);
+    this.drawShape(pos.target, this.target, true);
+    this.drawShape(pos.start, this.start, false);
+
+    if (this.isForthTravelTrialInReciprocalGroup()) {
+      this.target.style.backgroundColor = WAIT_COLOR;
+      this.start.style.backgroundColor = CLICK_COLOR;
+    } else if (this.isBackTravelTrialInReciprocalGroup()) {
+      this.target.style.backgroundColor = CLICK_COLOR;
+      this.start.style.backgroundColor = WAIT_COLOR;
     } else {
-      console.log("travel back: " + this.currentTravel);
-      this.drawTravelBack(pos);
+      this.target.style.backgroundColor = WAIT_COLOR;
+      this.start.style.backgroundColor = CLICK_COLOR;
     }
+
     this.drawTravelStart();
 
     this.drawBody();
@@ -190,9 +194,9 @@ class TrialReciprocal {
   }
 
   isSamePositionAsPreviousTrial() {
-    console.log(
-      `isSamePositionAsPreviousTrial ${!this.isFirstTrialInReciprocalGroup()}`,
-    );
+    /* console.log(
+                                                                                                                                           `isSamePositionAsPreviousTrial ${!this.isFirstTrialInReciprocalGroup()}`,
+                                                                                                                                         );*/
     return !this.isFirstTrialInReciprocalGroup();
   }
 
@@ -207,7 +211,6 @@ class TrialReciprocal {
   }
 
   checkIfCoordinatesFitTheScreen(pos) {
-    console.log(pos);
     if (
       !(
         pos.start &&
@@ -248,6 +251,7 @@ class TrialReciprocal {
 
   handleStartPress(event) {
     if (!this.firstClickDone) {
+      console.log("start press on travel :" + this.currentTravel);
       this.logMouseEvent(event, 0);
       this.startPressIn = true;
       successSound.play();
@@ -267,10 +271,11 @@ class TrialReciprocal {
     } else if (this.trialStarted) {
       this.startReleaseIn = isInsideStart;
       if (isInsideStart) {
+        console.log("start release on travel :" + this.currentTravel);
         this.logMouseEvent(event, 1);
 
-        this.target.style.backgroundColor = CLICK_COLOR;
-        this.start.style.backgroundColor = WAIT_COLOR;
+        // this.target.style.backgroundColor = WAIT_COLOR;
+        //this.start.style.backgroundColor = CLICK_COLOR;
 
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
@@ -281,6 +286,9 @@ class TrialReciprocal {
         this.body.addEventListener("touchstart", this.boundHandleBodyPress);
         this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
         this.body.addEventListener("touchend", this.boundHandleBodyRelease);
+
+        console.log("End Trial ---> start release");
+        this.endTrial();
       } else {
         errorSound.play();
       }
@@ -295,48 +303,62 @@ class TrialReciprocal {
 
       this.targetPressIn = isCursorInsideShape(event, this.target);
       this.bodyIsPressed = true;
+      console.log("Body Press on travel " + this.currentTravel);
     } else {
       this.targetPressIn = false;
       errorSound.play();
     }
     if (!this.isStartNotMandatoryOnReciprocal()) {
-      this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-      this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+      this.removeBodyPressListeners();
     }
   }
 
   handleBodyRelease(event) {
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       this.logMouseEvent(event, 3);
+
       this.targetReleaseIn = isCursorInsideShape(event, this.target);
 
-      if (this.targetPressIn) {
-        successSound.play();
+      this.handleTargetRelease();
 
-        if (isDiscrete()) {
-          this.start.style.display = "none";
-          this.target.style.backgroundColor = CLICK_COLOR;
-        } else {
-          this.target.style.backgroundColor = CLICK_COLOR;
-          this.start.style.backgroundColor = WAIT_COLOR;
-        }
-      } else {
-        errorSound.play();
-      }
       if (!this.isStartNotMandatoryOnReciprocal()) {
-        this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
-        this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+        this.removeBodyReleaseListeners();
       }
+      console.log("Body Release on travel " + this.currentTravel);
       this.endTrial();
     } else if (this.trialStarted && this.firstClickDone) {
       if (this.isStartNotMandatoryOnReciprocal()) {
         this.handleBodyReleaseAsStartRelease(event);
+        console.log(
+          "Body Release as Start Release on travel " + this.currentTravel,
+        );
+        this.endTrial();
       }
     }
   }
 
+  handleTargetRelease() {
+    if (this.targetPressIn) {
+      successSound.play();
+      this.target.style.backgroundColor = CLICK_COLOR;
+      this.start.style.backgroundColor = WAIT_COLOR;
+    } else {
+      errorSound.play();
+    }
+  }
+
+  removeBodyReleaseListeners() {
+    this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
+    this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+  }
+
+  removeBodyPressListeners() {
+    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+    this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
+  }
+
   handleBodyPressAsStartPress(event) {
-    console.log("start pressed");
+    console.log("start pressed on travel " + this.currentTravel);
     this.logMouseEvent(event, 0);
     this.startPressIn = true;
     this.firstClickDone = true;
@@ -351,7 +373,7 @@ class TrialReciprocal {
   }
 
   handleBodyReleaseAsStartRelease(event) {
-    console.log("release on start");
+    console.log("start release on travel :" + this.currentTravel);
     const isInsideStart = isCursorInsideShape(event, this.start);
     this.startReleaseIn = isInsideStart;
     this.logMouseEvent(event, 1);
@@ -365,6 +387,7 @@ class TrialReciprocal {
   }
 
   endTrial() {
+    console.log("end trial");
     this.trialCompleted = true;
     const trialData = this.getExportDataTrial();
     const trialCopy = JSON.parse(JSON.stringify(this));
@@ -392,7 +415,7 @@ class TrialReciprocal {
 
   isToBeRepeatedTrial() {
     if (this.isClickAMistake()) {
-      console.log("Click was a mistake, trial to be repeated: " + true);
+      console.log("Click was a mistake, trial to be repeated");
       return true;
     }
     if (REP_PRESS_OUT_REL_OUT) {
@@ -434,46 +457,49 @@ class TrialReciprocal {
   }
 
   isClickAMistake() {
-    if (
-      this.clicksCoords.at(0) === undefined ||
-      this.clicksCoords.at(1) === undefined ||
-      this.clicksCoords.at(2) === undefined ||
-      this.clicksCoords.at(3) === undefined
-    ) {
-      return true;
-    }
-    let coordX1;
-    let coordY1;
-    let coordX2;
-    let coordY2;
-
-    if (!this.startPressIn && this.targetPressIn) {
-      return false;
-    } else if (this.startPressIn && !this.targetPressIn) {
-      const startCenterCoords = this.getCenterCoordinatesOfStartShape();
-      coordX1 = startCenterCoords.x;
-      coordY1 = startCenterCoords.y;
-      coordX2 = this.clicksCoords.at(2).x;
-      coordY2 = this.clicksCoords.at(2).y;
-    } else if (!this.startPressIn && !this.targetPressIn) {
-      coordX1 = this.clicksCoords.at(0).x;
-      coordY1 = this.clicksCoords.at(0).y;
-      coordX2 = this.clicksCoords.at(2).x;
-      coordY2 = this.clicksCoords.at(2).y;
-    } else {
-      return false;
-    }
-
-    let distance = getDistance(coordX1, coordY1, coordX2, coordY2);
-    console.log("Distance is: " + distance);
-    console.log(
-      "Amplitude / threshold  is: " + this.amplitudePX / FAILED_TRIAL_THRESHOLD,
-    );
-    return distance < this.amplitudePX / FAILED_TRIAL_THRESHOLD;
+    /* TODO: Adapt based on Travel Functionality
+        if (
+          this.clicksCoords.at(0) === undefined ||
+          this.clicksCoords.at(1) === undefined ||
+          this.clicksCoords.at(2) === undefined ||
+          this.clicksCoords.at(3) === undefined
+        ) {
+          return true;
+        }
+        let coordX1;
+        let coordY1;
+        let coordX2;
+        let coordY2;
+    
+        if (!this.startPressIn && this.targetPressIn) {
+          return false;
+        } else if (this.startPressIn && !this.targetPressIn) {
+          const startCenterCoords = this.getCenterCoordinatesOfStartShape();
+          coordX1 = startCenterCoords.x;
+          coordY1 = startCenterCoords.y;
+          coordX2 = this.clicksCoords.at(2).x;
+          coordY2 = this.clicksCoords.at(2).y;
+        } else if (!this.startPressIn && !this.targetPressIn) {
+          coordX1 = this.clicksCoords.at(0).x;
+          coordY1 = this.clicksCoords.at(0).y;
+          coordX2 = this.clicksCoords.at(2).x;
+          coordY2 = this.clicksCoords.at(2).y;
+        } else {
+          return false;
+        }
+    
+        let distance = getDistance(coordX1, coordY1, coordX2, coordY2);
+        console.log("Distance is: " + distance);
+        console.log(
+          "Amplitude / threshold  is: " + this.amplitudePX / FAILED_TRIAL_THRESHOLD,
+        );
+         return distance < this.amplitudePX / FAILED_TRIAL_THRESHOLD;
+        */
+    return false;
   }
 
   getCenterCoordinatesOfStartShape() {
-    console.log("getCenterOfStartShape() not implemented yet.");
+    // console.log("getCenterOfStartShape() not implemented yet.");
     const posX = this.startCoords.x + this.startWidth / 2;
     const posY = this.startCoords.y + this.startHeight / 2;
     return { x: posX, y: posY };
@@ -566,10 +592,7 @@ class TrialReciprocal {
 
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-    console.log(centerX);
-    console.log(centerY);
     const angle = this.trialDirection;
-    console.log(angle);
 
     // Convert angle to radians
     const radians = (angle * Math.PI) / 180;

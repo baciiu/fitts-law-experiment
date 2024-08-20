@@ -25,6 +25,10 @@ class ReciprocalExperimentFrame {
       startY: null,
       targetX: null,
       targetY: null,
+      clicksTime: [],
+      clicksCoords: [],
+      startCoords: {},
+      targetCoords: {},
     };
 
     document.addEventListener(
@@ -34,8 +38,28 @@ class ReciprocalExperimentFrame {
   }
 
   init() {
-    console.log(this.experiment.getBlock(this.blockNumber));
+    this.printTrialsCalculation();
     this.showTrial();
+  }
+
+  printTrialsCalculation() {
+    console.log(
+      `Blocks: ${BLOCKS_NUMBER} x Targets:${INPUT.length} x Amplitudes: ${
+        AMPLITUDE_LIST.length
+      } x Directions: ${
+        DIRECTION_LIST.length
+      } x Travels: ${TRAVELS_NUMBER}+1  x Repetitions: ${REPETITION_PER_TRIAL}+1   = ${
+        BLOCKS_NUMBER *
+        INPUT.length *
+        AMPLITUDE_LIST.length *
+        DIRECTION_LIST.length *
+        (TRAVELS_NUMBER + 1) *
+        (REPETITION_PER_TRIAL + 1)
+      }`,
+    );
+    console.log(
+      `Total Reciprocal Trials Number: ${this.getReciprocalTotalTrials()}`,
+    );
   }
 
   handleTrialCompleted(event) {
@@ -106,12 +130,12 @@ class ReciprocalExperimentFrame {
       const copyTrial = new TrialReciprocal(
         trialId,
         trial.trialRep,
+        trial.currentTravel,
         trial.trialDirection,
         new Rectangle(trial.startWidth, trial.startHeight),
         new Rectangle(trial.targetWidth, trial.startHeight),
         trial.amplitude,
       );
-      copyTrial.setCurrentTravel(trial.currentTravel);
       copyTrial.setIsTrialAMistakeRepetition(true);
 
       reciprocalGroup.addTrial(copyTrial);
@@ -139,24 +163,10 @@ class ReciprocalExperimentFrame {
         ) {
           const reciprocalGroup =
             listOfReciprocalGroups[this.reciprocalGroupIndex];
-          console.log("reciprocalGroup: ");
-          console.log(reciprocalGroup);
 
           if (reciprocalGroup != null) {
             const trialList = reciprocalGroup.getTrialsGroup();
             if (trialList.length >= 1 && this.trialIndex < trialList.length) {
-              // TODO: show trial
-              console.log("trialIndex: " + this.trialIndex);
-
-              console.log(
-                "groupIndex: " +
-                  this.reciprocalGroupIndex +
-                  " / " +
-                  this.getCurrentBlock().getReciprocalList().length,
-              );
-              console.log(
-                "blockNumber: " + this.blockNumber + " / " + BLOCKS_NUMBER,
-              );
               this.showTrial();
             } else if (
               trialList.length >= 1 &&
@@ -167,10 +177,10 @@ class ReciprocalExperimentFrame {
               this.trialIndex = -1;
               this.prepareForNextTrialOrFinishReciprocal();
             } else {
-              console.log("trial List is empty");
+              console.error("trial List is empty");
             }
           } else {
-            console.log("reciprocal group is empty.");
+            console.error("reciprocal group is empty.");
           }
         } else if (
           listOfReciprocalGroups.length >= 1 &&
@@ -182,10 +192,10 @@ class ReciprocalExperimentFrame {
           this.reciprocalGroupIndex = 0;
           this.prepareForNextTrialOrFinishReciprocal();
         } else {
-          console.log("list of reciprocal group is empty");
+          console.error("list of reciprocal group is empty");
         }
       } else {
-        console.log("block has no lists of trials");
+        console.error("block has no lists of trials");
       }
     } else {
       this.experimentFinished();
@@ -222,20 +232,11 @@ class ReciprocalExperimentFrame {
 
     this.trial.setPreviousTrial(prev);
 
-    if (this.getTrialIndexInExperiment() == 1) {
-      this.trial.setIsFirstTrial(true);
-    }
-
     this.trial.drawShapes();
 
     this.showReciprocalIndexes();
 
-    this.setThisPrevTrial();
-
-    console.log(
-      `Trial Index In Experiment ${this.getTrialIndexInExperiment()} modulo ${TRIALS_PER_BREAK} is ` +
-        (this.getTrialIndexInExperiment() % TRIALS_PER_BREAK),
-    );
+    this.setPrevTrialOnExperimentFrame();
 
     if (this.getTrialIndexInExperiment() % TRIALS_PER_BREAK == 0) {
       this.displayBreakWindow();
@@ -248,10 +249,9 @@ class ReciprocalExperimentFrame {
 
   increaseTrialIndexInExperiment() {
     this.trialIndexInExperiment++;
-    console.log("Trial Index In Experiment is " + this.trialIndexInExperiment);
   }
 
-  setThisPrevTrial() {
+  setPrevTrialOnExperimentFrame() {
     this.prevTrial = {
       trialId: this.trial.trialId,
       trialRep: this.trial.trialRep,
@@ -259,6 +259,10 @@ class ReciprocalExperimentFrame {
       startY: this.trial.startCoords.y,
       targetX: this.trial.targetCoords.x,
       targetY: this.trial.targetCoords.y,
+      clicksTime: this.trial.clicksTime,
+      clicksCoords: this.trial.clicksCoords,
+      startCoords: this.trial.startCoords,
+      targetCoords: this.trial.targetCoords,
     };
   }
 

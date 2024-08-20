@@ -4,7 +4,6 @@ class BlockReciprocal {
   constructor(blockNumber, repTrial) {
     this.blockNumber = blockNumber;
     this.experimentType = EXPERIMENT_TYPE;
-    this.startSize = START_SIZE;
     this.repetitionTrial = repTrial;
     this.targetDimens = INPUT;
     this.trialDirection = DIRECTION_LIST;
@@ -18,7 +17,6 @@ class BlockReciprocal {
 
   initializeTrials() {
     this.generateReciprocalTrials();
-    console.log(this.reciprocalTrialsList);
   }
 
   has2InputParams() {
@@ -28,7 +26,14 @@ class BlockReciprocal {
     );
   }
 
-  addNewTrialReciprocal(id, trialRep, trialAngle, target, amplitude) {
+  addNewTrialReciprocal(
+    id,
+    trialRep,
+    currentTravel,
+    trialAngle,
+    target,
+    amplitude,
+  ) {
     let startWidth;
     let startHeight;
 
@@ -38,6 +43,7 @@ class BlockReciprocal {
     const trial = new TrialReciprocal(
       id,
       trialRep,
+      currentTravel,
       trialAngle,
       new Rectangle(startWidth, startHeight),
       new Rectangle(target.width, target.height),
@@ -55,21 +61,22 @@ class BlockReciprocal {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
           let reciprocalGroup = new ReciprocalGroup(temp_id);
-          for (let i = 0; i <= this.repetitionTrial; i++) {
-            for (let j = 0; j <= TRAVELS_NUMBER; j++) {
-              let trialRep;
-
-              trialRep = temp_id + "." + i + "." + j;
+          for (let repIndex = 0; repIndex <= this.repetitionTrial; repIndex++) {
+            for (
+              let travelIndex = 0;
+              travelIndex <= TRAVELS_NUMBER;
+              travelIndex++
+            ) {
+              let trialRep = temp_id + "." + repIndex + "." + travelIndex;
 
               const t = this.addNewTrialReciprocal(
                 this.trialId++,
                 trialRep,
+                travelIndex,
                 angle,
                 target,
                 amplitude,
               );
-
-              t.setCurrentTravel(j);
               reciprocalGroup.addTrial(t);
             }
           }
@@ -80,6 +87,7 @@ class BlockReciprocal {
   }
 
   init4InputTrialsReciprocal() {
+    // TODO: add travels
     this.reciprocalTrialsList = [];
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
