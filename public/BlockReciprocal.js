@@ -34,18 +34,12 @@ class BlockReciprocal {
     target,
     amplitude,
   ) {
-    let startWidth;
-    let startHeight;
-
-    startWidth = target.width;
-    startHeight = target.height;
-
     const trial = new TrialReciprocal(
       id,
       trialRep,
       currentTravel,
       trialAngle,
-      new Rectangle(startWidth, startHeight),
+      new Rectangle(target.width, target.height),
       new Rectangle(target.width, target.height),
       amplitude,
     );
@@ -60,8 +54,8 @@ class BlockReciprocal {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
           let temp_id = this.trialId;
-          let reciprocalGroup = new ReciprocalGroup(temp_id);
           for (let repIndex = 0; repIndex <= this.repetitionTrial; repIndex++) {
+            let reciprocalGroup = new ReciprocalGroup(temp_id);
             for (
               let travelIndex = 0;
               travelIndex <= TRAVELS_NUMBER;
@@ -79,20 +73,19 @@ class BlockReciprocal {
               );
               reciprocalGroup.addTrial(t);
             }
+            this.reciprocalTrialsList.push(reciprocalGroup);
           }
-          this.reciprocalTrialsList.push(reciprocalGroup);
         }
       }
     }
   }
 
   init4InputTrialsReciprocal() {
-    // TODO: add travels
     this.reciprocalTrialsList = [];
     for (const element of this.targetDimens) {
       let temp_id = this.trialId;
-      let reciprocalGroup = new ReciprocalGroup(temp_id);
       for (let repIndex = 0; repIndex <= this.repetitionTrial; repIndex++) {
+        let reciprocalGroup = new ReciprocalGroup(temp_id);
         for (
           let travelIndex = 0;
           travelIndex <= TRAVELS_NUMBER;
@@ -109,8 +102,8 @@ class BlockReciprocal {
           );
           reciprocalGroup.addTrial(t);
         }
+        this.reciprocalTrialsList.push(reciprocalGroup);
       }
-      this.reciprocalTrialsList.push(reciprocalGroup);
     }
   }
 
