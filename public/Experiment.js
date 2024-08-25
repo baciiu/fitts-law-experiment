@@ -96,6 +96,7 @@ class Experiment {
         const newTrial = new TrialReciprocal(
           trial.trialId,
           trial.trialRep,
+          trial.currentTravel,
           trial.trialDirection,
           new Rectangle(trial.startWidth, trial.startHeight),
           new Rectangle(trial.targetWidth, trial.startHeight),
@@ -106,7 +107,6 @@ class Experiment {
       reciprocalTrial.setReciprocalTrial(trialCopies);
       newList.push(reciprocalTrial);
     }
-    console.log(newList);
     return newList;
   }
 
