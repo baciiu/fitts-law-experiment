@@ -22,10 +22,10 @@ class TrialReciprocal {
 
     this.initPXVariables();
     this.initDOMElements();
-    this.initClickVariables();
     this.initFlags();
     this.initPreviousTrial();
-    //this.printTrialConstructor();
+    this.initClickVariables();
+    this.printTrialConstructor();
   }
 
   printTrialConstructor() {
@@ -86,6 +86,26 @@ class TrialReciprocal {
     this.clicksCoords = [];
   }
 
+  prefillClickDataFromPrevTrial() {
+    if (
+      this.previousTrial.clicksTime.length != 4 ||
+      this.previousTrial.clicksCoords.length != 4
+    ) {
+      console.error("Prev trial was not saved correctly");
+    }
+
+    if (this.isPreviousTrialValid()) {
+      this.clicksTime.push(this.previousTrial.clicksTime.at(2));
+      this.clicksCoords.push(this.previousTrial.clicksCoords.at(2));
+
+      this.clicksTime.push(this.previousTrial.clicksTime.at(3));
+      this.clicksCoords.push(this.previousTrial.clicksCoords.at(3));
+
+      this.startPressIn = this.previousTrial.targetPressIn;
+      this.startReleaseIn = this.previousTrial.targetReleaseIn;
+    }
+  }
+
   initPreviousTrial() {
     this.previousTrial = {
       trialId: null,
@@ -98,10 +118,17 @@ class TrialReciprocal {
       clicksCoords: [],
       startCoords: {},
       targetCoords: {},
+      startPressIn: false,
+      startReleaseIn: false,
+      targetPressIn: false,
+      targetReleaseIn: false,
     };
   }
 
   drawShapes() {
+    if (!this.isFirstTrialInReciprocalGroup()) {
+      this.prefillClickDataFromPrevTrial();
+    }
     this.drawReciprocalShapes();
   }
 
@@ -157,9 +184,6 @@ class TrialReciprocal {
     if (this.isForthTravelTrialInReciprocalGroup()) {
       this.target.style.backgroundColor = CLICK_COLOR;
       this.start.style.backgroundColor = WAIT_COLOR;
-    } else if (this.isBackTravelTrialInReciprocalGroup()) {
-      this.target.style.backgroundColor = WAIT_COLOR;
-      this.start.style.backgroundColor = CLICK_COLOR;
     } else {
       this.target.style.backgroundColor = WAIT_COLOR;
       this.start.style.backgroundColor = CLICK_COLOR;
@@ -226,7 +250,9 @@ class TrialReciprocal {
       this.previousTrial.startY &&
       this.previousTrial.targetX &&
       this.previousTrial.targetY &&
-      this.previousTrial.trialRep
+      this.previousTrial.trialRep &&
+      this.previousTrial.clicksTime &&
+      this.previousTrial.clicksCoords
     );
   }
 
@@ -272,7 +298,6 @@ class TrialReciprocal {
   handleStartPress(event) {
     if (!this.firstClickDone) {
       console.log("start press on travel :" + this.currentTravel);
-      console.log("Log Mouse Event 0");
       this.logMouseEvent(event, 0);
       this.startPressIn = true;
       successSound.play();
@@ -293,7 +318,6 @@ class TrialReciprocal {
       this.startReleaseIn = isInsideStart;
       if (isInsideStart) {
         console.log("start release on travel :" + this.currentTravel);
-        console.log("Log Mouse Event 1");
         this.logMouseEvent(event, 1);
         if (this.isFirstTrialInReciprocalGroup()) {
           this.target.style.backgroundColor = CLICK_COLOR;
@@ -330,7 +354,6 @@ class TrialReciprocal {
     ) {
       this.handleBodyPressAsStartPress(event);
     } else if (this.trialStarted && this.firstClickDone) {
-      console.log("Log Mouse Event 2");
       this.logMouseEvent(event, 2);
 
       this.targetPressIn = isCursorInsideShape(event, this.target);
@@ -347,7 +370,6 @@ class TrialReciprocal {
 
   handleBodyRelease(event) {
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
-      console.log("Log Mouse Event 3");
       this.logMouseEvent(event, 3);
 
       this.targetReleaseIn = isCursorInsideShape(event, this.target);
@@ -402,7 +424,6 @@ class TrialReciprocal {
 
   handleBodyPressAsStartPress(event) {
     console.log("start pressed on travel " + this.currentTravel);
-    console.log("Log Mouse Event 0");
     this.logMouseEvent(event, 0);
     this.firstClickDone = true;
     this.trialStarted = true;
@@ -410,7 +431,7 @@ class TrialReciprocal {
 
     if (this.isBackTravelTrialInReciprocalGroup()) {
       isInsideShape = isCursorInsideShape(event, this.start);
-      this.startPressIn = isInsideShape;
+      this.targetPressIn = isInsideShape;
     } else if (this.isForthTravelTrialInReciprocalGroup()) {
       isInsideShape = isCursorInsideShape(event, this.target);
       this.targetPressIn = isInsideShape;
@@ -430,7 +451,7 @@ class TrialReciprocal {
 
     if (this.isBackTravelTrialInReciprocalGroup()) {
       isInsideShape = isCursorInsideShape(event, this.start);
-      this.startReleaseIn = isInsideShape;
+      this.targetReleaseIn = isInsideShape;
     } else if (this.isForthTravelTrialInReciprocalGroup()) {
       isInsideShape = isCursorInsideShape(event, this.target);
       this.targetReleaseIn = isInsideShape;
@@ -459,10 +480,11 @@ class TrialReciprocal {
       console.log(`FORTH TRAVEL on: ${this.currentTravel} `);
     }
     console.log(`
-  Start Press In: ${this.startPressIn}
-  Start Release In: ${this.startReleaseIn}
-  Target Press In: ${this.targetPressIn}
-  Target Release In: ${this.targetReleaseIn}`);
+    Travel : ${this.currentTravel}
+    Start Press In: ${this.startPressIn}
+    Start Release In: ${this.startReleaseIn}
+    Target Press In: ${this.targetPressIn}
+    Target Release In: ${this.targetReleaseIn}`);
 
     this.trialCompleted = true;
     const trialData = this.getExportDataTrial();
@@ -595,12 +617,14 @@ class TrialReciprocal {
     if (!this.startPressIn && this.targetPressIn) {
       return false;
     } else if (this.startPressIn && !this.targetPressIn) {
+      console.log("calculating distance using center of the start.");
       const startCenterCoords = this.getCenterCoordinatesOfStartShape();
       coordX1 = startCenterCoords.x;
       coordY1 = startCenterCoords.y;
       coordX2 = this.clicksCoords.at(2).x;
       coordY2 = this.clicksCoords.at(2).y;
     } else if (!this.startPressIn && !this.targetPressIn) {
+      console.log("calculating distance using click data.");
       coordX1 = this.clicksCoords.at(0).x;
       coordY1 = this.clicksCoords.at(0).y;
       coordX2 = this.clicksCoords.at(2).x;
@@ -610,13 +634,22 @@ class TrialReciprocal {
     }
 
     let distance = getDistance(coordX1, coordY1, coordX2, coordY2);
-    console.log("Distance is: " + distance);
-    console.log(
-      "Amplitude / threshold  is: " + this.amplitudePX / FAILED_TRIAL_THRESHOLD,
-    );
-    return distance < this.amplitudePX / FAILED_TRIAL_THRESHOLD;
+    let condition = distance < this.amplitudePX / FAILED_TRIAL_THRESHOLD;
 
-    return false;
+    if (condition) {
+      console.log(`
+      Click was a mistake; distance is too small.
+      Distance is: ${distance}
+      Amplitude/threshold is: ${this.amplitudePX / FAILED_TRIAL_THRESHOLD}
+    `);
+    } else {
+      console.log(`
+      Click was ok;
+      Distance is: ${distance}
+      Amplitude/threshold  is: ${this.amplitudePX / FAILED_TRIAL_THRESHOLD}
+    `);
+    }
+    return condition;
   }
 
   getCenterCoordinatesOfStartShape() {
@@ -740,13 +773,9 @@ class TrialReciprocal {
     return { start, target };
   }
 
-  logMouseEvent(event, index) {
-    this.clicksTime[index] = new Date();
-    this.clicksCoords[index] = { x: event.clientX, y: event.clientY };
-    console.debug("!!!!!!! LOG EVENT !!!!!!!");
-    console.debug(`click time: ${this.clicksTime[index]}`);
-    console.debug(`click coords:`);
-    console.debug({ x: event.clientX, y: event.clientY });
+  logMouseEvent(event) {
+    this.clicksTime.push(new Date());
+    this.clicksCoords.push({ x: event.clientX, y: event.clientY });
   }
 
   setPreviousTrial(prevTrial) {
@@ -760,8 +789,7 @@ class TrialReciprocal {
   parseTrialRepByIndex(index) {
     const rep = this.trialRep;
     const elements = rep.split(".");
-    const extractedInt = parseInt(elements[index], 10);
-    return extractedInt;
+    return parseInt(elements[index], 10);
   }
 
   getCopyOfTrial() {
