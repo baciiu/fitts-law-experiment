@@ -29,6 +29,10 @@ class ReciprocalExperimentFrame {
       clicksCoords: [],
       startCoords: {},
       targetCoords: {},
+      startPressIn: false,
+      startReleaseIn: false,
+      targetPressIn: false,
+      targetReleaseIn: false,
     };
 
     document.addEventListener(
@@ -70,6 +74,11 @@ class ReciprocalExperimentFrame {
   trialCompleted(trialEmitted) {
     let trialData = trialEmitted.trialData;
     let trialCopy = trialEmitted.trialCopy;
+
+    this.prevTrial.startPressIn = trialCopy.startPressIn;
+    this.prevTrial.startReleaseIn = trialCopy.startReleaseIn;
+    this.prevTrial.targetPressIn = trialCopy.targetPressIn;
+    this.prevTrial.targetReleaseIn = trialCopy.targetReleaseIn;
 
     checkForNullOrUndefined(trialData);
 
@@ -263,6 +272,10 @@ class ReciprocalExperimentFrame {
       clicksCoords: this.trial.clicksCoords,
       startCoords: this.trial.startCoords,
       targetCoords: this.trial.targetCoords,
+      startPressIn: this.trial.startPressIn,
+      startReleaseIn: this.trial.startReleaseIn,
+      targetPressIn: this.trial.targetPressIn,
+      targetReleaseIn: this.trial.targetReleaseIn,
     };
   }
 
