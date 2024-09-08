@@ -25,7 +25,7 @@ class TrialReciprocal {
     this.initFlags();
     this.initPreviousTrial();
     this.initClickVariables();
-    this.printTrialConstructor();
+    //this.printTrialConstructor();
   }
 
   printTrialConstructor() {
@@ -512,10 +512,6 @@ class TrialReciprocal {
   }
 
   isToBeRepeatedTrial() {
-    if (this.currentTravel == 0) {
-      return false;
-    }
-
     if (this.isClickAMistake()) {
       console.log("CLick was a mistake ");
       return true;
@@ -540,42 +536,18 @@ class TrialReciprocal {
   }
 
   isPressOutReleaseOut() {
-    if (
-      this.isBackTravelTrialInReciprocalGroup() ||
-      this.isFirstTrialInReciprocalGroup()
-    ) {
-      return !this.startPressIn && !this.startReleaseIn;
-    }
     return !this.targetPressIn && !this.targetReleaseIn;
   }
 
   isPressOutReleaseIn() {
-    if (
-      this.isBackTravelTrialInReciprocalGroup() ||
-      this.isFirstTrialInReciprocalGroup()
-    ) {
-      return !this.startPressIn && this.targetReleaseIn;
-    }
     return !this.targetPressIn && this.targetReleaseIn;
   }
 
   isPressInReleaseOut() {
-    if (
-      this.isBackTravelTrialInReciprocalGroup() ||
-      this.isFirstTrialInReciprocalGroup()
-    ) {
-      return this.startPressIn && !this.startReleaseIn;
-    }
     return this.targetPressIn && !this.targetReleaseIn;
   }
 
   isPressInReleaseIn() {
-    if (
-      this.isBackTravelTrialInReciprocalGroup() ||
-      this.isFirstTrialInReciprocalGroup()
-    ) {
-      return this.startPressIn && this.startReleaseIn;
-    }
     return this.targetPressIn && this.targetReleaseIn;
   }
 
@@ -583,7 +555,7 @@ class TrialReciprocal {
     if (HIT_ON_PRESS_AND_RELEASE) {
       return this.isPressInReleaseIn();
     }
-    return this.isPressInReleaseOut() || this.isPressInReleaseIn();
+    return this.targetPressIn;
   }
 
   isClickAMistake() {
