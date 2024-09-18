@@ -274,7 +274,7 @@ class TrialReciprocal {
   }
 
   isStartNotMandatoryOnReciprocal() {
-    return START_HIT_NOT_MANDATORY;
+    return START_HIT_MANDATORY;
   }
 
   setupEventHandlers() {

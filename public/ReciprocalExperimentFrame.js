@@ -118,6 +118,15 @@ class ReciprocalExperimentFrame {
 
     if (
       currentBlock.getReciprocalList().length - 1 >
+      this.reciprocalGroupIndex + 1
+    ) {
+      insertReciprocalTrialInArray(
+        currentBlock.getReciprocalList(),
+        newReciprocalTrial,
+        this.reciprocalGroupIndex + 1,
+      );
+    } else if (
+      currentBlock.getReciprocalList().length - 1 >
       this.reciprocalGroupIndex
     ) {
       insertReciprocalTrialInArray(
@@ -358,9 +367,7 @@ class ReciprocalExperimentFrame {
 
   getReciprocalRemainingTrials() {
     let index = this.trialIndexInExperiment;
-    const a = index % TRIALS_PER_BREAK;
-    const b = TRIALS_PER_BREAK;
-    return b - a;
+    return TRIALS_PER_BREAK - (index % TRIALS_PER_BREAK);
   }
 
   getFirstReciprocalTrial() {
