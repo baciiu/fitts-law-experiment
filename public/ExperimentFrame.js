@@ -61,22 +61,26 @@ class ExperimentFrame {
     this.trialsData.push(trialData);
 
     if (trialData.toBeRepeatedTrial) {
-      const failedTrial = new Trial(
+      const failedTrial = new TrialDiscrete(
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
         trialCopy.trialDirection,
-        trialCopy.startWidth,
-        trialCopy.startHeight,
-        trialCopy.targetWidth,
-        trialCopy.targetHeight,
+        new Rectangle(trialCopy.startWidth, trialCopy.startHeight),
+        new Rectangle(trialCopy.targetWidth, trialCopy.targetHeight),
         trialCopy.amplitude,
       );
 
-      insertTrialInArray(
-        currentBlock.getTrials(),
-        failedTrial,
-        this.trialIndex,
-      );
+      failedTrial.setIsTrialAMistakeRepetition(true);
+
+      if (currentBlock.getTrials().length - 1 > this.trialIndex) {
+        insertTrialInArray(
+          currentBlock.getTrials(),
+          failedTrial,
+          this.trialIndex,
+        );
+      } else {
+        currentBlock.getTrials().push(failedTrial);
+      }
     }
     this.prepareForNextTrialOrFinish(currentBlock);
   }
@@ -102,7 +106,7 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     let trial = block.getTrials()[this.trialIndex];
 
-    if (checkIfInstanceOfTrial(trial)) {
+    if (checkIfInstanceOfTrialDiscrete(trial)) {
       this.trial = trial;
     } else {
       console.log("EXIT");
@@ -241,7 +245,7 @@ class ExperimentFrame {
 
         this.trial = firstTrial;
       } else {
-        throw Error("[MY ERROR]: No trials found in the first block.");
+        throw Error(ERROR_EMPTY_BLOCK);
       }
     }
   }

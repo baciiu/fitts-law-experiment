@@ -2,16 +2,17 @@
 
 function mmToPixels(mm) {
   // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-  const screenWidth = 1512; // Screen width in pixels
-  const screenHeight = 982; // Screen height in pixels
-  const screenDiagonal = 14.42; // Screen diagonal in pixel
+  //const screenWidth = 1512; // Screen width in pixels
+  //const screenHeight = 982; // Screen height in pixels
+  //const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  let result = inches * 151;
+  let result = inches * 126.5;
   //result = result.toFixed(2);
   //let res = Number(result);
   return result;
 
+  // Pixels per inch (PPI)
   // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1 // update 151 is more accurate
   // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
 }
@@ -62,35 +63,6 @@ function getDistance(x1, y1, x2, y2) {
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
-function testStartDistanceFromPreviousEnd(startX, startY) {
-  if (!this.previousTrialEnd) {
-    console.log("No previous trial to compare with.");
-    return true;
-  }
-
-  let screenWidth = window.innerWidth;
-
-  // Calculate the distance between the previous trial's end (target) and current trial's start
-  let actualDistance = this.getDistance(
-    startX,
-    startY,
-    this.previousTrialEnd.x,
-    this.previousTrialEnd.y,
-  );
-
-  // Check if the actual distance is within the screen width
-  if (actualDistance <= screenWidth) {
-    console.log(
-      "Test passed: The start is within screen width from the previous end.",
-    );
-  } else {
-    console.log(
-      "Test failed: The start exceeds screen width from the previous end.",
-    );
-  }
-  return actualDistance <= screenWidth;
-}
-
 function deepCopy(obj) {
   if (obj === null || typeof obj !== "object") {
     return obj;
@@ -104,6 +76,10 @@ function deepCopy(obj) {
     return arrCopy;
   }
 
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+
   const copy = {};
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
@@ -111,30 +87,6 @@ function deepCopy(obj) {
     }
   }
   return copy;
-}
-
-function calculateWrappingDimensions(
-  rect1Width,
-  rect1Height,
-  rect2Width,
-  rect2Height,
-  distance,
-  angle,
-) {
-  let radians = (angle * Math.PI) / 180;
-
-  let x2 = distance * Math.cos(radians);
-  let y2 = distance * Math.sin(radians);
-
-  let minX = Math.min(0, x2);
-  let maxX = Math.max(rect1Width, x2 + rect2Width);
-  let minY = Math.min(0, y2);
-  let maxY = Math.max(rect1Height, y2 + rect2Height);
-
-  let wrappingWidth = maxX - minX;
-  let wrappingHeight = maxY - minY;
-
-  return { width: wrappingWidth, height: wrappingHeight };
 }
 
 function generateCenterPointWithAmplitude(x, y, amplitude, angle) {
@@ -195,9 +147,17 @@ function insertItemAfterGivenIndex(array, newItem, startIndex) {
   array.splice(randomIndex, 0, newItem);
 }
 
-function checkIfInstanceOfTrial(newItem) {
-  if (!(newItem instanceof Trial)) {
-    throw Error("[MY ERROR]: not an instance of Trial");
+function checkIfInstanceOfTrialDiscrete(newItem) {
+  if (!(newItem instanceof TrialDiscrete)) {
+    throw Error(ERROR_TRIAL_INSTANCE_DISCRETE);
+  } else {
+    return true;
+  }
+}
+
+function checkIfInstanceOfTrialReciprocal(newItem) {
+  if (!(newItem instanceof TrialReciprocal)) {
+    throw Error(ERROR_TRIAL_INSTANCE_RECIPROCAL);
   } else {
     return true;
   }
@@ -205,7 +165,7 @@ function checkIfInstanceOfTrial(newItem) {
 
 function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
   if (!(reciprocalGroup instanceof ReciprocalGroup)) {
-    throw Error("[MY ERROR]: not an instance of ReciprocalGroup");
+    throw Error(ERROR_GROUP_INSTANCE);
   } else {
     return true;
   }
@@ -213,13 +173,13 @@ function checkIfInstanceOfReciprocalGroup(reciprocalGroup) {
 
 function insertItemAtPosition(array, item, index) {
   // Check if the index is within the bounds of the array
-  this.checkIfInstanceOfTrial(item);
+  this.checkIfInstanceOfTrialDiscrete(item);
   console.log(array);
   if (index >= 0 && index <= array.length) {
     // Use splice to add the item at the specified index
     array.splice(index, 0, item);
   } else {
-    console.error("Index out of bounds");
+    console.error("[MY ERROR]:Index out of bounds");
   }
   console.log(array);
 }
@@ -246,4 +206,77 @@ function getDirectionList(startAngle, stepSize) {
   }
   console.log(angles);
   return angles;
+}
+
+function isShapeWithinBounds(x, y, width, height) {
+  return (
+    isLeftEdgeWithinBounds(x, width) &&
+    isRightEdgeWithinBounds(x, width) &&
+    isTopEdgeWithinBounds(y, height) &&
+    isBottomEdgeWithinBounds(y, height)
+  );
+}
+
+function isAmplitude(x1, y1, x2, y2, amplitude) {
+  const distance = getDistance(x1, y1, x2, y2);
+  const tolerance = 1;
+  return distance - amplitude <= tolerance;
+}
+
+function isLeftEdgeWithinBounds(x, width) {
+  return x - width / 2 > OTHER_MARGINS_PX;
+}
+
+function isRightEdgeWithinBounds(x, width) {
+  return x + width / 2 < window.innerWidth - OTHER_MARGINS_PX;
+}
+
+function isTopEdgeWithinBounds(y, height) {
+  return y - height / 2 > TOP_MARGIN_PX;
+}
+
+function isBottomEdgeWithinBounds(y, height) {
+  return y + height / 2 < window.innerHeight - TOP_MARGIN_PX;
+}
+
+function getRandomPoint(width1, height1) {
+  const x1 =
+    Math.random() * (window.innerWidth - width1 - 2 * OTHER_MARGINS_PX) +
+    width1 / 2 +
+    OTHER_MARGINS_PX;
+  const y1 =
+    Math.random() *
+      (window.innerHeight - height1 - TOP_MARGIN_PX - OTHER_MARGINS_PX) +
+    height1 / 2 +
+    TOP_MARGIN_PX;
+  return { x: x1, y: y1 };
+}
+
+function getRandomPointWithRespectToPreviousTarget(previous) {
+  const midpoint = {
+    x: (previous.startX + previous.targetX) / 2,
+    y: (previous.startY + previous.targetY) / 2,
+  };
+
+  const radius = (window.innerWidth * MAX_SCREEN_DISTANCE) / 100;
+
+  const angle = Math.random() * 2 * Math.PI;
+  const distance = Math.random() * radius;
+
+  const x = midpoint.x + distance * Math.cos(angle);
+  const y = midpoint.y + distance * Math.sin(angle);
+
+  return { x: x, y: y };
+}
+
+function isCursorInsideShape(event, shape) {
+  const rect = shape.getBoundingClientRect();
+
+  let isCursorInsideShape =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+
+  return isCursorInsideShape;
 }

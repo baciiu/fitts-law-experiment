@@ -1,10 +1,10 @@
 "use strict";
 
 class Experiment {
-  constructor(numBlocks, repPerTrial) {
-    this.numBlocks = numBlocks;
+  constructor() {
+    this.numBlocks = BLOCKS_NUMBER;
     this.blocks = [];
-    this.repPerTrial = repPerTrial;
+    this.repPerTrial = REPETITION_PER_TRIAL;
 
     this.breakWindow = document.getElementById("breakWindow");
     this.continueButton = document.getElementById("continueButton");
@@ -14,19 +14,36 @@ class Experiment {
 
   init() {
     this.setupContinueButton();
-
-    this.generateBlocks();
-    if (SCRAMBLE_BLOCKS && isDiscrete()) {
-      this.shuffleBlocks();
-    } else if (SCRAMBLE_BLOCKS && isReciprocal()) {
-      this.shuffleReciprocalBlocks();
+    if (isDiscrete()) {
+      this.initDiscreteBlocks();
+    } else {
+      this.initReciprocalBlocks();
     }
-    console.log(this.blocks);
+  }
+
+  initDiscreteBlocks() {
+    this.generateBlocks();
+    if (SCRAMBLE_BLOCKS) {
+      this.shuffleBlocks();
+    }
+  }
+
+  initReciprocalBlocks() {
+    this.generateBlocksReciprocal();
+    if (SCRAMBLE_BLOCKS) {
+      this.shuffleBlocksReciprocal();
+    }
   }
 
   generateBlocks() {
     for (let i = 1; i <= this.numBlocks; i++) {
-      this.blocks.push(new Block(i, this.repPerTrial));
+      this.blocks.push(new BlockDiscrete(i, this.repPerTrial));
+    }
+  }
+
+  generateBlocksReciprocal() {
+    for (let i = 1; i <= this.numBlocks; i++) {
+      this.blocks.push(new BlockReciprocal(i, this.repPerTrial));
     }
   }
 
@@ -47,7 +64,7 @@ class Experiment {
     }
   }
 
-  shuffleReciprocalBlocks() {
+  shuffleBlocksReciprocal() {
     const firstList = this.shuffleArraySmall(
       this.getBlock(1).getReciprocalList(),
     );
@@ -76,14 +93,13 @@ class Experiment {
       const trialCopies = [];
 
       for (const trial of trials) {
-        const newTrial = new Trial(
+        const newTrial = new TrialReciprocal(
           trial.trialId,
           trial.trialRep,
+          trial.currentTravel,
           trial.trialDirection,
-          trial.startWidth,
-          trial.startHeight,
-          trial.targetWidth,
-          trial.startHeight,
+          new Rectangle(trial.startWidth, trial.startHeight),
+          new Rectangle(trial.targetWidth, trial.startHeight),
           trial.amplitude,
         );
         trialCopies.push(newTrial);
@@ -91,7 +107,6 @@ class Experiment {
       reciprocalTrial.setReciprocalTrial(trialCopies);
       newList.push(reciprocalTrial);
     }
-    console.log(newList);
     return newList;
   }
 
@@ -108,18 +123,10 @@ class Experiment {
     });
   }
 
-  getNumBlocks() {
-    return this.blocks.length;
-  }
-
   getBlock(blockNumber) {
     if (blockNumber >= 1 && blockNumber <= this.numBlocks) {
       return this.blocks[blockNumber - 1];
     }
-  }
-
-  hasNextBlock(blockNumber) {
-    return this.numBlocks > blockNumber;
   }
 
   getRandomNonRepeat() {

@@ -1,0 +1,14 @@
+# Ignore IDEA
+.idea/
+.idea/sonarlint/issuestore
+.idea/sonarlint/securityhotspotstore
+# Ignore node_modules
+node_modules/
+
+# Ignore build output directory
+out/
+
+# Ignore Protocol Buffer (pb) files
+*.pb
+
+*.iml
