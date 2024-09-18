@@ -61,14 +61,12 @@ class ExperimentFrame {
     this.trialsData.push(trialData);
 
     if (trialData.toBeRepeatedTrial) {
-      const failedTrial = new Trial(
+      const failedTrial = new TrialDiscrete(
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
         trialCopy.trialDirection,
-        trialCopy.startWidth,
-        trialCopy.startHeight,
-        trialCopy.targetWidth,
-        trialCopy.targetHeight,
+        new Rectangle(trialCopy.startWidth, trialCopy.startHeight),
+        new Rectangle(trialCopy.targetWidth, trialCopy.targetHeight),
         trialCopy.amplitude,
       );
 
@@ -108,7 +106,7 @@ class ExperimentFrame {
     let block = this.experiment.getBlock(this.blockNumber);
     let trial = block.getTrials()[this.trialIndex];
 
-    if (checkIfInstanceOfTrial(trial)) {
+    if (checkIfInstanceOfTrialDiscrete(trial)) {
       this.trial = trial;
     } else {
       console.log("EXIT");

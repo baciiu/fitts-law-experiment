@@ -1,30 +1,40 @@
 "use strict";
 
-class Trial {
+class TrialDiscrete {
   constructor(
     trialId,
     trialRep,
     trialDirection,
-    startWidth,
-    startHeight,
-    targetWidth,
-    targetHeight,
+    rectangleStart,
+    rectangleTarget,
     amplitude,
   ) {
     this.trialId = trialId;
     this.trialRep = trialRep;
     this.trialDirection = trialDirection;
-    this.startWidth = startWidth;
-    this.startHeight = startHeight;
-    this.targetWidth = targetWidth;
-    this.targetHeight = targetHeight;
+    this.startWidth = rectangleStart.width;
+    this.startHeight = rectangleStart.height;
+    this.targetWidth = rectangleTarget.width;
+    this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
+
+    this.printTrialConstructor();
 
     this.initPXVariables();
     this.initDOMElements();
     this.initClickVariables();
     this.initFlags();
     this.initPreviousTrial();
+  }
+
+  printTrialConstructor() {
+    console.log(this.trialId);
+    console.log(this.trialRep);
+    console.log(this.trialDirection);
+    console.log(this.startHeight);
+    console.log(this.targetWidth);
+    console.log(this.targetHeight);
+    console.log(this.amplitude);
   }
 
   initPXVariables() {
@@ -45,7 +55,6 @@ class Trial {
     this.firstClickDone = false;
     this.bodyIsPressed = false;
 
-    this.currentTravel = -1;
     this.firstTrial = false;
     this.isTrialAMistakeRepetition = false;
 
@@ -80,13 +89,7 @@ class Trial {
   }
 
   drawShapes() {
-    if (isDiscrete()) {
-      this.drawDiscreteShapes();
-    } else if (isReciprocal()) {
-      this.drawReciprocalShapes();
-    } else {
-      throw Error(ERROR_MESSAGE_EXPERIMENT);
-    }
+    this.drawDiscreteShapes();
   }
 
   drawShape(coords, shape, isTarget) {
@@ -106,10 +109,6 @@ class Trial {
     }
   }
 
-  isFirstTrialInReciprocalGroup() {
-    return !this.trialRep.toString().includes(".");
-  }
-
   drawBody() {
     this.body.style.display = "block";
     this.body.style.width = `${window.innerWidth}px`;
@@ -125,25 +124,6 @@ class Trial {
     this.target.style.backgroundColor = WAIT_COLOR;
     this.drawShape(pos.start, this.start, false);
     this.start.style.backgroundColor = START_COLOR;
-    this.drawBody();
-
-    this.setupEventHandlers();
-  }
-
-  drawReciprocalShapes() {
-    this.trialCompleted = false;
-
-    let pos = this.getPosition();
-
-    this.drawShape(pos.target, this.target, true);
-    this.target.style.backgroundColor = WAIT_COLOR;
-    this.drawShape(pos.start, this.start, false);
-    this.start.style.backgroundColor = CLICK_COLOR;
-
-    if (this.isFirstTrialInReciprocalGroup()) {
-      this.start.style.backgroundColor = START_COLOR;
-    }
-
     this.drawBody();
 
     this.setupEventHandlers();
@@ -180,10 +160,7 @@ class Trial {
   }
 
   isSamePositionAsPreviousTrial() {
-    if (isDiscrete()) {
-      return false;
-    }
-    return !this.isFirstTrialInReciprocalGroup();
+    return false;
   }
 
   isPreviousTrialValid() {
@@ -213,23 +190,14 @@ class Trial {
     }
   }
 
-  isStartNotMandatoryOnReciprocal() {
-    return isReciprocal() && START_HIT_NOT_MANDATORY;
-  }
-
   setupEventHandlers() {
     this.boundHandleStartPress = this.handleStartPress.bind(this);
     this.boundHandleStartRelease = this.handleStartRelease.bind(this);
     this.boundHandleBodyPress = this.handleBodyPress.bind(this);
     this.boundHandleBodyRelease = this.handleBodyRelease.bind(this);
 
-    if (this.isStartNotMandatoryOnReciprocal()) {
-      this.body.addEventListener("mousedown", this.boundHandleBodyPress);
-      this.body.addEventListener("mouseup", this.boundHandleBodyRelease);
-    } else {
-      this.start.addEventListener("mousedown", this.boundHandleStartPress);
-      this.start.addEventListener("mouseup", this.boundHandleStartRelease);
-    }
+    this.start.addEventListener("mousedown", this.boundHandleStartPress);
+    this.start.addEventListener("mouseup", this.boundHandleStartRelease);
   }
 
   handleStartPress(event) {
@@ -247,21 +215,15 @@ class Trial {
   }
 
   handleStartRelease(event) {
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
+    const isInsideStart = isCursorInsideShape(event, this.start);
     if (!this.trialStarted) {
       errorSound.play();
     } else if (this.trialStarted) {
       this.startReleaseIn = isInsideStart;
       if (isInsideStart) {
         this.logMouseEvent(event, 1);
-        if (isDiscrete()) {
-          this.start.style.display = "none";
-          this.target.style.backgroundColor = CLICK_COLOR;
-        } else {
-          this.target.style.backgroundColor = CLICK_COLOR;
-          this.start.style.backgroundColor = WAIT_COLOR;
-        }
-
+        this.start.style.display = "none";
+        this.target.style.backgroundColor = CLICK_COLOR;
         this.start.removeEventListener("mouseup", this.boundHandleStartRelease);
         this.start.removeEventListener(
           "touchend",
@@ -278,27 +240,22 @@ class Trial {
   }
 
   handleBodyPress(event) {
-    if (!this.trialStarted && this.isStartNotMandatoryOnReciprocal()) {
-      this.handleBodyPressAsStartPress(event);
-    } else if (this.trialStarted && this.firstClickDone) {
+    if (this.trialStarted && this.firstClickDone) {
       this.logMouseEvent(event, 2);
-
-      this.targetPressIn = this.isCursorInsideShape(event, this.target);
+      this.targetPressIn = isCursorInsideShape(event, this.target);
       this.bodyIsPressed = true;
     } else {
       this.targetPressIn = false;
       errorSound.play();
     }
-    if (!this.isStartNotMandatoryOnReciprocal()) {
-      this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
-      this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
-    }
+    this.body.removeEventListener("mousedown", this.boundHandleBodyPress);
+    this.body.removeEventListener("touchstart", this.boundHandleBodyPress);
   }
 
   handleBodyRelease(event) {
     if (this.trialStarted && this.firstClickDone && this.bodyIsPressed) {
       this.logMouseEvent(event, 3);
-      this.targetReleaseIn = this.isCursorInsideShape(event, this.target);
+      this.targetReleaseIn = isCursorInsideShape(event, this.target);
 
       if (this.targetPressIn) {
         successSound.play();
@@ -313,56 +270,11 @@ class Trial {
       } else {
         errorSound.play();
       }
-      if (!this.isStartNotMandatoryOnReciprocal()) {
-        this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
-        this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
-      }
+      this.body.removeEventListener("mouseup", this.boundHandleBodyRelease);
+      this.body.removeEventListener("touchend", this.boundHandleBodyRelease);
+
       this.endTrial();
-    } else if (this.trialStarted && this.firstClickDone) {
-      if (this.isStartNotMandatoryOnReciprocal()) {
-        this.handleBodyReleaseAsStartRelease(event);
-      }
     }
-  }
-
-  handleBodyPressAsStartPress(event) {
-    console.log("start pressed");
-    this.logMouseEvent(event, 0);
-    this.firstClickDone = true;
-    this.trialStarted = true;
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
-    this.startPressIn = isInsideStart;
-    if (isInsideStart) {
-      successSound.play();
-    } else {
-      errorSound.play();
-    }
-  }
-
-  handleBodyReleaseAsStartRelease(event) {
-    console.log("release on start");
-    const isInsideStart = this.isCursorInsideShape(event, this.start);
-    this.startReleaseIn = isInsideStart;
-    this.logMouseEvent(event, 1);
-    this.target.style.backgroundColor = CLICK_COLOR;
-    this.start.style.backgroundColor = WAIT_COLOR;
-    if (isInsideStart) {
-      successSound.play();
-    } else {
-      errorSound.play();
-    }
-  }
-
-  isCursorInsideShape(event, shape) {
-    const rect = shape.getBoundingClientRect();
-
-    let isCursorInsideShape =
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom;
-
-    return isCursorInsideShape;
   }
 
   endTrial() {
@@ -480,54 +392,8 @@ class Trial {
     return { x: posX, y: posY };
   }
 
-  getRandomPoint(width1, height1) {
-    const x1 =
-      Math.random() * (window.innerWidth - width1 - 2 * OTHER_MARGINS_PX) +
-      width1 / 2 +
-      OTHER_MARGINS_PX;
-    const y1 =
-      Math.random() *
-        (window.innerHeight - height1 - TOP_MARGIN_PX - OTHER_MARGINS_PX) +
-      height1 / 2 +
-      TOP_MARGIN_PX;
-    return { x: x1, y: y1 };
-  }
-
-  getRandomPointWithRespectToPreviousTarget() {
-    const previous = this.getPreviousTrial();
-
-    const midpoint = {
-      x: (previous.startX + previous.targetX) / 2,
-      y: (previous.startY + previous.targetY) / 2,
-    };
-
-    const radius = (window.innerWidth * MAX_SCREEN_DISTANCE) / 100;
-
-    const angle = Math.random() * 2 * Math.PI;
-    const distance = Math.random() * radius;
-
-    const x = midpoint.x + distance * Math.cos(angle);
-    const y = midpoint.y + distance * Math.sin(angle);
-
-    return { x: x, y: y };
-  }
-
-  isShapeWithinBounds(x, y, width, height) {
-    return (
-      isLeftEdgeWithinBounds(x, width) &&
-      isRightEdgeWithinBounds(x, width) &&
-      isTopEdgeWithinBounds(y, height) &&
-      isBottomEdgeWithinBounds(y, height)
-    );
-  }
-
-  isAmplitude(x1, y1, x2, y2, amplitude) {
-    const distance = getDistance(x1, y1, x2, y2);
-    const tolerance = 1;
-    return distance - amplitude <= tolerance;
-  }
-
   generateNotCenteredPositions() {
+    // TODO: refactor to reduce complexity
     let start,
       target,
       x1,
@@ -541,22 +407,23 @@ class Trial {
       let startCoords;
 
       if (this.isPreviousTrialValid()) {
-        startCoords = this.getRandomPointWithRespectToPreviousTarget();
+        startCoords = getRandomPointWithRespectToPreviousTarget(
+          this.getPreviousTrial(),
+        );
         while (
-          !this.isShapeWithinBounds(
+          !isShapeWithinBounds(
             startCoords.x,
             startCoords.y,
             this.startWidthPx,
             this.startHeightPX,
           )
         ) {
-          startCoords = this.getRandomPointWithRespectToPreviousTarget();
+          startCoords = getRandomPointWithRespectToPreviousTarget(
+            this.getPreviousTrial(),
+          );
         }
       } else {
-        startCoords = this.getRandomPoint(
-          this.startWidthPx,
-          this.startHeightPX,
-        );
+        startCoords = getRandomPoint(this.startWidthPx, this.startHeightPX);
       }
 
       x1 = startCoords.x;
@@ -574,13 +441,8 @@ class Trial {
       y2 = targetCoords.y;
 
       if (
-        this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
-        this.isShapeWithinBounds(
-          x2,
-          y2,
-          this.targetWidthPx,
-          this.targetHeightPx,
-        )
+        isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+        isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
       ) {
         start = {
           x: x1 - this.startWidthPx / 2,
@@ -630,8 +492,8 @@ class Trial {
     y2 = centerY - (this.amplitudePX / 2) * Math.sin(radians);
 
     if (
-      this.isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
-      this.isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
+      isAmplitude(x1, y1, x2, y2, this.amplitudePX) &&
+      isShapeWithinBounds(x2, y2, this.targetWidthPx, this.targetHeightPx)
     ) {
       start = { x: x1 - this.startWidthPx / 2, y: y1 - this.startHeightPX / 2 };
       target = {
@@ -659,15 +521,36 @@ class Trial {
     return this.previousTrial;
   }
 
+  parseTrialRepByIndex(index) {
+    const rep = this.trialRep;
+    const elements = rep.split(".");
+    return parseInt(elements[index], 10);
+  }
+
+  getCopyOfTrial() {
+    if (this.parseTrialRepByIndex(0)) {
+      return this.parseTrialRepByIndex(0);
+    } else {
+      return 0;
+    }
+  }
+
+  getRepeatNumber() {
+    if (this.parseTrialRepByIndex(1)) {
+      return this.parseTrialRepByIndex(1);
+    } else {
+      return 0;
+    }
+  }
+
   getExportDataTrial() {
     return {
       no: "",
       userNumber: "",
       blockNumber: "",
       trialNumber: this.trialId,
-      trialRep: this.trialRep,
-      currentTravel: this.currentTravel,
-      travelsNumber: TRAVELS_NUMBER,
+      copyOfTrial: this.getCopyOfTrial(),
+      trialRep: this.getRepeatNumber(),
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
 
@@ -776,9 +659,5 @@ class Trial {
 
   setIsTrialAMistakeRepetition(isMistake) {
     this.isTrialAMistakeRepetition = isMistake;
-  }
-
-  setCurrentTravel(travel) {
-    this.currentTravel = travel;
   }
 }
