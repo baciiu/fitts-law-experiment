@@ -19,15 +19,15 @@ const CLICK_COLOR = "green";
 const START_COLOR = "gray";
 
 const test = Object.freeze({
-  BLOCKS: 1,
+  BLOCKS: 2,
 
-  REP: 0,
+  REP: 2,
 
-  TRAVELS: 6,
+  TRAVELS: 4,
 
-  AMPL: [36, 54, 80],
+  AMPL: [36, 54],
 
-  ANGLES: [0, 90, 180],
+  ANGLES: [0, 90],
 
   INPUT_2: [
     { width: 15, height: 10 },
