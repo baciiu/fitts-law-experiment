@@ -521,13 +521,36 @@ class TrialDiscrete {
     return this.previousTrial;
   }
 
+  parseTrialRepByIndex(index) {
+    const rep = this.trialRep;
+    const elements = rep.split(".");
+    return parseInt(elements[index], 10);
+  }
+
+  getCopyOfTrial() {
+    if (this.parseTrialRepByIndex(0)) {
+      return this.parseTrialRepByIndex(0);
+    } else {
+      return 0;
+    }
+  }
+
+  getRepeatNumber() {
+    if (this.parseTrialRepByIndex(1)) {
+      return this.parseTrialRepByIndex(1);
+    } else {
+      return 0;
+    }
+  }
+
   getExportDataTrial() {
     return {
       no: "",
       userNumber: "",
       blockNumber: "",
       trialNumber: this.trialId,
-      trialRep: this.trialRep,
+      copyOfTrial: this.getCopyOfTrial(),
+      trialRep: this.getRepeatNumber(),
       experimentType: EXPERIMENT_TYPE,
       device: DEVICE_TYPE,
 
