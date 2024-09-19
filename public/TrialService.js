@@ -7,10 +7,7 @@ function mmToPixels(mm) {
   //const screenDiagonal = 14.42; // Screen diagonal in pixel
 
   const inches = mm / 25.4;
-  let result = inches * 126.5;
-  //result = result.toFixed(2);
-  //let res = Number(result);
-  return result;
+  return inches * 126.5;
 
   // Pixels per inch (PPI)
   // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1 // update 151 is more accurate
@@ -34,7 +31,8 @@ function getOnlyTimeFormat(date) {
   const seconds = String(now.getSeconds()).padStart(2, "0");
   const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
 
-  return `${seconds}.${milliseconds}`;
+  console.log(now.getTime());
+  return `${seconds}${milliseconds}`;
 }
 
 function isMobile() {

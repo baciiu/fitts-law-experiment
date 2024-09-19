@@ -19,6 +19,8 @@ class TrialReciprocal {
     this.targetWidth = rectangleTarget.width;
     this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
+    this.constelationInt = 0;
+    this.constelationString = "";
 
     this.initPXVariables();
     this.initDOMElements();
@@ -775,17 +777,17 @@ class TrialReciprocal {
   getExportDataTrial() {
     return {
       no: "",
+      experimentType: EXPERIMENT_TYPE,
       userNumber: "",
       blockNumber: "",
       trialId: this.trialId,
+      constNr: this.constelationInt,
+      constStr: this.constelationString,
       copyOfTrial: this.getCopyOfTrial(),
       trialRep: this.getRepeatNumber(),
 
       currTravel: this.currentTravel,
       travelsNumber: TRAVELS_NUMBER,
-      experimentType: EXPERIMENT_TYPE,
-      device: DEVICE_TYPE,
-
       amplitudeMM: this.amplitude,
       amplitudePx: this.amplitudePX,
       directionDegree: this.trialDirection,
@@ -822,66 +824,79 @@ class TrialReciprocal {
       rect2_WidthPx: this.targetWidthPx,
       rect2_HeightPx: this.targetHeightPx,
 
-      "Click T0 X": this.clicksCoords.at(0)?.x,
-      "Click T0 Y": this.clicksCoords.at(0)?.y,
+      rect1_Press_coord_X: this.clicksCoords.at(0)?.x,
+      rect1_Press_coord_Y: this.clicksCoords.at(0)?.y,
 
-      "Click T1 X": this.clicksCoords.at(1)?.x,
-      "Click T1 Y": this.clicksCoords.at(1)?.y,
+      rect1_Release_coord_X: this.clicksCoords.at(1)?.x,
+      rect1_Release_coord_Y: this.clicksCoords.at(1)?.y,
 
-      "Click T2 X": this.clicksCoords.at(2)?.x,
-      "Click T2 Y": this.clicksCoords.at(2)?.y,
+      rect2_Press_coord_X: this.clicksCoords.at(2)?.x,
+      rect2_Press_coord_Y: this.clicksCoords.at(2)?.y,
 
-      "Click T3 X": this.clicksCoords.at(3)?.x,
-      "Click T3 Y": this.clicksCoords.at(3)?.y,
+      rect2_Release_coord_X: this.clicksCoords.at(3)?.x,
+      rect2_Release_coord_Y: this.clicksCoords.at(3)?.y,
 
-      T0: getTimeFormat(this.clicksTime.at(0)),
-      T1: getTimeFormat(this.clicksTime.at(1)),
-      T2: getTimeFormat(this.clicksTime.at(2)),
-      T3: getTimeFormat(this.clicksTime.at(3)),
+      rect1_Press_timeT1: getTimeFormat(this.clicksTime.at(0)),
+      rect1_Release_timeT2: getTimeFormat(this.clicksTime.at(1)),
+      rect2_Press_timeT3: getTimeFormat(this.clicksTime.at(2)),
+      rect2_Release_timeT4: getTimeFormat(this.clicksTime.at(3)),
 
-      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
-      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
-      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
-      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
-      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
-      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
+      T2_T1_rect1_Release_rect1_Press_ms: getOnlyTimeFormat(
+        this.clicksTime.at(1) - this.clicksTime.at(0),
+      ),
+      T3_T1_rect2_Press_rect1_Press_ms: getOnlyTimeFormat(
+        this.clicksTime.at(2) - this.clicksTime.at(0),
+      ),
+      T4_T1_rect2_Release_rect1_Press_ms: getOnlyTimeFormat(
+        this.clicksTime.at(3) - this.clicksTime.at(0),
+      ),
+      T3_T2_rect2_Press_rect1_Release_ms: getOnlyTimeFormat(
+        this.clicksTime.at(2) - this.clicksTime.at(1),
+      ),
+      T4_T2_rect2_Release_rect1_Release_ms: getOnlyTimeFormat(
+        this.clicksTime.at(3) - this.clicksTime.at(1),
+      ),
+      T4_T3_rect2_Release_rect2_Press_ms: getOnlyTimeFormat(
+        this.clicksTime.at(3) - this.clicksTime.at(2),
+      ),
 
-      "Distance T1 to T0 ": getDistance(
+      D2_D1_rect1_Release_rect1_Press_px: getDistance(
         this.clicksCoords.at(0)?.x,
         this.clicksCoords.at(0)?.y,
         this.clicksCoords.at(1)?.x,
         this.clicksCoords.at(1)?.y,
       ),
-      "Distance T2 toT0 ": getDistance(
+      D3_D1_rect2_Press_rect1_Press_px: getDistance(
         this.clicksCoords.at(0)?.x,
         this.clicksCoords.at(0)?.y,
         this.clicksCoords.at(2)?.x,
         this.clicksCoords.at(2)?.y,
       ),
-      "Distance T3 to T0 ": getDistance(
+      D4_D1_rect2_Release_rect1_Press_px: getDistance(
         this.clicksCoords.at(0)?.x,
         this.clicksCoords.at(0)?.y,
         this.clicksCoords.at(3)?.x,
         this.clicksCoords.at(3)?.y,
       ),
-      "Distance T2 to T1 ": getDistance(
+      D3_D2_rect2_Press_rect1_Release_px: getDistance(
         this.clicksCoords.at(1)?.x,
         this.clicksCoords.at(1)?.y,
         this.clicksCoords.at(2)?.x,
         this.clicksCoords.at(2)?.y,
       ),
-      "Distance T3 to T1 ": getDistance(
+      D4_D2_rect2_Release_rect1_Release_px: getDistance(
         this.clicksCoords.at(1)?.x,
         this.clicksCoords.at(1)?.y,
         this.clicksCoords.at(3)?.x,
         this.clicksCoords.at(3)?.y,
       ),
-      "Distance T3 to T2 ": getDistance(
+      D4_D3_rect2_Release_rect2_Press_px: getDistance(
         this.clicksCoords.at(2)?.x,
         this.clicksCoords.at(2)?.y,
         this.clicksCoords.at(3)?.x,
         this.clicksCoords.at(3)?.y,
       ),
+      device: DEVICE_TYPE,
     };
   }
 
