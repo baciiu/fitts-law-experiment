@@ -20,7 +20,7 @@ class TrialReciprocal {
     this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
     this.constelationInt = 0;
-    this.constelationString = "";
+    this.constelationString = "const";
 
     this.initPXVariables();
     this.initDOMElements();
