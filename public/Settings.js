@@ -1,4 +1,4 @@
-const INPUT = test.INPUT_2;
+const INPUT = test.INPUT_4;
 const AMPLITUDE_LIST = test.AMPL;
 
 const START_SIZE = 10;

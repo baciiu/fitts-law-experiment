@@ -48,9 +48,9 @@ class ReciprocalExperimentFrame {
 
   printTrialsCalculation() {
     console.log(
-      `Blocks: ${BLOCKS_NUMBER} x Targets:${INPUT.length} x Amplitudes: ${
-        AMPLITUDE_LIST.length
-      } x Directions: ${
+      `2 INPUT: \nBlocks: ${BLOCKS_NUMBER} x Targets:${
+        INPUT.length
+      } x Amplitudes: ${AMPLITUDE_LIST.length} x Directions: ${
         DIRECTION_LIST.length
       } x Travels: ${TRAVELS_NUMBER}+1  x Repetitions: ${REPETITION_PER_TRIAL}+1   = ${
         BLOCKS_NUMBER *
@@ -59,10 +59,18 @@ class ReciprocalExperimentFrame {
         DIRECTION_LIST.length *
         (TRAVELS_NUMBER + 1) *
         (REPETITION_PER_TRIAL + 1)
-      }`,
+      }
+      Total Reciprocal Trials Number: ${this.getReciprocalTotalTrials()}`,
     );
     console.log(
-      `Total Reciprocal Trials Number: ${this.getReciprocalTotalTrials()}`,
+      `4 INPUT: \nBlocks: ${BLOCKS_NUMBER} x Input Dimensions:${INPUT.length}
+        } x Travels: ${TRAVELS_NUMBER}+1  x Repetitions: ${REPETITION_PER_TRIAL}+1   = ${
+          BLOCKS_NUMBER *
+          INPUT.length *
+          (TRAVELS_NUMBER + 1) *
+          (REPETITION_PER_TRIAL + 1)
+        }
+      Total Reciprocal Trials Number: ${this.getReciprocalTotalTrials()}`,
     );
   }
 
@@ -89,7 +97,11 @@ class ReciprocalExperimentFrame {
     this.endTrialPos = trialData.endTrialPos;
     this.trialsData.push(trialData);
 
+    console.log(" *******   TRIAL DATA   ******* ");
+    console.log(this.trialsData);
+
     if (trialData.toBeRepeatedTrial) {
+      this.markFailedGroup(trialData);
       this.trialIsFailed = true;
       console.log("REPEAT TRIAL");
       this.insertReciprocalTrialToBlock(trialCopy);
@@ -101,6 +113,7 @@ class ReciprocalExperimentFrame {
 
   insertReciprocalTrialToBlock(failedTrial) {
     const currentBlock = this.experiment.getBlock(this.blockNumber);
+    const constellationMap = currentBlock.constellationMap;
 
     const failedTrialGroupOriginal = currentBlock
       .getReciprocalList()
@@ -109,6 +122,7 @@ class ReciprocalExperimentFrame {
     let newReciprocalTrial = this.getCopyOfGroup(
       failedTrial.trialRep,
       failedTrialGroupOriginal,
+      constellationMap,
     );
 
     console.log(
@@ -139,21 +153,35 @@ class ReciprocalExperimentFrame {
     }
   }
 
-  getCopyOfGroup(trialRep, group) {
-    // TODO: every trial within group gets the same trial ID
+  getCopyOfGroup(trialRep, group, constellationMap) {
     const reciprocalGroup = new ReciprocalGroup(trialRep);
     let trialId = this.getCurrentBlock().getReciprocalTotalTrialsNumber() + 1;
     for (const trial of group) {
       trialId++;
+      const target = new Rectangle(trial.startWidth, trial.startHeight);
       const copyTrial = new TrialReciprocal(
         trialId,
         trial.trialRep,
         trial.currentTravel,
         trial.trialDirection,
-        new Rectangle(trial.startWidth, trial.startHeight),
-        new Rectangle(trial.targetWidth, trial.startHeight),
+        target,
+        target,
         trial.amplitude,
       );
+
+      const constellationTemp = getConstellation(
+        target,
+        copyTrial.trialDirection,
+        copyTrial.amplitude,
+        copyTrial.currentTravel,
+      );
+
+      assignConstellationToTrial(
+        copyTrial,
+        constellationMap,
+        constellationTemp,
+      );
+
       copyTrial.setIsTrialAMistakeRepetition(true);
 
       reciprocalGroup.addTrial(copyTrial);
@@ -403,5 +431,32 @@ class ReciprocalExperimentFrame {
       this.breakWindow.style.display = "none";
       document.body.style.pointerEvents = "auto";
     });
+  }
+
+  markFailedGroup(trialData) {
+    console.log(trialData);
+    const copyOfTrial = trialData.copyOfTrial;
+    const trialRep = trialData.trialRep;
+    const currentTravel = trialData.currTravel;
+
+    for (const row of this.trialsData) {
+      if (
+        row.trialRep == trialRep &&
+        row.copyOfTrial == copyOfTrial &&
+        row.currTravel >= 0 &&
+        row.currTravel <= currentTravel
+      ) {
+        if (!row.toBeRepeatedTrial) {
+          console.log(
+            `Travel ${currentTravel} was a mistake. Set RETRO travel ${row.currTravel} to be repeated.`,
+          );
+          row.toBeRepeatedTrial = true;
+        } else {
+          console.log(
+            `Travel ${currentTravel} was a mistake. RETRO travel ${row.currTravel} is already set.`,
+          );
+        }
+      }
+    }
   }
 }

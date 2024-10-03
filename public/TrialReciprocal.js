@@ -19,8 +19,8 @@ class TrialReciprocal {
     this.targetWidth = rectangleTarget.width;
     this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
-    this.constelationInt = 0;
-    this.constelationString = "const";
+    this.constellationInt = 0;
+    this.constellationString = "";
 
     this.initPXVariables();
     this.initDOMElements();
@@ -44,13 +44,9 @@ class TrialReciprocal {
   }
 
   initPXVariables() {
-    if (this.isFirstTrialInReciprocalGroup()) {
-      this.startWidthPx = mmToPixels(START_SIZE);
-      this.startHeightPX = mmToPixels(START_SIZE);
-    } else {
-      this.startWidthPx = mmToPixels(this.startWidth);
-      this.startHeightPX = mmToPixels(this.startHeight);
-    }
+    this.startWidthPx = mmToPixels(this.startWidth);
+    this.startHeightPX = mmToPixels(this.startHeight);
+
     this.targetWidthPx = mmToPixels(this.targetWidth);
     this.targetHeightPx = mmToPixels(this.targetHeight);
     this.amplitudePX = mmToPixels(this.amplitude);
@@ -220,10 +216,9 @@ class TrialReciprocal {
     let start;
     let target;
     if (this.currentTravel == 1) {
-      let startSizePx = mmToPixels(START_SIZE);
       const startCenter = {
-        x: this.previousTrial.startX + startSizePx / 2,
-        y: this.previousTrial.startY + startSizePx / 2,
+        x: this.previousTrial.startX + this.startWidthPx / 2,
+        y: this.previousTrial.startY + this.startHeightPX / 2,
       };
       start = {
         x: startCenter.x - this.targetWidthPx / 2,
@@ -781,8 +776,8 @@ class TrialReciprocal {
       userNumber: "",
       blockNumber: "",
       trialId: this.trialId,
-      constNr: this.constelationInt,
-      constStr: this.constelationString,
+      constNr: this.constellationInt,
+      constStr: this.constellationString,
       copyOfTrial: this.getCopyOfTrial(),
       trialRep: this.getRepeatNumber(),
 

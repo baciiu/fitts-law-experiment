@@ -12,11 +12,16 @@ class BlockReciprocal {
     this.trialId = 1;
     this.trials = [];
     this.reciprocalTrialsList = [];
+    this.constellationMap = new Map();
     this.initializeTrials();
   }
 
   initializeTrials() {
     this.generateReciprocalTrials();
+    console.log("**********    TRIALS  **********");
+    console.log(this.trials);
+    console.log("******    CONSTELLATIONS  ******");
+    console.log(Array.from(this.constellationMap));
   }
 
   has2InputParams() {
@@ -48,33 +53,53 @@ class BlockReciprocal {
     return trial;
   }
 
+  getRepetitionsFor2Input(target, angle, amplitude) {
+    let temp_id = this.trialId;
+
+    for (let repIndex = 0; repIndex <= this.repetitionTrial; repIndex++) {
+      let reciprocalGroup = new ReciprocalGroup(temp_id);
+      for (let travelIndex = 0; travelIndex <= TRAVELS_NUMBER; travelIndex++) {
+        let trialRep = temp_id + "." + repIndex + "." + travelIndex;
+
+        const trial = this.getInitializedTrial(
+          trialRep,
+          travelIndex,
+          angle,
+          target,
+          amplitude,
+        );
+
+        reciprocalGroup.addTrial(trial);
+      }
+      this.reciprocalTrialsList.push(reciprocalGroup);
+    }
+  }
+
+  getInitializedTrial(trialRep, travelIndex, angle, target, amplitude) {
+    const t = this.addNewTrialReciprocal(
+      this.trialId++,
+      trialRep,
+      travelIndex,
+      angle,
+      target,
+      amplitude,
+    );
+    const constellationTemp = getConstellation(
+      target,
+      angle,
+      amplitude,
+      travelIndex,
+    );
+    assignConstellationToTrial(t, this.constellationMap, constellationTemp);
+    return t;
+  }
+
   init2InputParametersReciprocal() {
     this.reciprocalTrialsList = [];
     for (let target of this.targetDimens) {
       for (let angle of this.trialDirection) {
         for (let amplitude of this.amplitude) {
-          let temp_id = this.trialId;
-          for (let repIndex = 0; repIndex <= this.repetitionTrial; repIndex++) {
-            let reciprocalGroup = new ReciprocalGroup(temp_id);
-            for (
-              let travelIndex = 0;
-              travelIndex <= TRAVELS_NUMBER;
-              travelIndex++
-            ) {
-              let trialRep = temp_id + "." + repIndex + "." + travelIndex;
-
-              const t = this.addNewTrialReciprocal(
-                this.trialId++,
-                trialRep,
-                travelIndex,
-                angle,
-                target,
-                amplitude,
-              );
-              reciprocalGroup.addTrial(t);
-            }
-            this.reciprocalTrialsList.push(reciprocalGroup);
-          }
+          this.getRepetitionsFor2Input(target, angle, amplitude);
         }
       }
     }
@@ -92,7 +117,7 @@ class BlockReciprocal {
           travelIndex++
         ) {
           let trialRep = temp_id + "." + repIndex + "." + travelIndex;
-          const t = this.addNewTrialReciprocal(
+          const trial = this.addNewTrialReciprocal(
             this.trialId++,
             trialRep,
             travelIndex,
@@ -100,7 +125,18 @@ class BlockReciprocal {
             element,
             element.amplitude,
           );
-          reciprocalGroup.addTrial(t);
+          const constellationTemp = getConstellation(
+            element,
+            element.angle,
+            element.amplitude,
+            travelIndex,
+          );
+          assignConstellationToTrial(
+            trial,
+            this.constellationMap,
+            constellationTemp,
+          );
+          reciprocalGroup.addTrial(trial);
         }
         this.reciprocalTrialsList.push(reciprocalGroup);
       }

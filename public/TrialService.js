@@ -28,11 +28,32 @@ function getTimeFormat(date) {
 
 function getOnlyTimeFormat(date) {
   const now = new Date(date);
+  const min = String(now.getMinutes()).padStart(2, "0");
   const seconds = String(now.getSeconds()).padStart(2, "0");
   const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
 
   console.log(now.getTime());
-  return `${seconds}${milliseconds}`;
+  console.log(`${min}${seconds}${milliseconds}`);
+  return `${min}${seconds}${milliseconds}`;
+}
+
+function assignConstellationToTrial(
+  trial,
+  constellationMap,
+  constellationTemp,
+) {
+  const index = constellationMap.size + 1;
+  if (!constellationMap.has(constellationTemp)) {
+    constellationMap.set(constellationTemp, index);
+  }
+  trial.constellationInt = constellationMap.get(constellationTemp);
+  trial.constellationString = constellationTemp;
+}
+
+function getConstellation(target, angle, amplitude, travelIndex) {
+  // `W_${target.width}_H_${target.height}_D_${angle}_Amp_${amplitude}_T_${travelIndex}`;
+  const travelParity = travelIndex % 2 == 0 ? 0 : 1;
+  return `W_${target.width}_H_${target.height}_D_${angle}_Amp_${amplitude}_T_${travelParity}`;
 }
 
 function isMobile() {
