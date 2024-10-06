@@ -279,7 +279,7 @@ class TrialDiscrete {
 
   endTrial() {
     this.trialCompleted = true;
-    const trialData = this.getExportDataTrial();
+    const trialData = getTrialData(this);
     const trialCopy = JSON.parse(JSON.stringify(this));
 
     this.cleanupTrial();
@@ -320,6 +320,7 @@ class TrialDiscrete {
     if (REP_PRESS_IN_REL_IN) {
       return this.isPressInReleaseIn();
     }
+    return false;
   }
 
   isPressOutReleaseOut() {
@@ -541,116 +542,6 @@ class TrialDiscrete {
     } else {
       return 0;
     }
-  }
-
-  getExportDataTrial() {
-    return {
-      no: "",
-      userNumber: "",
-      blockNumber: "",
-      trialNumber: this.trialId,
-      copyOfTrial: this.getCopyOfTrial(),
-      trialRep: this.getRepeatNumber(),
-      experimentType: EXPERIMENT_TYPE,
-      device: DEVICE_TYPE,
-
-      amplitudeMM: this.amplitude,
-      amplitudePx: this.amplitudePX,
-      directionDegree: this.trialDirection,
-
-      rect1_PressIn: this.startPressIn,
-      rect1_ReleaseIn: this.startReleaseIn,
-
-      rect2_PressIn: this.targetPressIn,
-      rect2_ReleaseIn: this.targetReleaseIn,
-
-      HIT: this.isHit(),
-
-      isRepetitionOfMistake: this.isTrialAMistakeRepetition,
-
-      toBeRepeatedTrial: this.isToBeRepeatedTrial(),
-
-      /** Start info **/
-      rect1_X: this.startCoords.x,
-      rect1_Y: this.startCoords.y,
-
-      rect1_WidthMM: this.startWidth,
-      rect1_HeightMM: this.startHeight,
-
-      rect1_WidthPx: this.startWidthPx,
-      rect1_HeightPx: this.startHeightPX,
-
-      /** Target info **/
-      rect2_X: this.targetCoords.x,
-      rect2_Y: this.targetCoords.y,
-
-      rect2_WidthMM: this.targetWidth,
-      rect2_HeightMM: this.targetHeight,
-
-      rect2_WidthPx: this.targetWidthPx,
-      rect2_HeightPx: this.targetHeightPx,
-
-      "Click T0 X": this.clicksCoords.at(0)?.x,
-      "Click T0 Y": this.clicksCoords.at(0)?.y,
-
-      "Click T1 X": this.clicksCoords.at(1)?.x,
-      "Click T1 Y": this.clicksCoords.at(1)?.y,
-
-      "Click T2 X": this.clicksCoords.at(2)?.x,
-      "Click T2 Y": this.clicksCoords.at(2)?.y,
-
-      "Click T3 X": this.clicksCoords.at(3)?.x,
-      "Click T3 Y": this.clicksCoords.at(3)?.y,
-
-      T0: getTimeFormat(this.clicksTime.at(0)),
-      T1: getTimeFormat(this.clicksTime.at(1)),
-      T2: getTimeFormat(this.clicksTime.at(2)),
-      T3: getTimeFormat(this.clicksTime.at(3)),
-
-      "T1-T0": getOnlyTimeFormat(this.clicksTime.at(1) - this.clicksTime.at(0)),
-      "T2-T0": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(0)),
-      "T3-T0": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(0)),
-      "T2-T1": getOnlyTimeFormat(this.clicksTime.at(2) - this.clicksTime.at(1)),
-      "T3-T1": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(1)),
-      "T3-T2": getOnlyTimeFormat(this.clicksTime.at(3) - this.clicksTime.at(2)),
-
-      "Distance T1 to T0 ": getDistance(
-        this.clicksCoords.at(0)?.x,
-        this.clicksCoords.at(0)?.y,
-        this.clicksCoords.at(1)?.x,
-        this.clicksCoords.at(1)?.y,
-      ),
-      "Distance T2 toT0 ": getDistance(
-        this.clicksCoords.at(0)?.x,
-        this.clicksCoords.at(0)?.y,
-        this.clicksCoords.at(2)?.x,
-        this.clicksCoords.at(2)?.y,
-      ),
-      "Distance T3 to T0 ": getDistance(
-        this.clicksCoords.at(0)?.x,
-        this.clicksCoords.at(0)?.y,
-        this.clicksCoords.at(3)?.x,
-        this.clicksCoords.at(3)?.y,
-      ),
-      "Distance T2 to T1 ": getDistance(
-        this.clicksCoords.at(1)?.x,
-        this.clicksCoords.at(1)?.y,
-        this.clicksCoords.at(2)?.x,
-        this.clicksCoords.at(2)?.y,
-      ),
-      "Distance T3 to T1 ": getDistance(
-        this.clicksCoords.at(1)?.x,
-        this.clicksCoords.at(1)?.y,
-        this.clicksCoords.at(3)?.x,
-        this.clicksCoords.at(3)?.y,
-      ),
-      "Distance T3 to T2 ": getDistance(
-        this.clicksCoords.at(2)?.x,
-        this.clicksCoords.at(2)?.y,
-        this.clicksCoords.at(3)?.x,
-        this.clicksCoords.at(3)?.y,
-      ),
-    };
   }
 
   setIsFirstTrial(isFirstTrial) {

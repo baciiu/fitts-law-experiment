@@ -56,27 +56,6 @@ function getConstellation(target, angle, amplitude, travelIndex) {
   return `W_${target.width}_H_${target.height}_D_${angle}_Amp_${amplitude}_T_${travelParity}`;
 }
 
-function isMobile() {
-  const regex =
-    /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-  return regex.test(navigator.userAgent);
-}
-
-function getDirection(direction) {
-  switch (direction) {
-    case 0:
-      return "right";
-    case 90:
-      return "down";
-    case 180:
-      return "left";
-    case 270:
-      return "up";
-    default:
-      return "diagonal";
-  }
-}
-
 // Euclidean distance takes 2 points (x1,y1) and (x2,y2) and returns the straight-line distance between them
 function getDistance(x1, y1, x2, y2) {
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
@@ -126,21 +105,8 @@ const DEV_TYPE = Object.freeze({
   MOUSE: "mouse",
 });
 
-function getRandomIndexForItem(array, startIndex) {
-  // Ensure the startIndex is within the array bounds and not the last element
-  if (startIndex < 0 || startIndex >= array.length - 1) {
-    throw Error("[MY ERROR]: Invalid startIndex. Item not inserted.");
-  }
-
-  // Generate a random index in the range from startIndex + 1 to the array length inclusive
-  const rand = Math.random();
-  const randomIndex =
-    Math.floor(rand * (array.length - startIndex)) + startIndex + 1;
-  return randomIndex;
-}
-
 function insertTrialInArray(array, trial, startIndex) {
-  checkIfInstanceOfTrial(trial);
+  checkIfInstanceOfTrialDiscrete(trial);
   insertItemAfterGivenIndex(array, trial, startIndex);
 }
 
@@ -217,16 +183,6 @@ function isReciprocal() {
   return EXPERIMENT_TYPE === "reciprocal";
 }
 
-function getDirectionList(startAngle, stepSize) {
-  const endAngle = 360;
-  let angles = [];
-  for (let angle = startAngle; angle < endAngle; angle += stepSize) {
-    angles.push(angle);
-  }
-  console.log(angles);
-  return angles;
-}
-
 function isShapeWithinBounds(x, y, width, height) {
   return (
     isLeftEdgeWithinBounds(x, width) &&
@@ -298,4 +254,156 @@ function isCursorInsideShape(event, shape) {
     event.clientY <= rect.bottom;
 
   return isCursorInsideShape;
+}
+
+function getTrialData(trial) {
+  return {
+    no: "",
+    experimentType: EXPERIMENT_TYPE,
+    userNumber: "",
+    blockNumber: "",
+    trialId: trial.trialId,
+    constNr: trial.constellationInt,
+    constStr: trial.constellationString,
+    copyOfTrial: trial.getCopyOfTrial(),
+    trialRep: trial.getRepeatNumber(),
+
+    currTravel: trial.currentTravel,
+    travelsNumber:
+      EXPERIMENT_TYPE === EX_TYPE.RECIPROCAL ? TRAVELS_NUMBER : null,
+    amplitudeMM: trial.amplitude,
+    amplitudePx: trial.amplitudePX,
+    directionDegree: trial.trialDirection,
+
+    rect1_PressIn: trial.startPressIn,
+    rect1_ReleaseIn: trial.startReleaseIn,
+
+    rect2_PressIn: trial.targetPressIn,
+    rect2_ReleaseIn: trial.targetReleaseIn,
+
+    HIT: trial.isHit(),
+
+    isRepetitionOfMistake: trial.isTrialAMistakeRepetition,
+
+    toBeRepeatedTrial: trial.isToBeRepeatedTrial(),
+
+    /** Start info **/
+    rect1_X: trial.startCoords.x,
+    rect1_Y: trial.startCoords.y,
+
+    rect1_WidthMM: trial.startWidth,
+    rect1_HeightMM: trial.startHeight,
+
+    rect1_WidthPx: trial.startWidthPx,
+    rect1_HeightPx: trial.startHeightPX,
+
+    /** Target info **/
+    rect2_X: trial.targetCoords.x,
+    rect2_Y: trial.targetCoords.y,
+
+    rect2_WidthMM: trial.targetWidth,
+    rect2_HeightMM: trial.targetHeight,
+
+    rect2_WidthPx: trial.targetWidthPx,
+    rect2_HeightPx: trial.targetHeightPx,
+
+    rect1_Press_coord_X: trial.clicksCoords.at(0)?.x,
+    rect1_Press_coord_Y: trial.clicksCoords.at(0)?.y,
+
+    rect1_Release_coord_X: trial.clicksCoords.at(1)?.x,
+    rect1_Release_coord_Y: trial.clicksCoords.at(1)?.y,
+
+    rect2_Press_coord_X: trial.clicksCoords.at(2)?.x,
+    rect2_Press_coord_Y: trial.clicksCoords.at(2)?.y,
+
+    rect2_Release_coord_X: trial.clicksCoords.at(3)?.x,
+    rect2_Release_coord_Y: trial.clicksCoords.at(3)?.y,
+
+    rect1_Press_timeT1: getTimeFormat(trial.clicksTime.at(0)),
+    rect1_Release_timeT2: getTimeFormat(trial.clicksTime.at(1)),
+    rect2_Press_timeT3: getTimeFormat(trial.clicksTime.at(2)),
+    rect2_Release_timeT4: getTimeFormat(trial.clicksTime.at(3)),
+
+    T2_T1_rect1_Release_rect1_Press_ms: getOnlyTimeFormat(
+      trial.clicksTime.at(1) - trial.clicksTime.at(0),
+    ),
+    T3_T1_rect2_Press_rect1_Press_ms: getOnlyTimeFormat(
+      trial.clicksTime.at(2) - trial.clicksTime.at(0),
+    ),
+    T4_T1_rect2_Release_rect1_Press_ms: getOnlyTimeFormat(
+      trial.clicksTime.at(3) - trial.clicksTime.at(0),
+    ),
+    T3_T2_rect2_Press_rect1_Release_ms: getOnlyTimeFormat(
+      trial.clicksTime.at(2) - trial.clicksTime.at(1),
+    ),
+    T4_T2_rect2_Release_rect1_Release_ms: getOnlyTimeFormat(
+      trial.clicksTime.at(3) - trial.clicksTime.at(1),
+    ),
+    T4_T3_rect2_Release_rect2_Press_ms: getOnlyTimeFormat(
+      trial.clicksTime.at(3) - trial.clicksTime.at(2),
+    ),
+
+    D2_D1_rect1_Release_rect1_Press_px: getDistance(
+      trial.clicksCoords.at(0)?.x,
+      trial.clicksCoords.at(0)?.y,
+      trial.clicksCoords.at(1)?.x,
+      trial.clicksCoords.at(1)?.y,
+    ),
+    D3_D1_rect2_Press_rect1_Press_px: getDistance(
+      trial.clicksCoords.at(0)?.x,
+      trial.clicksCoords.at(0)?.y,
+      trial.clicksCoords.at(2)?.x,
+      trial.clicksCoords.at(2)?.y,
+    ),
+    D4_D1_rect2_Release_rect1_Press_px: getDistance(
+      trial.clicksCoords.at(0)?.x,
+      trial.clicksCoords.at(0)?.y,
+      trial.clicksCoords.at(3)?.x,
+      trial.clicksCoords.at(3)?.y,
+    ),
+    D3_D2_rect2_Press_rect1_Release_px: getDistance(
+      trial.clicksCoords.at(1)?.x,
+      trial.clicksCoords.at(1)?.y,
+      trial.clicksCoords.at(2)?.x,
+      trial.clicksCoords.at(2)?.y,
+    ),
+    D4_D2_rect2_Release_rect1_Release_px: getDistance(
+      trial.clicksCoords.at(1)?.x,
+      trial.clicksCoords.at(1)?.y,
+      trial.clicksCoords.at(3)?.x,
+      trial.clicksCoords.at(3)?.y,
+    ),
+    D4_D3_rect2_Release_rect2_Press_px: getDistance(
+      trial.clicksCoords.at(2)?.x,
+      trial.clicksCoords.at(2)?.y,
+      trial.clicksCoords.at(3)?.x,
+      trial.clicksCoords.at(3)?.y,
+    ),
+    device: DEVICE_TYPE,
+  };
+}
+
+// Not Used Methods
+function getDirection(direction) {
+  switch (direction) {
+    case 0:
+      return "right";
+    case 90:
+      return "down";
+    case 180:
+      return "left";
+    case 270:
+      return "up";
+    default:
+      return "diagonal";
+  }
+}
+
+function getDirectionList(startAngle, stepSize) {
+  const endAngle = 360;
+  let angles = [];
+  for (let angle = startAngle; angle < endAngle; angle += stepSize) {
+    angles.push(angle);
+  }
+  return angles;
 }

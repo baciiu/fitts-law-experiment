@@ -484,7 +484,7 @@ class TrialReciprocal {
     Target Release In: ${this.targetReleaseIn}`);
 
     this.trialCompleted = true;
-    const trialData = this.getExportDataTrial();
+    const trialData = getTrialData(this);
     const trialCopy = JSON.parse(JSON.stringify(this));
 
     this.cleanupTrial();
@@ -767,132 +767,6 @@ class TrialReciprocal {
 
   getRepeatNumber() {
     return this.parseTrialRepByIndex(1);
-  }
-
-  getExportDataTrial() {
-    return {
-      no: "",
-      experimentType: EXPERIMENT_TYPE,
-      userNumber: "",
-      blockNumber: "",
-      trialId: this.trialId,
-      constNr: this.constellationInt,
-      constStr: this.constellationString,
-      copyOfTrial: this.getCopyOfTrial(),
-      trialRep: this.getRepeatNumber(),
-
-      currTravel: this.currentTravel,
-      travelsNumber: TRAVELS_NUMBER,
-      amplitudeMM: this.amplitude,
-      amplitudePx: this.amplitudePX,
-      directionDegree: this.trialDirection,
-
-      rect1_PressIn: this.startPressIn,
-      rect1_ReleaseIn: this.startReleaseIn,
-
-      rect2_PressIn: this.targetPressIn,
-      rect2_ReleaseIn: this.targetReleaseIn,
-
-      HIT: this.isHit(),
-
-      isRepetitionOfMistake: this.isTrialAMistakeRepetition,
-
-      toBeRepeatedTrial: this.isToBeRepeatedTrial(),
-
-      /** Start info **/
-      rect1_X: this.startCoords.x,
-      rect1_Y: this.startCoords.y,
-
-      rect1_WidthMM: this.startWidth,
-      rect1_HeightMM: this.startHeight,
-
-      rect1_WidthPx: this.startWidthPx,
-      rect1_HeightPx: this.startHeightPX,
-
-      /** Target info **/
-      rect2_X: this.targetCoords.x,
-      rect2_Y: this.targetCoords.y,
-
-      rect2_WidthMM: this.targetWidth,
-      rect2_HeightMM: this.targetHeight,
-
-      rect2_WidthPx: this.targetWidthPx,
-      rect2_HeightPx: this.targetHeightPx,
-
-      rect1_Press_coord_X: this.clicksCoords.at(0)?.x,
-      rect1_Press_coord_Y: this.clicksCoords.at(0)?.y,
-
-      rect1_Release_coord_X: this.clicksCoords.at(1)?.x,
-      rect1_Release_coord_Y: this.clicksCoords.at(1)?.y,
-
-      rect2_Press_coord_X: this.clicksCoords.at(2)?.x,
-      rect2_Press_coord_Y: this.clicksCoords.at(2)?.y,
-
-      rect2_Release_coord_X: this.clicksCoords.at(3)?.x,
-      rect2_Release_coord_Y: this.clicksCoords.at(3)?.y,
-
-      rect1_Press_timeT1: getTimeFormat(this.clicksTime.at(0)),
-      rect1_Release_timeT2: getTimeFormat(this.clicksTime.at(1)),
-      rect2_Press_timeT3: getTimeFormat(this.clicksTime.at(2)),
-      rect2_Release_timeT4: getTimeFormat(this.clicksTime.at(3)),
-
-      T2_T1_rect1_Release_rect1_Press_ms: getOnlyTimeFormat(
-        this.clicksTime.at(1) - this.clicksTime.at(0),
-      ),
-      T3_T1_rect2_Press_rect1_Press_ms: getOnlyTimeFormat(
-        this.clicksTime.at(2) - this.clicksTime.at(0),
-      ),
-      T4_T1_rect2_Release_rect1_Press_ms: getOnlyTimeFormat(
-        this.clicksTime.at(3) - this.clicksTime.at(0),
-      ),
-      T3_T2_rect2_Press_rect1_Release_ms: getOnlyTimeFormat(
-        this.clicksTime.at(2) - this.clicksTime.at(1),
-      ),
-      T4_T2_rect2_Release_rect1_Release_ms: getOnlyTimeFormat(
-        this.clicksTime.at(3) - this.clicksTime.at(1),
-      ),
-      T4_T3_rect2_Release_rect2_Press_ms: getOnlyTimeFormat(
-        this.clicksTime.at(3) - this.clicksTime.at(2),
-      ),
-
-      D2_D1_rect1_Release_rect1_Press_px: getDistance(
-        this.clicksCoords.at(0)?.x,
-        this.clicksCoords.at(0)?.y,
-        this.clicksCoords.at(1)?.x,
-        this.clicksCoords.at(1)?.y,
-      ),
-      D3_D1_rect2_Press_rect1_Press_px: getDistance(
-        this.clicksCoords.at(0)?.x,
-        this.clicksCoords.at(0)?.y,
-        this.clicksCoords.at(2)?.x,
-        this.clicksCoords.at(2)?.y,
-      ),
-      D4_D1_rect2_Release_rect1_Press_px: getDistance(
-        this.clicksCoords.at(0)?.x,
-        this.clicksCoords.at(0)?.y,
-        this.clicksCoords.at(3)?.x,
-        this.clicksCoords.at(3)?.y,
-      ),
-      D3_D2_rect2_Press_rect1_Release_px: getDistance(
-        this.clicksCoords.at(1)?.x,
-        this.clicksCoords.at(1)?.y,
-        this.clicksCoords.at(2)?.x,
-        this.clicksCoords.at(2)?.y,
-      ),
-      D4_D2_rect2_Release_rect1_Release_px: getDistance(
-        this.clicksCoords.at(1)?.x,
-        this.clicksCoords.at(1)?.y,
-        this.clicksCoords.at(3)?.x,
-        this.clicksCoords.at(3)?.y,
-      ),
-      D4_D3_rect2_Release_rect2_Press_px: getDistance(
-        this.clicksCoords.at(2)?.x,
-        this.clicksCoords.at(2)?.y,
-        this.clicksCoords.at(3)?.x,
-        this.clicksCoords.at(3)?.y,
-      ),
-      device: DEVICE_TYPE,
-    };
   }
 
   setIsFirstTrial(isFirstTrial) {
