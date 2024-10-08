@@ -14,6 +14,47 @@ function mmToPixels(mm) {
   // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
 }
 
+function sendDataAsCSVToServer(data) {
+  const csvContent = convertToCSV(data);
+  saveToServerFile(csvContent, "write");
+  saveToServerFile(csvContent, "append");
+}
+
+function convertToCSV(array) {
+  let csvContent = "";
+
+  if (array.length > 0) {
+    const headers = Object.keys(array[0]).join(",");
+    csvContent += headers + "\r\n";
+  }
+
+  array.forEach((obj) => {
+    const row = Object.values(obj).join(",");
+    csvContent += row + "\r\n";
+  });
+
+  return csvContent;
+}
+
+/*** actions: append or write */
+function saveToServerFile(csvContent, action) {
+  fetch(`/${action}-csv/${USER}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/csv",
+    },
+    body: csvContent,
+  })
+    .then((response) => response.text())
+    .then((result) => {
+      console.log("Display the server response:");
+      console.log(result);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
 function getTimeFormat(date) {
   const now = new Date(date);
   const month = String(now.getMonth() + 1).padStart(2, "0"); // January is 0 in JavaScript
@@ -50,8 +91,11 @@ function assignConstellationToTrial(
   trial.constellationString = constellationTemp;
 }
 
-function getConstellation(target, angle, amplitude, travelIndex) {
-  // `W_${target.width}_H_${target.height}_D_${angle}_Amp_${amplitude}_T_${travelIndex}`;
+function getConstellationForDiscrete(target, angle, amplitude) {
+  return `W_${target.width}_H_${target.height}_D_${angle}_Amp_${amplitude}`;
+}
+
+function getConstellationForReciprocal(target, angle, amplitude, travelIndex) {
   const travelParity = travelIndex % 2 == 0 ? 0 : 1;
   return `W_${target.width}_H_${target.height}_D_${angle}_Amp_${amplitude}_T_${travelParity}`;
 }

@@ -108,6 +108,7 @@ class ReciprocalExperimentFrame {
     } else {
       this.trialIsFailed = false;
     }
+    sendDataAsCSVToServer(this.trialsData);
     this.prepareForNextTrialOrFinishReciprocal();
   }
 
@@ -169,7 +170,7 @@ class ReciprocalExperimentFrame {
         trial.amplitude,
       );
 
-      const constellationTemp = getConstellation(
+      const constellationTemp = getConstellationForReciprocal(
         target,
         copyTrial.trialDirection,
         copyTrial.amplitude,
@@ -336,7 +337,7 @@ class ReciprocalExperimentFrame {
 
   downloadCSV(data) {
     let filename = "trial_" + "USER_" + this.userNumber + ".csv";
-    const csvContent = this.convertToCSV(data);
+    const csvContent = convertToCSV(data);
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -344,24 +345,6 @@ class ReciprocalExperimentFrame {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  convertToCSV(array) {
-    let csvContent = "data:text/csv;charset=utf-8,";
-
-    // Add header row
-    if (array.length > 0) {
-      const headers = Object.keys(array[0]).join(",");
-      csvContent += headers + "\r\n";
-    }
-
-    // Add data rows
-    array.forEach((obj) => {
-      const row = Object.values(obj).join(",");
-      csvContent += row + "\r\n";
-    });
-
-    return csvContent;
   }
 
   displayBreakWindow() {
