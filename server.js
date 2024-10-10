@@ -1,8 +1,10 @@
 const express = require("express");
 const compression = require("compression");
 const app = express();
+const validator = require("validator");
 const path = require("path");
 const fs = require("fs");
+
 const filePath = `${new Date().toISOString()}.csv`;
 
 app.use(compression());
@@ -26,6 +28,11 @@ app.use(express.text({ type: "text/csv" })); // Middleware for CSV (plain text)
 app.post(`/write-csv/:number`, (req, res) => {
   const csvRow = req.body; // The new CSV row sent from the client
   const user = req.params.number;
+
+  if (!validator.isNumeric(user)) {
+    return res.status(400).send("Invalid user parameter.");
+  }
+
   const filePathToWrite = path.join(
     __dirname,
     "public/logs",
@@ -43,6 +50,11 @@ app.post(`/write-csv/:number`, (req, res) => {
 app.post(`/append-csv/:number`, (req, res) => {
   const csvRow = req.body; // The new CSV row sent from the client
   const user = req.params.number;
+
+  if (!validator.isNumeric(user)) {
+    return res.status(400).send("Invalid user parameter.");
+  }
+
   const filePathToWrite = path.join(
     __dirname,
     "public/logs",
