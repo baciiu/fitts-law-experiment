@@ -40,10 +40,10 @@ app.post(`/write-csv/:number`, (req, res) => {
   );
   fs.writeFile(filePathToWrite, csvRow, (err) => {
     if (err) {
-      console.error("Error appending CSV row:", err); // Log the error
+      console.error("Error overriding the file", err); // Log the error
       return res.status(500).send("Error override the CSV file.");
     }
-    res.send("CSV file override - successfully!");
+    res.send("CSV file override successfully!");
   });
 });
 
@@ -65,6 +65,6 @@ app.post(`/append-csv/:number`, (req, res) => {
       console.error("Error appending CSV row:", err); // Log the error
       return res.status(500).send("Error override the CSV file.");
     }
-    res.send("CSV file override - successfully!");
+    res.send("CSV row append successfully!");
   });
 });
