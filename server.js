@@ -1,8 +1,11 @@
 const express = require("express");
+const compression = require("compression");
 const app = express();
 const path = require("path");
 const fs = require("fs");
 const filePath = `${new Date().toISOString()}.csv`;
+
+app.use(compression());
 
 app.use(express.static(path.join(__dirname, "public")));
 
