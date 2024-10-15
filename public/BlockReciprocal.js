@@ -84,7 +84,7 @@ class BlockReciprocal {
       target,
       amplitude,
     );
-    const constellationTemp = getConstellation(
+    const constellationTemp = getConstellationForReciprocal(
       target,
       angle,
       amplitude,
@@ -125,7 +125,7 @@ class BlockReciprocal {
             element,
             element.amplitude,
           );
-          const constellationTemp = getConstellation(
+          const constellationTemp = getConstellationForReciprocal(
             element,
             element.angle,
             element.amplitude,

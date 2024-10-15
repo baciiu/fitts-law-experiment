@@ -17,8 +17,10 @@ class TrialDiscrete {
     this.targetWidth = rectangleTarget.width;
     this.targetHeight = rectangleTarget.height;
     this.amplitude = amplitude;
+    this.constellationInt = 0;
+    this.constellationString = "";
 
-    this.printTrialConstructor();
+    // this.printTrialConstructor();
 
     this.initPXVariables();
     this.initDOMElements();

@@ -108,8 +108,30 @@ class ReciprocalExperimentFrame {
     } else {
       this.trialIsFailed = false;
     }
-    sendDataAsCSVToServer(this.trialsData);
+
+    if (this.getTrialIndexInExperiment() == 1) {
+      createServerFile();
+      sendDataAsCSVToServer(convertToCSVHeader(this.trialsData));
+    }
+
+    if (this.isReciprocalGroupDoneOrInterrupted()) {
+      sendDataAsCSVToServer(convertToCSVRow(this.trialsData));
+      this.trialsData.length = 0;
+    }
+
     this.prepareForNextTrialOrFinishReciprocal();
+  }
+
+  isReciprocalGroupDoneOrInterrupted() {
+    if (this.trial.isToBeRepeatedTrial() && INTERRUPT_RECIPROCAL_GROUP) {
+      console.log("Trial is failed and group will be interrupted.");
+      return true;
+    }
+    if (this.trial.currentTravel == TRAVELS_NUMBER) {
+      console.log("Group of trials done!");
+      return true;
+    }
+    return false;
   }
 
   insertReciprocalTrialToBlock(failedTrial) {
@@ -219,7 +241,7 @@ class ReciprocalExperimentFrame {
               trialList.length >= 1 &&
               this.trialIndex == trialList.length
             ) {
-              // TODO: go to next trialGroup
+              // go to next trialGroup
               this.reciprocalGroupIndex++;
               this.trialIndex = -1;
               this.prepareForNextTrialOrFinishReciprocal();
@@ -233,7 +255,7 @@ class ReciprocalExperimentFrame {
           listOfReciprocalGroups.length >= 1 &&
           this.reciprocalGroupIndex == listOfReciprocalGroups.length
         ) {
-          // TODO: go to next block
+          // go to next block
           this.blockNumber++;
           this.trialIndex = -1;
           this.reciprocalGroupIndex = 0;
@@ -331,7 +353,6 @@ class ReciprocalExperimentFrame {
 
   experimentFinished() {
     this.cleanUpSounds();
-    this.downloadCSV(this.trialsData);
     showFinishWindow();
   }
 

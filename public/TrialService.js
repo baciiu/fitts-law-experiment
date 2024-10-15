@@ -14,31 +14,44 @@ function mmToPixels(mm) {
   // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
 }
 
-function sendDataAsCSVToServer(data) {
-  const csvContent = convertToCSV(data);
-  saveToServerFile(csvContent, "write");
-  saveToServerFile(csvContent, "append");
-}
-
-function convertToCSV(array) {
+function convertToCSVHeader(array) {
   let csvContent = "";
-
   if (array.length > 0) {
     const headers = Object.keys(array[0]).join(",");
     csvContent += headers + "\r\n";
   }
+  return csvContent;
+}
 
+function convertToCSVRow(array) {
+  let csvContent = "";
   array.forEach((obj) => {
     const row = Object.values(obj).join(",");
     csvContent += row + "\r\n";
   });
-
   return csvContent;
 }
 
-/*** actions: append or write */
-function saveToServerFile(csvContent, action) {
-  fetch(`/${action}-csv/${USER}`, {
+function createServerFile() {
+  fetch(`/create-csv-file`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/csv",
+    },
+    body: "",
+  })
+    .then((response) => response.text())
+    .then((result) => {
+      console.log("Display the server response:");
+      console.log(result);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+function sendDataAsCSVToServer(csvContent) {
+  fetch(`/append-csv/${USER}`, {
     method: "POST",
     headers: {
       "Content-Type": "text/csv",
@@ -73,8 +86,6 @@ function getOnlyTimeFormat(date) {
   const seconds = String(now.getSeconds()).padStart(2, "0");
   const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
 
-  console.log(now.getTime());
-  console.log(`${min}${seconds}${milliseconds}`);
   return `${min}${seconds}${milliseconds}`;
 }
 

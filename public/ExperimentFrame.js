@@ -61,6 +61,7 @@ class ExperimentFrame {
     this.trialsData.push(trialData);
 
     if (trialData.toBeRepeatedTrial) {
+      const constellationMap = currentBlock.constellationMap;
       const failedTrial = new TrialDiscrete(
         currentBlock.getTrialsNumber() + 1,
         trialCopy.trialRep,
@@ -68,6 +69,16 @@ class ExperimentFrame {
         new Rectangle(trialCopy.startWidth, trialCopy.startHeight),
         new Rectangle(trialCopy.targetWidth, trialCopy.targetHeight),
         trialCopy.amplitude,
+      );
+      const constellationTemp = getConstellationForDiscrete(
+        new Rectangle(trialCopy.targetWidth, trialCopy.targetHeight),
+        trialCopy.trialDirection,
+        trialCopy.amplitude,
+      );
+      assignConstellationToTrial(
+        failedTrial,
+        constellationMap,
+        constellationTemp,
       );
 
       failedTrial.setIsTrialAMistakeRepetition(true);
@@ -82,7 +93,13 @@ class ExperimentFrame {
         currentBlock.getTrials().push(failedTrial);
       }
     }
-    sendDataAsCSVToServer(this.trialsData);
+    if (this.getTrialIndexInExperiment() == 1) {
+      createServerFile();
+      sendDataAsCSVToServer(convertToCSVHeader(this.trialsData));
+    }
+    sendDataAsCSVToServer(convertToCSVRow(this.trialsData));
+    this.trialsData.length = 0;
+
     this.prepareForNextTrialOrFinish(currentBlock);
   }
 
@@ -169,7 +186,6 @@ class ExperimentFrame {
 
   experimentFinished() {
     this.cleanUpSounds();
-    this.downloadCSV(this.trialsData);
     showFinishWindow();
   }
 

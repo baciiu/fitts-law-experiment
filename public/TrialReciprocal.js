@@ -376,10 +376,6 @@ class TrialReciprocal {
       if (!this.isStartNotMandatoryOnReciprocal()) {
         this.removeBodyReleaseListeners();
       }
-      console.log("Body Release on travel " + this.currentTravel);
-      console.log("MOUSE EVENTS:");
-      console.log(this.clicksCoords);
-      console.log(this.clicksTime);
       this.endTrial();
     } else if (this.trialStarted && this.firstClickDone) {
       if (
@@ -453,10 +449,8 @@ class TrialReciprocal {
       isInsideShape = isCursorInsideShape(event, this.target);
       this.targetReleaseIn = isInsideShape;
     } else {
-      console.error("wtf is this" + this.currentTravel);
+      console.error("[ERROR] travel: " + this.currentTravel);
     }
-
-    console.log("Log Mouse Event 1");
     this.logMouseEvent(event, 1);
     this.target.style.backgroundColor = CLICK_COLOR;
     this.start.style.backgroundColor = WAIT_COLOR;
@@ -469,19 +463,7 @@ class TrialReciprocal {
   }
 
   endTrial() {
-    console.error("end trial");
-
-    if (this.isBackTravelTrialInReciprocalGroup()) {
-      console.log(`BACK TRAVEL on: ${this.currentTravel} `);
-    } else if (this.isForthTravelTrialInReciprocalGroup()) {
-      console.log(`FORTH TRAVEL on: ${this.currentTravel} `);
-    }
-    console.log(`
-    Travel : ${this.currentTravel}
-    Start Press In: ${this.startPressIn}
-    Start Release In: ${this.startReleaseIn}
-    Target Press In: ${this.targetPressIn}
-    Target Release In: ${this.targetReleaseIn}`);
+    console.log("end trial");
 
     this.trialCompleted = true;
     const trialData = getTrialData(this);
@@ -556,19 +538,6 @@ class TrialReciprocal {
   }
 
   isClickAMistake() {
-    // TODO: Adapt based on coordinates ;
-    //  make sure the click coords are set correctly on each trial
-    console.log(
-      "clicksCoords.at(0):",
-      this.clicksCoords.at(0),
-      "clicksCoords.at(1):",
-      this.clicksCoords.at(1),
-      "clicksCoords.at(2):",
-      this.clicksCoords.at(2),
-      "clicksCoords.at(3):",
-      this.clicksCoords.at(3),
-    );
-
     if (
       this.clicksCoords.at(0) === undefined ||
       this.clicksCoords.at(1) === undefined ||

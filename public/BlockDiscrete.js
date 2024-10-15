@@ -12,6 +12,7 @@ class BlockDiscrete {
     this.blockNumber = blockNumber;
     this.trialId = 1;
     this.trials = [];
+    this.constellationMap = new Map();
     this.initializeTrials();
   }
 
@@ -41,6 +42,13 @@ class BlockDiscrete {
       new Rectangle(target.width, target.height),
       amplitude,
     );
+    const constellationTemp = getConstellationForDiscrete(
+      target,
+      trialAngle,
+      amplitude,
+    );
+    assignConstellationToTrial(trial, this.constellationMap, constellationTemp);
+
     this.trials.push(trial);
   }
 
