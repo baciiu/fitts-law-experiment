@@ -25,7 +25,7 @@ Press Ctrl + C to stop the server.`);
 
 app.use(express.text({ type: "text/csv" })); // Middleware for CSV (plain text)
 
-app.post(`/create-csv-file`, (req, res) => {
+app.post(`/create-csv-file`, () => {
   filePath = `${new Date().toISOString()}.csv`;
 });
 
