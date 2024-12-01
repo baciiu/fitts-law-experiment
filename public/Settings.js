@@ -1,22 +1,22 @@
-const INPUT = test.INPUT_4;
-const AMPLITUDE_LIST = test.AMPL;
-
-const START_SIZE = 10;
-const RADIAN_START = 0;
-const RADIAN_STEP = 180;
-const DIRECTION_LIST = test.ANGLES;
-// 90 => [0,90,180,270] // 4 directions
+"use strict";
 
 const EXPERIMENT_TYPE = EX_TYPE.RECIPROCAL;
 
-const TRIALS_PER_BREAK = 100;
+const INPUT = test.INPUT_4_PARAMS;
+
+const AMPLITUDE_LIST = test.AMPL;
+
+const DIRECTION_LIST = test.ANGLES;
+
+const TRIALS_PER_BREAK = test.TRIALS_PER_BREAK;
 
 /** SETTINGS FOR RECIPROCAL EXPERIMENT ONLY START */
+
 const START_HIT_MANDATORY = true;
 
 const INTERRUPT_RECIPROCAL_GROUP = true;
 
-const TRAVELS_NUMBER = test.TRAVELS; // first one is the 0 travel
+const TRAVELS_NUMBER = test.TRAVELS;
 
 /** SETTINGS FOR RECIPROCAL EXPERIMENT ONLY END */
 
@@ -39,11 +39,12 @@ const USE_CENTER_OF_SCREEN = true;
 
 const DEVICE_TYPE = DEV_TYPE.MOUSE;
 
-const USER = 8;
+const USER = 10;
 
 const MAX_SCREEN_DISTANCE = 60; // max percentage of screen distance
 
 const ENABLE_FULL_SCREEN = false;
+const START_SIZE = 10;
 
 const TOP_MARGIN_PX = mmToPixels(10);
 const OTHER_MARGINS_PX = mmToPixels(5);

@@ -120,7 +120,6 @@ class BlockDiscrete {
   }
 
   getTrials() {
-    if (this.trials) return this.trials;
-    return null;
+    return this.trials ?? null;
   }
 }

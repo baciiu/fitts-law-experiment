@@ -301,14 +301,12 @@ function getRandomPointWithRespectToPreviousTarget(previous) {
 
 function isCursorInsideShape(event, shape) {
   const rect = shape.getBoundingClientRect();
-
-  let isCursorInsideShape =
+  return (
     event.clientX >= rect.left &&
     event.clientX <= rect.right &&
     event.clientY >= rect.top &&
-    event.clientY <= rect.bottom;
-
-  return isCursorInsideShape;
+    event.clientY <= rect.bottom
+  );
 }
 
 function getTrialData(trial) {
@@ -436,29 +434,4 @@ function getTrialData(trial) {
     ),
     device: DEVICE_TYPE,
   };
-}
-
-// Not Used Methods
-function getDirection(direction) {
-  switch (direction) {
-    case 0:
-      return "right";
-    case 90:
-      return "down";
-    case 180:
-      return "left";
-    case 270:
-      return "up";
-    default:
-      return "diagonal";
-  }
-}
-
-function getDirectionList(startAngle, stepSize) {
-  const endAngle = 360;
-  let angles = [];
-  for (let angle = startAngle; angle < endAngle; angle += stepSize) {
-    angles.push(angle);
-  }
-  return angles;
 }

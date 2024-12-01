@@ -18,10 +18,10 @@ class BlockReciprocal {
 
   initializeTrials() {
     this.generateReciprocalTrials();
-    console.log("**********    TRIALS  **********");
-    console.log(this.trials);
-    console.log("******    CONSTELLATIONS  ******");
-    console.log(Array.from(this.constellationMap));
+    console.log(`**********    TRIALS  **********
+    ${this.trials}
+    ******    CONSTELLATIONS  ******
+   ${Array.from(this.constellationMap)}`);
   }
 
   has2InputParams() {
@@ -163,8 +163,7 @@ class BlockReciprocal {
   }
 
   getTrials() {
-    if (this.trials) return this.trials;
-    return null;
+    return this.trials ?? null;
   }
 
   setReciprocalList(trials) {
@@ -172,14 +171,13 @@ class BlockReciprocal {
   }
 
   getReciprocalList() {
-    if (this.reciprocalTrialsList) return this.reciprocalTrialsList;
-    return null;
+    return this.reciprocalTrialsList ?? null;
   }
 
   getReciprocalTotalTrialsNumber() {
     let totalTrials = 0;
-    for (let i = 0; i < this.reciprocalTrialsList.length; i++) {
-      totalTrials += this.reciprocalTrialsList[i].getTrialsGroup().length;
+    for (const element of this.reciprocalTrialsList) {
+      totalTrials += element.getTrialsGroup().length;
     }
     return totalTrials;
   }
