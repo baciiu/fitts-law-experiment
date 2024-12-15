@@ -1,17 +1,11 @@
 "use strict";
 
+/**
+ * https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
+ * */
 function mmToPixels(mm) {
-  // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-  //const screenWidth = 1512; // Screen width in pixels
-  //const screenHeight = 982; // Screen height in pixels
-  //const screenDiagonal = 14.42; // Screen diagonal in pixel
-
   const inches = mm / 25.4;
-  return inches * 126.5;
-
-  // Pixels per inch (PPI)
-  // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1 // update 151 is more accurate
-  // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
+  return inches * PPI;
 }
 
 function convertToCSVHeader(array) {

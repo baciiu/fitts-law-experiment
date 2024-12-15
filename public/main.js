@@ -56,5 +56,3 @@ startButton.addEventListener("click", click);
 
 const enableFullScreen = ENABLE_FULL_SCREEN;
 showStartWindow();
-
-// http://169.254.141.169:3000 for ipad
