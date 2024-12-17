@@ -6,7 +6,8 @@
 function mmToPixels(mm) {
   const inches = mm / 25.4;
   const PPI =
-    Math.sqrt(SCREEN_WIDTH_PX ** 2 + SCREEN_HEIGHT_PX ** 2) / DIAGONAL_INCH;
+    Math.sqrt(SCREEN_WIDTH_PX ** 2 + SCREEN_HEIGHT_PX ** 2) / DIAGONAL_INCH +
+    PRECISION_OFFSET;
   return inches * PPI;
 }
 
