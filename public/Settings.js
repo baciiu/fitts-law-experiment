@@ -46,6 +46,9 @@ const MAX_SCREEN_DISTANCE = 60; // max percentage of screen distance
 const ENABLE_FULL_SCREEN = false;
 const START_SIZE = 10;
 
-const PPI = 153;
+const SCREEN_WIDTH_PX = 1512;
+const SCREEN_HEIGHT_PX = 982;
+const DIAGONAL_INCH = 14;
+
 const TOP_MARGIN_PX = mmToPixels(10);
 const OTHER_MARGINS_PX = mmToPixels(5);
