@@ -43,10 +43,10 @@ function startExperiment() {
   let experiment;
 
   if (isDiscrete()) {
-    experiment = new ExperimentFrame(USER);
+    experiment = new ExperimentFrameDiscrete(USER);
     experiment.init();
   } else if (isReciprocal()) {
-    experiment = new ReciprocalExperimentFrame(USER);
+    experiment = new ExperimentFrameReciprocal(USER);
     experiment.init();
   }
 }

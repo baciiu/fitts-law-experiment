@@ -1,6 +1,6 @@
 "use strict";
 
-class ReciprocalExperimentFrame {
+class ExperimentFrameReciprocal {
   constructor(userNumber) {
     this.blockNumber = 1;
     this.trialNumber = -1;
