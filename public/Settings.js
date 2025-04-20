@@ -1,6 +1,6 @@
 "use strict";
 
-const EXPERIMENT_TYPE = EX_TYPE.RECIPROCAL;
+const EXPERIMENT_TYPE = input.EXPERIMENT_TYPE;
 
 const INPUT = input.INPUT_4_PARAMS;
 
@@ -46,9 +46,10 @@ const MAX_SCREEN_DISTANCE = 60; // max percentage of screen distance
 const ENABLE_FULL_SCREEN = false;
 const START_SIZE = 10;
 
-const SCREEN_WIDTH_PX = 1512;
-const SCREEN_HEIGHT_PX = 982;
-const DIAGONAL_INCH = 14;
+const SCREEN_WIDTH_PX = 1920; // 1512; // 1920
+const SCREEN_HEIGHT_PX = 1080; // 982; // 1080
+
+const DIAGONAL_INCH = 27; //14; // 27
 const PRECISION_OFFSET = -1.2;
 
 const TOP_MARGIN_PX = mmToPixels(10);

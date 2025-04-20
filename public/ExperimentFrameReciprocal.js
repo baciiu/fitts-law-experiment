@@ -17,6 +17,7 @@ class ExperimentFrameReciprocal {
     this.trialRep = null;
     this.trialIndexInExperiment = 0;
     this.trialIsFailed = false;
+    this.skippedTrials = 0;
 
     this.prevTrial = {
       trialId: null,
@@ -174,6 +175,7 @@ class ExperimentFrameReciprocal {
     } else {
       currentBlock.getReciprocalList().push(newReciprocalTrial);
     }
+    this.skippedTrials += TRAVELS_NUMBER - (this.reciprocalGroupIndex + 1);
   }
 
   getCopyOfGroup(trialRep, group, constellationMap) {
@@ -335,7 +337,7 @@ class ExperimentFrameReciprocal {
 
     this.trial.drawShapes();
 
-    this.showReciprocalIndexes();
+    this.showReciprocalIndexes(); // do subtraction
 
     this.setPrevTrialOnExperimentFrame();
 
@@ -373,14 +375,14 @@ class ExperimentFrameReciprocal {
 
   showReciprocalIndexes() {
     let index = this.getTrialIndexInExperiment();
+    const trialsToBlockIndexEI = document.getElementById("trialsToBreak");
+    trialsToBlockIndexEI.innerText = this.getReciprocalRemainingTrials() + "";
+
     const currentTrialIndexEl = document.getElementById("trialNumber");
     currentTrialIndexEl.innerText = index;
 
     const currentBlockIndexEl = document.getElementById("totalTrials");
-    currentBlockIndexEl.innerText = this.getReciprocalTotalTrials() + "";
-
-    const trialsToBlockIndexEI = document.getElementById("trialsToBreak");
-    trialsToBlockIndexEI.innerText = this.getReciprocalRemainingTrials() + "";
+    currentBlockIndexEl.innerText = this.getTotalTrials() + "";
   }
 
   handleFinish() {
@@ -402,6 +404,14 @@ class ExperimentFrameReciprocal {
       breakWindow.style.display = "none";
       document.body.style.pointerEvents = "auto";
     });
+  }
+
+  getTotalTrials() {
+    console.log(" TOTAL TRIALS");
+    console.log(this.getReciprocalTotalTrials());
+    console.log(" SKIPPED TRIALS");
+    console.log(this.skippedTrials);
+    return this.getReciprocalTotalTrials() - this.skippedTrials;
   }
 
   getReciprocalTotalTrials() {
