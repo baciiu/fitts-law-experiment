@@ -1,6 +1,6 @@
 "use strict";
 
-const EXPERIMENT_TYPE = input.EXPERIMENT_TYPE;
+const EXPERIMENT_TYPE = EX_TYPE.DISCRETE;
 
 const INPUT = input.INPUT_4_PARAMS;
 
@@ -20,13 +20,13 @@ const TRAVELS_NUMBER = input.TRAVELS;
 
 /** SETTINGS FOR RECIPROCAL EXPERIMENT ONLY END */
 
-const SCRAMBLE_BLOCKS = false;
+const SCRAMBLE_BLOCKS = true;
 
 const BLOCKS_NUMBER = input.BLOCKS;
 
 const REPETITION_PER_TRIAL = input.REP;
 
-const FAILED_TRIAL_THRESHOLD = 4;
+const FAILED_TRIAL_THRESHOLD = 2; // amplitude/2
 
 const HIT_ON_PRESS_AND_RELEASE = true;
 
@@ -35,11 +35,11 @@ const REP_PRESS_OUT_REL_IN = false;
 const REP_PRESS_IN_REL_OUT = false;
 const REP_PRESS_IN_REL_IN = false;
 
-const USE_CENTER_OF_SCREEN = true;
+const USE_CENTER_OF_SCREEN = false;
 
 const DEVICE_TYPE = DEV_TYPE.MOUSE;
 
-const USER = 10;
+const USER = 8;
 
 const MAX_SCREEN_DISTANCE = 60; // max percentage of screen distance
 
