@@ -25,21 +25,26 @@ Press Ctrl + C to stop the server.`);
 
 app.use(express.text({ type: "text/csv" })); // Middleware for CSV (plain text)
 
-app.post(`/create-csv-file`, (req, res) => {
+app.post(`/create-csv-file`, () => {
   filePath = `${new Date().toISOString()}.csv`;
 });
 
 app.post(`/append-csv/:number`, (req, res) => {
   const csvRow = req.body; // The new CSV row sent from the client
   const user = req.params.number;
+  const dirPath = "public/logs";
 
   if (!validator.isNumeric(user)) {
     return res.status(400).send("Invalid user parameter.");
   }
 
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
   const filePathToWrite = path.join(
     __dirname,
-    "public/logs",
+    dirPath,
     `user_${user}_${filePath}`,
   );
   fs.appendFile(filePathToWrite, csvRow, (err) => {

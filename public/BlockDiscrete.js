@@ -9,7 +9,6 @@ class BlockDiscrete {
     this.targetDimens = INPUT;
     this.trialDirection = DIRECTION_LIST;
     this.amplitude = AMPLITUDE_LIST;
-    this.blockNumber = blockNumber;
     this.trialId = 1;
     this.trials = [];
     this.constellationMap = new Map();
@@ -120,7 +119,6 @@ class BlockDiscrete {
   }
 
   getTrials() {
-    if (this.trials) return this.trials;
-    return null;
+    return this.trials ?? null;
   }
 }

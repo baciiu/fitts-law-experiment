@@ -1,17 +1,14 @@
 "use strict";
 
+/**
+ * https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
+ * */
 function mmToPixels(mm) {
-  // https://www.calculatorsoup.com/calculators/technology/ppi-calculator.php
-  //const screenWidth = 1512; // Screen width in pixels
-  //const screenHeight = 982; // Screen height in pixels
-  //const screenDiagonal = 14.42; // Screen diagonal in pixel
-
   const inches = mm / 25.4;
-  return inches * 126.5;
-
-  // Pixels per inch (PPI)
-  // resolution 1800px x 1169 px  diag inch 14.4 => ppi 149.1 // update 151 is more accurate
-  // resolution 1512 px x 982 px diag inch 14.4 => ppi 125.20 // update 127 is more accurate
+  const PPI =
+    Math.sqrt(SCREEN_WIDTH_PX ** 2 + SCREEN_HEIGHT_PX ** 2) / DIAGONAL_INCH +
+    PRECISION_OFFSET;
+  return inches * PPI;
 }
 
 function convertToCSVHeader(array) {
@@ -301,14 +298,12 @@ function getRandomPointWithRespectToPreviousTarget(previous) {
 
 function isCursorInsideShape(event, shape) {
   const rect = shape.getBoundingClientRect();
-
-  let isCursorInsideShape =
+  return (
     event.clientX >= rect.left &&
     event.clientX <= rect.right &&
     event.clientY >= rect.top &&
-    event.clientY <= rect.bottom;
-
-  return isCursorInsideShape;
+    event.clientY <= rect.bottom
+  );
 }
 
 function getTrialData(trial) {
@@ -436,29 +431,4 @@ function getTrialData(trial) {
     ),
     device: DEVICE_TYPE,
   };
-}
-
-// Not Used Methods
-function getDirection(direction) {
-  switch (direction) {
-    case 0:
-      return "right";
-    case 90:
-      return "down";
-    case 180:
-      return "left";
-    case 270:
-      return "up";
-    default:
-      return "diagonal";
-  }
-}
-
-function getDirectionList(startAngle, stepSize) {
-  const endAngle = 360;
-  let angles = [];
-  for (let angle = startAngle; angle < endAngle; angle += stepSize) {
-    angles.push(angle);
-  }
-  return angles;
 }

@@ -1,6 +1,6 @@
 "use strict";
 
-class ExperimentFrame {
+class ExperimentFrameDiscrete {
   constructor(userNumber) {
     this.blockNumber = 1;
     this.trialNumber = -1;
