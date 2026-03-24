@@ -12,3 +12,4 @@ out/
 *.pb
 
 *.iml
+.DS_Store
