@@ -11,6 +11,13 @@ function mmToPixels(mm) {
   return inches * PPI;
 }
 
+function pxToMillimeters(px) {
+  const PPI =
+    Math.sqrt(SCREEN_WIDTH_PX ** 2 + SCREEN_HEIGHT_PX ** 2) / DIAGONAL_INCH +
+    PRECISION_OFFSET;
+  return (px / PPI) * 25.4;
+}
+
 function convertToCSVHeader(array) {
   let csvContent = "";
   if (array.length > 0) {
